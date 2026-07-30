@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manufacturers A–Z — Aerospace Unlimited</title>
+<meta name="description" content="Browse aviation and aerospace parts by manufacturer. Every OEM listed with its CAGE code.">
+<link rel="stylesheet" href="assets/ux.css">
+</head>
+<body>
+
+<div data-au-header data-page="browse.html"></div>
+
+<main id="main">
+  <div class="u-page">
+    <ol class="breadcrumb">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="browse.html">Catalog</a></li>
+      <li>Manufacturers</li>
+    </ol>
+  </div>
+
+  <!-- ======================================================================
+       MANUFACTURER INDEX
+
+       An A–Z index is only useful if you can skip to a letter and filter as
+       you type — otherwise it is a very long page. Both are provided, and
+       the CAGE code is shown against every name so a buyer holding a
+       nameplate can confirm the entity before opening the list. OEM naming
+       is genuinely ambiguous after decades of acquisitions, which is why
+       the code matters more than the name.
+       ====================================================================== -->
+  <section class="section-tight">
+    <div class="u-page">
+      <h1 class="au-h1">Manufacturers</h1>
+      <p class="u-muted" style="margin-top:var(--au-s-3);max-width:64ch">
+        Every OEM we list, with its CAGE code. If the manufacturer you need is not here,
+        we can still source the part — send us the number.
+      </p>
+
+      <div class="field" style="margin-top:var(--au-s-5);max-width:420px">
+        <label class="u-visually-hidden" for="mfr-filter">Filter manufacturers by name or CAGE code</label>
+        <input id="mfr-filter" type="search" placeholder="Filter by name or CAGE code" data-filter>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight">
+    <div class="u-page">
+      <nav class="az-bar" aria-label="Jump to letter" data-az></nav>
+      <p class="results-count" role="status" aria-live="polite" data-count style="margin-bottom:var(--au-s-5)"></p>
+      <div data-index></div>
+    </div>
+  </section>
+
+  <section class="section-tight">
+    <div class="u-page">
+      <div class="notice">
+        <strong>Cannot see your manufacturer?</strong>
+        Our supplier network reaches well past this index. Send the part number and manufacturer
+        name and we will come back within 15 minutes.
+        <a href="rfq.html" style="display:inline-block;margin-top:var(--au-s-2)">Request a quote →</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div data-au-footer></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+document.addEventListener("au:ready", function () {
+  var LIST = window.AU_DATA.MANUFACTURERS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
+  var LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+  function render(filter) {
+    var q = (filter || "").trim().toUpperCase();
+    var rows = LIST.filter(function (m) {
+      return !q || m.name.toUpperCase().indexOf(q) > -1 || m.cage.toUpperCase().indexOf(q) > -1;
+    });
+
+    AU.$("[data-count]").innerHTML = "<strong>" + rows.length + "</strong> manufacturer" + (rows.length === 1 ? "" : "s");
+
+    var present = new Set(rows.map(function (m) { return m.name[0].toUpperCase(); }));
+    // Letters with no entries are shown but disabled — a buyer learns the
+    // index is complete rather than wondering if it failed to load.
+    AU.$("[data-az]").innerHTML = LETTERS.map(function (L) {
+      return present.has(L)
+        ? '<a href="#letter-' + L + '">' + L + "</a>"
+        : '<a aria-disabled="true" tabindex="-1">' + L + "</a>";
+    }).join("");
+
+    if (!rows.length) {
+      AU.$("[data-index]").innerHTML =
+        '<div class="empty-state"><h2>No manufacturer matches that.</h2>' +
+        "<p>We can still source parts from manufacturers outside this index.</p>" +
+        '<div class="actions"><a class="btn btn-primary btn-lg" href="rfq.html">Request a quote</a></div></div>';
+      return;
+    }
+
+    var groups = {};
+    rows.forEach(function (m) {
+      var L = m.name[0].toUpperCase();
+      (groups[L] = groups[L] || []).push(m);
+    });
+
+    AU.$("[data-index]").innerHTML = Object.keys(groups).sort().map(function (L) {
+      return '<section class="index-group" id="letter-' + L + '">' +
+        "<h3>" + L + "</h3>" +
+        '<ul class="index-list">' + groups[L].map(function (m) {
+          return "<li><a href=\"browse-category.html?type=manufacturer&id=" + encodeURIComponent(m.name) + "\">" +
+            AU.esc(m.name) + '</a> <span class="count">CAGE ' + m.cage + " · " + m.count.toLocaleString() + "</span></li>";
+        }).join("") + "</ul></section>";
+    }).join("");
+  }
+
+  var input = AU.$("[data-filter]");
+  input.addEventListener("input", function () { render(input.value); });
+  render("");
+});
+</script>
+</body>
+</html>

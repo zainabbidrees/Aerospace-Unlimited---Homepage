@@ -1,0 +1,44 @@
+{
+  "source": {
+    "url": "https://agentwork.com/",
+    "extractedAt": "2026-07-27T08:04:30.267Z",
+    "extractor": "dembrandt"
+  },
+  "colors": {
+    "primary": "rgb(255, 255, 255)",
+    "palette": [
+      "rgb(255, 255, 255)"
+    ],
+    "cssVariables": {}
+  },
+  "typography": {
+    "headingFont": "Mona Sans",
+    "bodyFont": "Mona Sans"
+  },
+  "spacing": {
+    "scale": [
+      "1px",
+      "2px",
+      "4px",
+      "6px",
+      "8px",
+      "12px",
+      "16px",
+      "24px",
+      "32px",
+      "40px",
+      "48px",
+      "56px",
+      "64px",
+      "68px",
+      "80px",
+      "120px"
+    ]
+  },
+  "radius": {
+    "scale": []
+  },
+  "shadows": {
+    "scale": []
+  }
+}

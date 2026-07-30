@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blog — Aerospace Unlimited</title>
+<meta name="description" content="Articles on aviation and aerospace parts sourcing, NSN and CAGE code reference, and procurement guidance from Aerospace Unlimited.">
+<link rel="stylesheet" href="assets/ux.css">
+</head>
+<body>
+
+<div data-au-header data-page="blog.html"></div>
+
+<main id="main">
+  <div class="u-page">
+    <ol class="breadcrumb">
+      <li><a href="index.html">Home</a></li>
+      <li>Blog</li>
+    </ol>
+  </div>
+
+  <!-- ======================================================================
+       BLOG
+
+       This exists in the live site's main navigation, so it is carried over
+       here. It is a stub: the IA marks the blog as P1 (a long-tail search
+       entry point rather than part of the quoting funnel), so it keeps its
+       nav slot and its index layout without being redesigned ahead of the
+       pages that convert.
+
+       The one UX rule applied: an article index is an entry point from
+       Google, which means most visitors land here having never seen the
+       homepage. So the page routes into the catalog rather than ending at a
+       list of links.
+       ====================================================================== -->
+  <section class="section-tight">
+    <div class="u-page">
+      <h1 class="au-h1">Blog</h1>
+      <p class="u-muted" style="margin-top:var(--au-s-3);max-width:62ch">
+        Reference material and sourcing guidance for procurement and maintenance teams.
+      </p>
+    </div>
+  </section>
+
+  <section class="section-tight">
+    <div class="u-page">
+      <div class="notice">
+        <strong>Placeholder.</strong>
+        The blog is marked P1 in the information architecture — kept, but not redesigned ahead
+        of the pages that generate quotes. Existing articles migrate into this index unchanged.
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight">
+    <div class="u-page">
+      <div class="grid grid-3">
+        <article class="card">
+          <p class="u-caption">Reference</p>
+          <h2 class="u-h3" style="margin-top:var(--au-s-2)">How to read an NSN</h2>
+          <p class="u-small u-muted" style="margin-top:var(--au-s-2)">
+            What each block of a 13-digit National Stock Number means, and how the NIIN sits inside it.
+          </p>
+        </article>
+        <article class="card">
+          <p class="u-caption">Reference</p>
+          <h2 class="u-h3" style="margin-top:var(--au-s-2)">CAGE codes explained</h2>
+          <p class="u-small u-muted" style="margin-top:var(--au-s-2)">
+            Why the code on the nameplate is more reliable than the manufacturer name printed beside it.
+          </p>
+        </article>
+        <article class="card">
+          <p class="u-caption">Sourcing</p>
+          <h2 class="u-h3" style="margin-top:var(--au-s-2)">What to send with an AOG request</h2>
+          <p class="u-small u-muted" style="margin-top:var(--au-s-2)">
+            The four details that let a supplier quote a grounded aircraft without calling you back.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- An article reader arriving from a search engine has never seen the
+       homepage. The page hands them the catalog rather than ending. -->
+  <section class="section-tight">
+    <div class="u-page">
+      <div class="empty-state">
+        <h2>Looking for a specific part?</h2>
+        <p>Search by part number, NSN, NIIN or CAGE code — or send us the numbers and we will quote every line within 15 minutes.</p>
+        <div class="actions">
+          <a class="btn btn-primary btn-lg" href="rfq.html">Request a quote</a>
+          <a class="btn btn-quiet btn-lg" href="browse.html">Browse the catalog</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div data-au-footer></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

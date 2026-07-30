@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Browse the catalog — Aerospace Unlimited</title>
+<meta name="description" content="Browse aviation and aerospace parts by manufacturer, aircraft model, part category, or by NSN, NIIN, CAGE code and Federal Supply Class.">
+<link rel="stylesheet" href="assets/ux.css">
+</head>
+<body>
+
+<div data-au-header data-page="browse.html"></div>
+
+<main id="main">
+  <div class="u-page">
+    <ol class="breadcrumb">
+      <li><a href="index.html">Home</a></li>
+      <li>Browse catalog</li>
+    </ol>
+  </div>
+
+  <!-- ======================================================================
+       BROWSE HUB
+
+       The old site scattered six browse routes across six top-level nav
+       items — Manufacturers, FSCs, NIIN, NSN, Part Types, CAGE Code — with
+       nothing explaining which to pick. That pushed a database schema onto
+       the buyer. This hub restates them as answers to one question: what do
+       you actually have in front of you right now?
+       ====================================================================== -->
+  <section class="section-tight">
+    <div class="u-page">
+      <h1 class="au-h1" style="max-width:22ch">Browse the catalog</h1>
+      <p class="u-muted" style="margin-top:var(--au-s-3);max-width:62ch">
+        Four ways in, depending on what you already know. If you have a part number or any
+        identifier, searching is faster — the field at the top accepts all of them.
+      </p>
+    </div>
+  </section>
+
+  <!-- ==================================================================
+       BY CATEGORY — the default route, because a description is the one
+       thing every buyer has even when the paperwork is missing.
+       ================================================================== -->
+  <section class="section-tight" id="categories">
+    <div class="u-page">
+      <div class="section-head section-head-row">
+        <div>
+          <div class="eyebrow">Route 1 · You know what the part does</div>
+          <h2>By part category</h2>
+          <p>Grouped by function, with the matching Federal Supply Class shown for anyone working from a government parts list.</p>
+        </div>
+      </div>
+      <div class="grid grid-3" data-categories></div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="section-tight section-subtle" id="manufacturers">
+    <div class="u-page">
+      <div class="section-head section-head-row">
+        <div>
+          <div class="eyebrow">Route 2 · You know who made it</div>
+          <h2>By manufacturer</h2>
+          <p>Every OEM is listed with its CAGE code, so you can confirm you have the right company before you open the list.</p>
+        </div>
+        <a class="btn btn-quiet" href="browse-manufacturers.html">Full A–Z index</a>
+      </div>
+      <div class="grid grid-3" data-manufacturers></div>
+    </div>
+  </section>
+
+  <!-- ================================================================== -->
+  <section class="section-tight" id="aircraft">
+    <div class="u-page">
+      <div class="section-head section-head-row">
+        <div>
+          <div class="eyebrow">Route 3 · You know the aircraft</div>
+          <h2>By aircraft model</h2>
+          <p>Commercial airframes, regional jets, rotorcraft and military platforms.</p>
+        </div>
+        <a class="btn btn-quiet" href="browse-aircraft.html">All models</a>
+      </div>
+      <div class="grid grid-4" data-aircraft></div>
+    </div>
+  </section>
+
+  <!-- ==================================================================
+       BY IDENTIFIER
+
+       Kept as a route because government and defence buyers genuinely think
+       in NSN and FSC — but demoted below the plain-language routes, and each
+       one explains what it is. A buyer who does not recognise the acronym
+       now learns it here instead of guessing at a nav item.
+       ================================================================== -->
+  <section class="section-tight section-subtle" id="identifiers">
+    <div class="u-page">
+      <div class="section-head">
+        <div class="eyebrow">Route 4 · You have a government or supply-chain identifier</div>
+        <h2>By NSN, NIIN, CAGE code or FSC</h2>
+        <p>You can type any of these straight into the search field — it recognises the format automatically. These pages are here for browsing rather than looking one up.</p>
+      </div>
+
+      <div class="grid grid-4">
+        <div class="card">
+          <h3 class="u-small u-body-strong">NSN</h3>
+          <p class="u-caption" style="margin-top:var(--au-s-2)">National Stock Number — 13 digits, e.g. <span class="u-mono">5310-00-877-5797</span>. The full NATO identifier for a supply item.</p>
+          <p style="margin-top:var(--au-s-3)"><a class="u-caption" href="browse-category.html?type=fsc&id=5310">Browse by NSN group →</a></p>
+        </div>
+        <div class="card">
+          <h3 class="u-small u-body-strong">NIIN</h3>
+          <p class="u-caption" style="margin-top:var(--au-s-2)">National Item Identification Number — the last 9 digits of an NSN, e.g. <span class="u-mono">008775797</span>.</p>
+          <p style="margin-top:var(--au-s-3)"><a class="u-caption" href="search.html?q=008775797">Try a NIIN search →</a></p>
+        </div>
+        <div class="card">
+          <h3 class="u-small u-body-strong">CAGE code</h3>
+          <p class="u-caption" style="margin-top:var(--au-s-2)">Commercial and Government Entity code — 5 characters identifying the manufacturer, e.g. <span class="u-mono">99193</span>.</p>
+          <p style="margin-top:var(--au-s-3)"><a class="u-caption" href="browse-manufacturers.html">Manufacturers by CAGE →</a></p>
+        </div>
+        <div class="card">
+          <h3 class="u-small u-body-strong">FSC</h3>
+          <p class="u-caption" style="margin-top:var(--au-s-2)">Federal Supply Class — 4 digits grouping parts by type, e.g. <span class="u-mono">4820</span> for valves.</p>
+          <p style="margin-top:var(--au-s-3)"><a class="u-caption" href="#categories">FSC by category →</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- The catalog is a fraction of what can be sourced, so no browse page
+       is allowed to be the end of the road. -->
+  <section class="section-tight">
+    <div class="u-page">
+      <div class="empty-state">
+        <h2>Cannot find the category you need?</h2>
+        <p>We source well beyond what is listed here. Send the part numbers and we will quote every line within 15 minutes.</p>
+        <div class="actions">
+          <a class="btn btn-primary btn-lg" href="rfq.html?mode=list">Send us a parts list</a>
+          <a class="btn btn-quiet btn-lg" href="contact.html">Talk to a specialist</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div data-au-footer></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+document.addEventListener("au:ready", function () {
+  var D = window.AU_DATA;
+
+  AU.$("[data-categories]").innerHTML = D.CATEGORIES.map(function (c) {
+    return '<a class="card card-link" href="browse-category.html?type=category&id=' + c.slug + '">' +
+      '<h3 class="u-small u-body-strong">' + AU.esc(c.name) + "</h3>" +
+      '<p class="u-caption" style="margin-top:var(--au-s-2)">FSC <span class="u-mono">' + c.fsc + "</span> · " +
+      c.count.toLocaleString() + " parts</p></a>";
+  }).join("");
+
+  AU.$("[data-manufacturers]").innerHTML = D.MANUFACTURERS.slice(0, 9).map(function (m) {
+    return '<a class="card card-link" href="browse-category.html?type=manufacturer&id=' + encodeURIComponent(m.name) + '">' +
+      '<h3 class="u-small u-body-strong">' + AU.esc(m.name) + "</h3>" +
+      '<p class="u-caption" style="margin-top:var(--au-s-2)">CAGE <span class="u-mono">' + m.cage + "</span> · " +
+      m.count.toLocaleString() + " parts</p></a>";
+  }).join("");
+
+  AU.$("[data-aircraft]").innerHTML = D.AIRCRAFT.map(function (a) {
+    return '<a class="card card-link" href="browse-category.html?type=aircraft&id=' + a.slug + '">' +
+      '<h3 class="u-small u-body-strong">' + AU.esc(a.name) + "</h3>" +
+      '<p class="u-caption" style="margin-top:var(--au-s-2)">' + a.count.toLocaleString() + " parts</p></a>";
+  }).join("");
+});
+</script>
+</body>
+</html>

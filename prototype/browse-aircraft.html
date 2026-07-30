@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parts by aircraft model — Aerospace Unlimited</title>
+<meta name="description" content="Find aviation parts by airframe or helicopter model, including commercial, regional, rotorcraft and military platforms.">
+<link rel="stylesheet" href="assets/ux.css">
+</head>
+<body>
+
+<div data-au-header data-page="browse.html"></div>
+
+<main id="main">
+  <div class="u-page">
+    <ol class="breadcrumb">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="browse.html">Catalog</a></li>
+      <li>By aircraft</li>
+    </ol>
+  </div>
+
+  <!-- ======================================================================
+       AIRCRAFT INDEX
+
+       This route did not exist as a first-class path on the old site, yet it
+       matches how maintenance organisations actually think — they work on a
+       tail number, not a Federal Supply Class. Grouping by platform family
+       lets a buyer start from the one fact they are certain of.
+       ====================================================================== -->
+  <section class="section-tight">
+    <div class="u-page">
+      <h1 class="au-h1">Parts by aircraft model</h1>
+      <p class="u-muted" style="margin-top:var(--au-s-3);max-width:66ch">
+        Start from the platform you are working on. Always confirm applicability against the
+        illustrated parts catalogue for your specific series and effectivity before ordering.
+      </p>
+
+      <div class="field" style="margin-top:var(--au-s-5);max-width:420px">
+        <label class="u-visually-hidden" for="ac-filter">Filter aircraft models</label>
+        <input id="ac-filter" type="search" placeholder="Filter by model — 737, UH-60, CRJ…" data-filter>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight">
+    <div class="u-page">
+      <p class="results-count" role="status" aria-live="polite" data-count style="margin-bottom:var(--au-s-4)"></p>
+      <div class="grid grid-3" data-list></div>
+    </div>
+  </section>
+
+  <section class="section-tight">
+    <div class="u-page">
+      <div class="notice">
+        <strong>Working on a platform not listed here?</strong>
+        We supply parts for out-of-production and legacy airframes, including through salvaged
+        inventory. <a href="capabilities.html#salvage">See salvage capabilities</a> or
+        <a href="rfq.html">send us the part numbers</a>.
+      </div>
+    </div>
+  </section>
+</main>
+
+<div data-au-footer></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+document.addEventListener("au:ready", function () {
+  var LIST = window.AU_DATA.AIRCRAFT;
+
+  function render(filter) {
+    var q = (filter || "").trim().toUpperCase();
+    var rows = LIST.filter(function (a) { return !q || a.name.toUpperCase().indexOf(q) > -1; });
+
+    AU.$("[data-count]").innerHTML = "<strong>" + rows.length + "</strong> platform" + (rows.length === 1 ? "" : "s");
+
+    if (!rows.length) {
+      AU.$("[data-list]").innerHTML =
+        '<div class="empty-state" style="grid-column:1/-1"><h2>No platform matches that.</h2>' +
+        "<p>We supply legacy and out-of-production airframes too — send us the part numbers.</p>" +
+        '<div class="actions"><a class="btn btn-primary btn-lg" href="rfq.html">Request a quote</a></div></div>';
+      return;
+    }
+
+    AU.$("[data-list]").innerHTML = rows.map(function (a) {
+      return '<a class="card card-link" href="browse-category.html?type=aircraft&id=' + a.slug + '">' +
+        '<h2 class="u-h3">' + AU.esc(a.name) + "</h2>" +
+        '<p class="u-caption" style="margin-top:var(--au-s-2)">' + a.count.toLocaleString() + " parts listed</p>" +
+        '<p class="u-caption" style="margin-top:var(--au-s-4)">Browse parts →</p></a>';
+    }).join("");
+  }
+
+  var input = AU.$("[data-filter]");
+  input.addEventListener("input", function () { render(input.value); });
+  render("");
+});
+</script>
+</body>
+</html>

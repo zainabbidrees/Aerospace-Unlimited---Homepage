@@ -1,0 +1,191 @@
+/* ==========================================================================
+   Aerospace Unlimited — Design Tokens
+   Draft 1 · Phase A
+   System adapted from agentwork.com (extracted 2026-07-27); identity is our own.
+   Docs: ../DESIGN-TOKENS.md
+   ========================================================================== */
+
+:root {
+  /* ---- Typeface stacks ------------------------------------------------ */
+  --au-font-sans: "Mona Sans", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Helvetica, Arial, sans-serif;
+  --au-font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", monospace;
+
+  /* ---- Variable font weights ------------------------------------------
+     Intermediate instances, not 400/600/700. Body sits at 425 and reads
+     cleaner at 16px than a full regular. */
+  --au-weight-body: 425;
+  --au-weight-caption: 450;
+  --au-weight-mono: 500;
+  --au-weight-medium: 550;
+  --au-weight-bold: 650;
+
+  /* ---- Type scale ------------------------------------------------------ */
+  --au-text-display: 3rem;      /* 48px */
+  --au-text-h1: 2rem;           /* 32px */
+  --au-text-h2: 1.5rem;         /* 24px */
+  --au-text-h3: 1.25rem;        /* 20px */
+  --au-text-body: 1rem;         /* 16px */
+  --au-text-small: 0.875rem;    /* 14px */
+  --au-text-caption: 0.8125rem; /* 13px */
+  --au-text-part: 0.9375rem;    /* 15px — part numbers */
+
+  /* ---- Line heights ---------------------------------------------------- */
+  --au-leading-display: 1.15;
+  --au-leading-mid: 1.35;
+  --au-leading-body: 1.5;
+  --au-leading-small: 1.43;
+
+  /* ---- Optical tracking ------------------------------------------------
+     Tightens as size grows, opens slightly at small sizes. This is the
+     single biggest contributor to the reference site's tidiness. */
+  --au-tracking-display: -0.03em;
+  --au-tracking-heading: -0.02em;
+  --au-tracking-body: 0.005em;
+  --au-tracking-caption: 0.01em;
+
+  /* ---- Neutrals — warm sand ramp, not blue-grey ------------------------ */
+  --au-bg: #fdfdfc;
+  --au-surface: #ffffff;
+  --au-surface-subtle: #f9f9f8;
+  --au-surface-sunken: #f1f0ef;
+  --au-border: #e2e1de;
+  --au-border-strong: #cfceca;
+  --au-ink: #21201c;
+  --au-ink-muted: #63635e;
+  --au-ink-faint: #82827c;
+
+  /* ---- Accent — one hue only ------------------------------------------
+     Primary CTA and Instant RFQ share this colour and are separated by
+     weight (solid vs. outline), never by a second hue. */
+  --au-accent: #e05a00;
+  --au-accent-hover: #c44e00;
+  --au-accent-contrast: #ffffff;
+  --au-accent-surface: #fff0e6;
+  --au-accent-border: #ffd0b0;
+
+  /* ---- Stock status semantics — catalog-specific ----------------------- */
+  --au-stock-in: #208368;
+  --au-stock-in-surface: #e6f7ed;
+  --au-stock-limited: #9e6c00;
+  --au-stock-limited-surface: #fefce9;
+  --au-stock-out: #d13415;
+  --au-stock-out-surface: #feebe7;
+
+  /* ---- Spacing — 4px base ---------------------------------------------- */
+  --au-space-1: 0.25rem;  /*   4px */
+  --au-space-2: 0.5rem;   /*   8px */
+  --au-space-3: 0.75rem;  /*  12px */
+  --au-space-4: 1rem;     /*  16px */
+  --au-space-5: 1.5rem;   /*  24px */
+  --au-space-6: 2rem;     /*  32px */
+  --au-space-7: 2.5rem;   /*  40px */
+  --au-space-8: 3rem;     /*  48px */
+  --au-space-9: 4rem;     /*  64px */
+  --au-space-10: 5rem;    /*  80px */
+  --au-space-11: 7.5rem;  /* 120px */
+
+  /* ---- Radius ----------------------------------------------------------- */
+  --au-radius-sm: 6px;
+  --au-radius-md: 10px;
+  --au-radius-lg: 16px;
+  --au-radius-pill: 999px;
+
+  /* ---- Borders & elevation ---------------------------------------------
+     Elevation is a 0.5px ring plus a very soft shadow. Nothing floats. */
+  --au-border-width: 1px;
+  --au-ring: 0 0 0 0.5px var(--au-border-strong);
+  --au-elevation-1: var(--au-ring);
+  --au-elevation-2: var(--au-ring), 0 2px 8px -2px rgba(0, 0, 0, 0.08);
+  --au-elevation-3: var(--au-ring), 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px -1px rgba(0, 0, 0, 0.1);
+
+  /* ---- Containers -------------------------------------------------------- */
+  --au-container-page: 1200px;
+  --au-container-prose: 720px;
+  --au-container-narrow: 588px;
+
+  /* ---- Motion — minimal; the promise is speed --------------------------- */
+  --au-duration: 150ms;
+  --au-ease: cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   Role classes — apply the tokens as a matched set
+   ========================================================================== */
+
+.au-display {
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-display);
+  font-weight: var(--au-weight-bold);
+  line-height: var(--au-leading-display);
+  letter-spacing: var(--au-tracking-display);
+  text-wrap: balance;
+}
+
+.au-h1 {
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-h1);
+  font-weight: var(--au-weight-bold);
+  line-height: var(--au-leading-display);
+  letter-spacing: var(--au-tracking-display);
+  text-wrap: balance;
+}
+
+.au-h2 {
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-h2);
+  font-weight: var(--au-weight-medium);
+  line-height: var(--au-leading-mid);
+  letter-spacing: var(--au-tracking-heading);
+  text-wrap: balance;
+}
+
+.au-h3 {
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-h3);
+  font-weight: var(--au-weight-medium);
+  line-height: var(--au-leading-body);
+  letter-spacing: var(--au-tracking-heading);
+}
+
+.au-body {
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-body);
+  font-weight: var(--au-weight-body);
+  line-height: var(--au-leading-body);
+  letter-spacing: var(--au-tracking-body);
+}
+
+.au-body-strong {
+  font-weight: var(--au-weight-medium);
+}
+
+.au-small {
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-small);
+  font-weight: var(--au-weight-medium);
+  line-height: var(--au-leading-small);
+  letter-spacing: var(--au-tracking-body);
+}
+
+.au-caption {
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-caption);
+  font-weight: var(--au-weight-caption);
+  line-height: 1.4;
+  letter-spacing: var(--au-tracking-caption);
+  color: var(--au-ink-muted);
+}
+
+/* Part numbers, NSN, NIIN, CAGE codes, quantities.
+   Tabular figures are required so digits align down a column. */
+.au-part-number {
+  font-family: var(--au-font-mono);
+  font-size: var(--au-text-part);
+  font-weight: var(--au-weight-mono);
+  line-height: 1.4;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}

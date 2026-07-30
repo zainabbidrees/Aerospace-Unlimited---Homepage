@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Part detail — Aerospace Unlimited</title>
+<meta name="description" content="Part specification, availability and instant quote request.">
+<link rel="stylesheet" href="assets/ux.css">
+</head>
+<body>
+
+<div data-au-header data-page="part.html"></div>
+
+<main id="main">
+  <div class="u-page">
+    <ol class="breadcrumb" data-crumb></ol>
+  </div>
+
+  <!-- ======================================================================
+       PART DETAIL — the convergence point.
+
+       Every entry path on the site ends here: search, browse by
+       manufacturer, browse by aircraft, browse by identifier, and inbound
+       Google traffic. The page answers exactly two questions in order:
+       "is this the right part?" and "how do I get a price?" — and it never
+       makes the buyer scroll back up to act on the second one.
+       ====================================================================== -->
+  <div class="u-page" data-part-root style="padding-bottom:var(--au-s-7)"></div>
+</main>
+
+<div data-au-footer></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+document.addEventListener("au:ready", function () {
+  var pn = AU.param("pn");
+  var p = AU.findPart(pn);
+  var root = AU.$("[data-part-root]");
+
+  /* --------------------------------------------------------------------
+     NOT FOUND
+
+     A stale link or a mistyped URL must not produce a bare 404. This is
+     still a buyer with a part number, so it converts like the zero-result
+     page rather than terminating.
+     -------------------------------------------------------------------- */
+  if (!p) {
+    document.title = (pn ? pn + " — not listed" : "Part not found") + " — Aerospace Unlimited";
+    AU.$("[data-crumb]").innerHTML = '<li><a href="index.html">Home</a></li><li>Part not found</li>';
+    // Heading level 1, not 2 — this is still the page's own title, and a
+    // page that ships without an h1 breaks screen-reader navigation.
+    root.innerHTML =
+      '<div class="empty-state">' +
+        "<h1>We do not have a listing for " + (pn ? '<span class="u-mono">' + AU.esc(pn) + "</span>" : "that part") + ".</h1>" +
+        "<p>The listing may have been retired, or the number may belong to a part we source to order. " +
+        "Either way we can quote it — send it over and we will come back within 15 minutes.</p>" +
+        '<div class="actions">' +
+          '<a class="btn btn-primary btn-lg" href="rfq.html?q=' + encodeURIComponent(pn) + '">Request a quote for ' + (pn ? AU.esc(pn) : "a part") + "</a>" +
+          '<a class="btn btn-quiet btn-lg" href="browse.html">Browse the catalog</a>' +
+        "</div>" +
+      "</div>";
+    return;
+  }
+
+  document.title = p.pn + " — " + p.desc + " — Aerospace Unlimited";
+  var cat = window.AU_DATA.CATEGORIES.find(function (c) { return c.slug === p.category; });
+  var mfr = window.AU_DATA.MANUFACTURERS.find(function (m) { return m.name === p.mfr; });
+
+  AU.$("[data-crumb]").innerHTML =
+    '<li><a href="index.html">Home</a></li>' +
+    '<li><a href="browse.html">Catalog</a></li>' +
+    (cat ? '<li><a href="browse-category.html?type=category&id=' + cat.slug + '">' + AU.esc(cat.name) + "</a></li>" : "") +
+    '<li><span class="u-mono">' + AU.esc(p.pn) + "</span></li>";
+
+  function row(label, value, plain, copy) {
+    return "<tr><th>" + label + "</th><td" + (plain ? " data-plain" : "") + ">" + AU.esc(value) +
+      (copy ? ' <button class="copy-btn" type="button" data-copy="' + AU.esc(value) + '">Copy</button>' : "") +
+      "</td></tr>";
+  }
+
+  var related = window.AU_DATA.PARTS.filter(function (x) {
+    return x.pn !== p.pn && (x.category === p.category || x.mfr === p.mfr);
+  }).slice(0, 4);
+
+  root.innerHTML =
+  '<div class="pdp-layout">' +
+    "<div>" +
+      /* Identity block — the part number is the headline, set in mono, because
+         it is the string the buyer is visually diffing against their own
+         paperwork. */
+      '<div class="pdp-head">' +
+        "<h1>" + AU.esc(p.pn) + "</h1>" +
+        '<p class="sub">' + AU.esc(p.desc) + "</p>" +
+        '<div class="pdp-badges">' +
+          '<span class="stock" data-stock="' + p.stock + '">' + AU.STOCK_LABEL[p.stock] +
+            (p.stock !== "quote" ? " · " + p.qty.toLocaleString() + " available" : "") + "</span>" +
+          '<span class="badge">' + AU.esc(p.condition) + "</span>" +
+          '<span class="badge">Lead time: ' + AU.esc(p.lead) + "</span>" +
+          '<span class="badge badge-accent">Traceability included</span>' +
+        "</div>" +
+      "</div>" +
+
+      /* Specification table — every identifier a buyer might cross-check,
+         each individually copyable. Copying a 13-digit NSN by hand into a
+         purchasing system is where transcription errors happen. */
+      '<section style="margin-top:var(--au-s-6)">' +
+        '<h2 class="u-h3" style="margin-bottom:var(--au-s-3)">Identification</h2>' +
+        '<div class="card" style="padding:0;overflow:hidden">' +
+          '<table class="spec-table">' +
+            row("Part number", p.pn, false, true) +
+            row("NSN", p.nsn, false, true) +
+            row("NIIN", p.niin, false, true) +
+            row("CAGE code", p.cage, false, true) +
+            row("Federal Supply Class", p.fsc + (cat ? " — " + cat.name : ""), false, false) +
+            row("Manufacturer", p.mfr, true, false) +
+            row("Condition", p.condition, true, false) +
+            row("Lead time", p.lead, true, false) +
+          "</table>" +
+        "</div>" +
+      "</section>" +
+
+      /* What arrives with the part. Quality reviewers ask this before a PO is
+         approved; answering it on the part page prevents a stalled order. */
+      '<section style="margin-top:var(--au-s-6)">' +
+        '<h2 class="u-h3" style="margin-bottom:var(--au-s-3)">What ships with this part</h2>' +
+        '<div class="grid grid-2">' +
+          '<div class="card"><h3 class="u-small u-body-strong">Documentation</h3>' +
+            '<p class="u-caption" style="margin-top:var(--au-s-2)">Certificate of conformance and full traceability to source. FAA Form 8130-3 supplied where the condition and part class require it.</p></div>' +
+          '<div class="card"><h3 class="u-small u-body-strong">Inspection</h3>' +
+            '<p class="u-caption" style="margin-top:var(--au-s-2)">Received, inspected and stored under our AS9120B-certified quality system, including counterfeit-part screening.</p></div>' +
+          '<div class="card"><h3 class="u-small u-body-strong">Packaging</h3>' +
+            '<p class="u-caption" style="margin-top:var(--au-s-2)">ATA 300 compliant packaging as standard. ESD-safe handling for electrical and avionics items.</p></div>' +
+          '<div class="card"><h3 class="u-small u-body-strong">Shipping</h3>' +
+            '<p class="u-caption" style="margin-top:var(--au-s-2)">Dispatched from Anaheim, California. Same-day on in-stock items ordered before 3pm PT. Export compliance handled with the order.</p></div>' +
+        "</div>" +
+      "</section>" +
+
+      /* Lateral routes. A buyer who has decided this is the wrong part should
+         land on a neighbouring list, not on the back button. */
+      (related.length ?
+      '<section style="margin-top:var(--au-s-6)">' +
+        '<h2 class="u-h3" style="margin-bottom:var(--au-s-3)">Related parts</h2>' +
+        '<ul class="part-list" data-related></ul>' +
+        '<p class="u-caption" style="margin-top:var(--au-s-3)">' +
+          '<a href="browse-category.html?type=manufacturer&id=' + encodeURIComponent(p.mfr) + '">All ' + AU.esc(p.mfr) + " parts</a>" +
+          (cat ? ' · <a href="browse-category.html?type=category&id=' + cat.slug + '">All ' + AU.esc(cat.name) + "</a>" : "") +
+        "</p>" +
+      "</section>" : "") +
+    "</div>" +
+
+    /* ------------------------------------------------------------------
+       RFQ PANEL
+
+       Sticky, so the conversion point never leaves the screen while the
+       buyer reads specs. It asks for the absolute minimum that still
+       produces a quotable request: quantity and an email address. Company
+       name, phone and shipping details are collected later, once there is
+       a live quote and the buyer is already committed.
+       ------------------------------------------------------------------ */
+    '<aside class="rfq-panel">' +
+      '<div class="rfq-panel-head">' +
+        '<h2 class="u-h3">Get a quote on this part</h2>' +
+        '<p class="u-caption" style="margin-top:4px">Two fields. Answer back within 15 minutes.</p>' +
+      "</div>" +
+      '<form class="rfq-panel-body" data-validate action="confirmation.html" method="get">' +
+        '<input type="hidden" name="pn" value="' + AU.esc(p.pn) + '">' +
+        '<div class="field-row">' +
+          '<div class="field" data-label="Quantity">' +
+            '<label for="qty">Quantity <span class="required" aria-hidden="true">*</span></label>' +
+            '<input id="qty" name="qty" type="number" min="1" value="1" required class="qty-input" data-mono>' +
+            '<div class="error"></div>' +
+          "</div>" +
+          '<div class="field" data-label="Condition">' +
+            "<label for=\"cond\">Condition <span class='optional'>(optional)</span></label>" +
+            '<select id="cond" name="condition">' +
+              "<option>Any condition</option><option>New / Factory Sealed</option>" +
+              "<option>New Surplus</option><option>Overhauled / 8130-3</option><option>Serviceable / Traceable</option>" +
+            "</select>" +
+            '<div class="error"></div>' +
+          "</div>" +
+        "</div>" +
+        '<div class="field" data-label="Email">' +
+          '<label for="email">Where should we send the quote? <span class="required" aria-hidden="true">*</span></label>' +
+          '<input id="email" name="email" type="email" required placeholder="name@company.com" autocomplete="email">' +
+          '<div class="hint">No account needed. We reply to this address only.</div>' +
+          '<div class="error"></div>' +
+        "</div>" +
+        '<label class="check">' +
+          '<input type="checkbox" name="aog" value="1">' +
+          "<span><span class='t'>This is an AOG / urgent requirement</span>" +
+          "<span class='d'>Routes straight to the 24/7 desk and jumps the queue.</span></span>" +
+        "</label>" +
+        '<button class="btn btn-primary btn-lg btn-block" type="submit">Request quote</button>' +
+        '<button class="btn btn-quiet btn-block" type="button" data-add-part="' + AU.esc(p.pn) + '">Add to quote list</button>' +
+        '<p class="u-caption u-center">Sourcing several parts? Add them to your list and send one request.</p>' +
+      "</form>" +
+      '<div class="rfq-panel-foot">' +
+        "Prefer to talk? <a href=\"tel:+17147054780\">+1-714-705-4780</a>, answered 24/7." +
+      "</div>" +
+    "</aside>" +
+  "</div>";
+
+  if (related.length) AU.renderParts(AU.$("[data-related]"), related);
+
+  /* On a phone the sticky RFQ panel is not sticky, so the fixed bottom bar
+     becomes the conversion point. Point its CTA at this part rather than at a
+     blank form — arriving at an empty RFQ after tapping from a part page means
+     retyping a part number the site already knows. */
+  AU.$$('.mobile-bar a[href="rfq.html"]').forEach(function (a) {
+    a.href = "rfq.html?pn=" + encodeURIComponent(p.pn);
+  });
+
+  AU.wireForms();
+  AU.repaint();
+});
+</script>
+</body>
+</html>

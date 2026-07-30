@@ -1,0 +1,493 @@
+/* ==========================================================================
+   Aerospace Unlimited — Design Tokens
+   Layout/rhythm derived from fleet-template.webflow.io (probed 2026-07-27)
+   Docs: ../design.md
+
+   Character of the system, in order of importance:
+     1. Mona Sans throughout, weight 400 for display and headings — emphasis
+        comes from size and case. 500 for interface labels.
+     2. Glass and light skeuomorphism. Translucent surfaces over a blurred
+        ground, lit from above: a 1px white inner highlight on the top edge
+        and a soft, layered drop shadow beneath.
+     3. Rounded corners on a graded scale, 8px through 28px, or fully pill.
+     4. Enormous vertical section rhythm on a 9px spacing base.
+
+   Rules 2 and 3 REPLACE the reference's flat, square treatment at the
+   client's direction. Only the rhythm and the type discipline still come from
+   Fleet — the palette is sampled from the client hero photograph.
+
+   Glass needs something behind it to blur, so --au-ground gives the page a
+   soft ambient wash. On a flat fill, translucent panels read as flat grey
+   panels and the whole device is wasted — see `body::before` in ux.css.
+   ========================================================================== */
+
+:root {
+  /* ---- Typeface stacks ------------------------------------------------ */
+  /* Mona Sans is variable (200–900) and reads slightly wider and rounder than
+     the Geist it replaces, which suits the rounded, glassy direction. It is on
+     Google Fonts as of v4 — see the @import in ux.css. */
+  --au-font-sans: "Mona Sans", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Helvetica, Arial, sans-serif;
+  --au-font-mono: "Fragment Mono", ui-monospace, SFMono-Regular, Menlo,
+    Monaco, Consolas, "Liberation Mono", monospace;
+
+  /* ---- Weights ---------------------------------------------------------
+     400 carries the entire display and heading range. 500 exists only for
+     interface labels, where a label must separate from its value.
+
+     600/700 are used by the homepage feature cards. They are real cut weights,
+     not synthesised — Mona Sans is imported as a variable font over the full
+     200–900 range in ux.css — because faux-bolding a grotesque at display size
+     smears the terminals. */
+  --au-weight-regular: 400;
+  --au-weight-medium: 500;
+  --au-weight-semibold: 600;
+  --au-weight-bold: 700;
+
+  /* ---- Type scale — metrics from eleken.co (probed 2026-07-28) ----------
+     Their measured ramp: h1 52/500/-1.5px, 32/500/-0.64px, 22/500/-0.44px,
+     18/500/-0.18px, body 15/400 at lh 25px, small 14/400, micro 13/500.
+
+     Two things carried over and both matter more than the sizes:
+       · Headings are weight 500, never 700. Substance without shouting.
+       · Body runs 15px at lh 1.667 — small text, generous leading. The old
+         18px/1.45 was the opposite trade and read heavier for less comfort.
+
+     Clamp minimums stay low enough to survive a 375px viewport; a 44px floor on
+     the display size overflowed the hero on a phone. */
+  /* Nothing exceeds 52px, because nothing on eleken's page does. The old ceiling
+     was 80px, which is where the display line stopped reading as confident and
+     started reading as oversized. */
+  --au-text-display: clamp(2rem, 4.6vw, 3.25rem);    /* 32 → 52px */
+  --au-text-h1: clamp(1.75rem, 3.6vw, 3.25rem);      /* 28 → 52px — eleken's h1 */
+  --au-text-h2: clamp(1.5rem, 2.4vw, 2rem);          /* 24 → 32px */
+  --au-text-h3: 1.375rem;                            /*    22px */
+  --au-text-h4: 1.125rem;                            /*    18px */
+  --au-text-body: 0.9375rem;                         /*    15px */
+  --au-text-small: 0.875rem;                         /*    14px */
+  --au-text-label: 0.875rem;                         /*    14px — nav, UI labels */
+  --au-text-btn: 0.8125rem;                          /*    13px — eleken's button size */
+  /* Eyebrows and micro-labels. 14.4px uppercase read as a heading competing with
+     the h2 under it; 12px at weight 600 and open tracking reads as a label. */
+  --au-text-eyebrow: 0.75rem;                        /*    12px */
+  --au-text-caption: 0.8125rem;                      /*    13px */
+  --au-text-code: 0.9375rem;                         /*    15px — part numbers */
+
+  /* ---- Line heights ----------------------------------------------------
+     Display stays tight; body is deliberately airy at 1.667, which is eleken's
+     25px on 15px and the single biggest reason their prose reads easily. */
+  --au-leading-display: 1.08;
+  --au-leading-h1: 1.115;
+  --au-leading-h2: 1.25;
+  --au-leading-tight: 1.35;
+  --au-leading-body: 1.667;
+
+  /* ---- Tracking --------------------------------------------------------
+     eleken tightens headings and leaves body at `normal`, which is the opposite
+     of the −0.01em body tracking that was here. Converted from their pixel
+     values: −1.5px on 52px is −0.029em, −0.64px on 32px is −0.02em, −0.18px on
+     18px is −0.01em. */
+  --au-tracking-display: -0.03em;
+  --au-tracking-h1: -0.029em;
+  --au-tracking-h2: -0.02em;
+  --au-tracking-h3: -0.02em;
+  --au-tracking-h4: -0.01em;
+  --au-tracking-body: normal;
+  --au-tracking-label: 0.06em;
+
+  /* ---- Colour — navy and steel, all cool ------------------------------
+     Sampled from the client hero photograph, so the page and the picture are
+     the same scene: cool navies for structure and hazy neutrals for surfaces.
+
+     THE PALETTE IS ENTIRELY COOL, at the client's direction (2026-07-28). The
+     earlier system spent a warm amber — the runway lights — as its accent and
+     its CTA colour. There is now no warm accent at all: the accent is Steel
+     Blue, the most common colour in the photograph, so the buttons are drawn
+     from the hero rather than set against it. Do not reintroduce a warm accent
+     to "lift" the page; the answer is depth (Deep Navy, Midnight) not heat.
+
+     Every value below is contrast-checked. The ratios in the comments are real
+     measurements, not aspirations — keep them true if you change a value.
+     Two results constrain the system and are easy to undo by accident:
+       · The accent is DARK, so it takes WHITE ink — white on Steel Blue is
+         7.52:1. This is the reverse of the amber system it replaces, where the
+         accent was light and always took dark ink. Any rule that paints dark
+         text on the accent band is a leftover from that system and is broken.
+       · Steel Blue on Midnight is 2.38:1 — FAILS. Links on a dark ground take
+         --au-link-inverse (Horizon: 10.41:1 on Midnight, 6.02:1 on Deep Navy),
+         never the accent itself. */
+
+  /* The palette by name, so a role below never restates a hex. Use the roles
+     in stylesheets — these eight exist to be aliased, not applied directly. */
+  --au-navy: #22406e;               /* Deep Navy   — primary brand */
+  --au-midnight: #14171f;           /* Midnight    — maximum depth */
+  --au-steel: #2f558b;              /* Steel Blue  — most common in the photo */
+  --au-silver-mist: #b9bfcd;        /* Silver Mist — the airframe */
+  --au-sky-steel: #858bab;          /* Sky Steel   — haze */
+  --au-warm-paper: #f8f5f0;         /* Warm Paper  — the light glow */
+  --au-horizon: #a9c8f0;            /* Horizon     — the pale band of dusk sky */
+  --au-wash: #d8e5f5;               /* Wash        — Horizon at low strength */
+
+  /* Light surfaces */
+  --au-bg: var(--au-warm-paper);    /* page ground */
+  --au-surface: #ffffff;            /* cards sit on top, plain white */
+  --au-surface-alt: #efeae2;        /* warm paper, one step down */
+
+  /* Dark surfaces. Midnight is maximum depth (footer, hero scrim); Deep Navy
+     is the brand band — nav, dark sections, cards on dark. */
+  --au-surface-dark: var(--au-midnight);
+  --au-surface-dark-alt: var(--au-navy);
+
+  --au-border: var(--au-silver-mist);   /* decorative hairlines */
+  --au-border-quiet: #dcdfe6;
+  /* Control outlines — inputs, checkboxes, anything with a boundary a user has
+     to find. Silver Mist is only 1.84:1 on white, short of the 3:1 that
+     WCAG 1.4.11 asks of UI boundaries; Sky Steel is 3.34:1 and clears it. */
+  --au-border-strong: var(--au-sky-steel);
+  --au-border-dark: rgba(133, 139, 171, 0.5);   /* Sky Steel, on dark bands */
+
+  --au-ink: var(--au-midnight);         /* 16.48:1 on --au-bg */
+  --au-ink-heading: var(--au-navy);     /* 9.53:1 on --au-bg */
+  --au-ink-body: #333a45;           /* 11.6:1 — navy-tinted, not neutral grey */
+  --au-ink-muted: #5f6880;          /* 5.11:1 on --au-bg */
+  --au-ink-inverse: #ffffff;
+  /* Silver Mist, not Sky Steel. Sky Steel is the palette's stated caption
+     colour for dark sections and holds up on Midnight (5.36:1), but on a Deep
+     Navy band it drops to 3.10:1 and fails for small text. Silver Mist clears
+     both surfaces — 9.72:1 on Midnight, 5.62:1 on Deep Navy — so it carries
+     muted text everywhere and Sky Steel keeps the border role above. */
+  --au-ink-inverse-muted: var(--au-silver-mist);
+
+  /* Links. Steel Blue is the most common colour in the source photograph, and
+     it reads as a link without being a different hue from the brand. */
+  --au-link: var(--au-steel);           /* 6.91:1 on --au-bg */
+  --au-link-hover: var(--au-navy);
+  /* On a dark ground. Steel Blue collapses to 2.38:1 on Midnight, so a dark
+     band cannot simply reuse --au-link. Horizon clears both dark surfaces —
+     10.41:1 on Midnight, 6.02:1 on Deep Navy. */
+  --au-link-inverse: var(--au-horizon);
+
+  /* Accent — Steel Blue, the most common colour in the hero photograph.
+     Carries the primary CTA and exactly one section per page. It is a DARK
+     accent and therefore takes white ink; hover deepens toward Deep Navy
+     rather than brightening, because there is no warmer step to move to. */
+  --au-accent: var(--au-steel);
+  --au-accent-hover: var(--au-navy);    /* 10.36:1 with --au-accent-ink */
+  --au-accent-ink: #ffffff;             /* on Steel Blue — 7.52:1 */
+  --au-accent-soft: var(--au-wash);     /* hover washes, icon grounds */
+
+  /* ---- Stock status — catalog-specific, not in the reference -----------
+     Dark enough to pass 4.5:1 on --au-bg (5.63 / 6.36 / 6.63). These are the
+     one place warm hues survive, and deliberately so: red/amber/green is a
+     learned convention for stock state, and recolouring "Limited" to a blue
+     would say nothing to a buyer scanning a results page. They are status
+     signals, not brand colour, and each is always paired with its word rather
+     than carrying the meaning alone. */
+  --au-stock-in: #1f6f4a;
+  --au-stock-limited: #7a5200;
+  --au-stock-out: #a32b12;
+
+  /* ---- Spacing — 9px base --------------------------------------------- */
+  --au-s-1: 4.5px;
+  --au-s-2: 9px;
+  --au-s-3: 13.5px;
+  --au-s-4: 18px;
+  --au-s-5: 27px;   /* the dominant gap */
+  --au-s-6: 36px;
+  --au-s-7: 54px;
+  --au-s-8: 90px;
+  --au-s-9: 144px;
+  --au-s-10: 180px;
+
+  /* Section rhythm — fluid, because a fixed desktop value cannot hold on a
+     phone.
+
+     Trimmed from the reference's 180px. Fleet is a marketing template with four
+     short sections; this homepage has ten, and at 180px top and bottom the page
+     ran 9.4k tall with ~400px of content floating in the middle of most bands.
+     That reads as unfinished rather than spacious. 116px still breathes — more
+     than double what a conventional system would use — but the sections now
+     compose as a page instead of drifting apart. */
+  --au-section-y: clamp(64px, 7.5vw, 116px);
+  --au-section-y-tight: clamp(44px, 4.5vw, 68px);
+
+  /* ---- Radius — from eleken.co (probed 2026-07-28) ---------------------
+     Their scale is markedly tighter than what was here: 10px on 77 elements and
+     6px on 55 are the whole system, with 14px and 16px used once each and
+     nothing above 16px anywhere on the page. Ours ran to 22px on cards and 28px
+     on the hero slab, which is what read as over-rounded.
+
+     CONCENTRIC RULE: when one rounded box sits inside another, the inner radius
+     must equal the outer radius minus the gap between them. Break it and the
+     inner corner visibly cuts across the outer curve — see the hero search field
+     in ux.css, where a 12px button inset 7px inside a 28px field was 9px short
+     and sliced straight through the arc. */
+  --au-radius-xs: 6px;    /* badges, kbd hints, tiny inputs */
+  --au-radius-sm: 10px;   /* buttons, inputs, controls — eleken's dominant value */
+  --au-radius-md: 12px;   /* dropdowns, checks, notices, icon tiles */
+  --au-radius-lg: 16px;   /* cards, panels, media */
+  --au-radius-xl: 16px;   /* the ceiling; eleken has nothing above this */
+  --au-radius-pill: 999px;
+  --au-radius-circle: 50%;
+
+  /* Retained aliases — the feature section referenced these by name when it
+     was the site's one rounded exception. It is no longer an exception, so they
+     simply point at the shared scale. */
+  --au-radius-card: var(--au-radius-lg);
+  --au-radius-card-sm: var(--au-radius-md);
+
+  /* ---- Glass ----------------------------------------------------------
+     A translucent fill plus a backdrop blur. The fill is a gradient, not a
+     flat alpha: the top edge is more opaque than the bottom, which is what
+     makes the surface read as a lit pane rather than a grey wash.
+
+     `saturate` is doing real work — blurring alone desaturates whatever sits
+     behind the pane, and pushing saturation back up is what keeps the ground
+     feeling like colour seen through glass.
+
+     BLUR IS EXPENSIVE. `backdrop-filter` forces a new compositing layer and
+     re-filters on every scroll frame. Applied to a long list it drops frames
+     badly, so it goes on bounded surfaces only — header, dropdowns, drawer,
+     cards, panels — and never on `.part-row`, which can repeat 50+ times on a
+     results page. Those rows get the gradient and the shadow, no blur. */
+  --au-glass-fill: linear-gradient(160deg,
+    rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.70));
+  --au-glass-fill-strong: linear-gradient(160deg,
+    rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.86));
+
+  /* The border is a faint NAVY hairline, not white.
+     This was white at 0.78 and it made every card on the page edgeless — a white
+     border on a 0.88-white pane sitting on #F8F5F0 has nothing to contrast
+     against, so the cards read as pale ghosts with no containment. The lit top
+     edge is what wants to be white, and that is --au-inner-top's job; the
+     border's job is to say where the card stops. Keep the two separate. */
+  --au-glass-border: rgba(var(--au-tint-rgb), 0.14);
+  --au-glass-blur: blur(20px) saturate(180%);
+  --au-glass-blur-sm: blur(12px) saturate(160%);
+
+  /* On an inverted ground the same device has to invert: a white-heavy fill
+     over near-black turns milky, so the fill drops to a low-alpha white and
+     the inner highlight all but disappears.
+
+     0.07 IS A CONTRAST CEILING, not an aesthetic preference. A dark pane
+     lightens the band beneath it, which eats the muted-text headroom the
+     palette guarantees. Silver Mist on Deep Navy is 5.62:1 bare; measured over
+     this fill it falls to 4.63:1 at 0.07 and 3.85:1 at 0.13 — the latter fails
+     WCAG AA for small text. Deep Navy is the binding case because it is the
+     lightest dark surface; Midnight has room to spare. Raise this and the
+     muted captions on every dark card and hero chip go under. */
+  --au-glass-fill-dark: linear-gradient(160deg,
+    rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+  --au-glass-border-dark: rgba(255, 255, 255, 0.17);
+
+  /* ---- Light skeuomorphism — lit from above ---------------------------
+     The inner top highlight is the whole trick. A 1px white inset along the
+     top edge reads as a light source overhead catching the surface's lip; the
+     matching dark inset along the bottom is the far edge falling away.
+
+     Every shadow and tint below is mixed from these three channel triplets
+     rather than literal hex. That is deliberate: the first version of this
+     block hardcoded the old grey palette, and when the palette moved to navy
+     the shadows silently kept casting warm grey over a cool page. Change a
+     palette colour and update the matching triplet here — nothing else. */
+  --au-shadow-rgb: 20, 23, 31;      /* --au-ink, Midnight */
+  --au-tint-rgb: 34, 64, 110;       /* --au-surface-dark-alt, Deep Navy */
+  --au-accent-rgb: 47, 85, 139;     /* --au-accent, Steel Blue */
+
+  --au-inner-top: inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  --au-inner-bottom: inset 0 -1px 0 rgba(var(--au-shadow-rgb), 0.05);
+  --au-inner-top-dark: inset 0 1px 0 rgba(255, 255, 255, 0.10);
+
+  /* ---- The accent sheen ------------------------------------------------
+     The dimensional gradient for filled accent surfaces — primary buttons,
+     accent badges, the checked state, the empty state.
+
+     It DARKENS toward the bottom rather than lightening the top, and that is a
+     contrast requirement, not a taste call. Accent is Steel Blue and takes
+     WHITE ink, so any meaningful white sheen wrecks legibility where the text
+     sits: measured on #2f558b, a 0.42 white overlay drops white-on-accent to
+     2.80:1 and even 0.24 only reaches 4.16:1 — both fail WCAG AA. Shading the
+     lower half instead moves contrast the safe way (8.13:1 at 0.10) and still
+     reads as lit from above, because an overhead light source is exactly what
+     puts the bottom edge in shade.
+
+     The 0.10 white at the very top is the safe ceiling — it measures 5.84:1.
+     If the accent ever becomes a LIGHT colour taking dark ink, this flips: the
+     white sheen becomes safe and the bottom shade is what needs checking.
+     Re-measure before changing either stop. */
+  --au-accent-sheen: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.10) 0%,
+    rgba(255, 255, 255, 0) 45%,
+    rgba(0, 0, 0, 0.10) 100%);
+
+  /* Shadows are layered — a tight contact shadow plus a wide soft one. A
+     single large blur reads as a sticker floating over the page. Because the
+     shadow colour is navy-tinted rather than neutral black, it sits in the same
+     family as the page instead of greying it. */
+  --au-shadow-xs: 0 1px 2px rgba(var(--au-shadow-rgb), 0.06);
+  --au-shadow-sm: 0 2px 6px rgba(var(--au-shadow-rgb), 0.08),
+                  0 1px 2px rgba(var(--au-shadow-rgb), 0.05);
+  --au-shadow-md: 0 8px 20px rgba(var(--au-shadow-rgb), 0.10),
+                  0 2px 6px rgba(var(--au-shadow-rgb), 0.06);
+  --au-shadow-lg: 0 18px 40px rgba(var(--au-shadow-rgb), 0.13),
+                  0 4px 12px rgba(var(--au-shadow-rgb), 0.07);
+  --au-shadow-xl: 0 32px 64px rgba(var(--au-shadow-rgb), 0.18),
+                  0 8px 20px rgba(var(--au-shadow-rgb), 0.09);
+
+  /* Matched sets — highlight and shadow together. Reach for these, not the
+     parts, so a raised surface can never end up lit without a shadow. */
+  --au-raised: var(--au-inner-top), var(--au-shadow-sm);
+  --au-raised-md: var(--au-inner-top), var(--au-shadow-md);
+  --au-raised-lg: var(--au-inner-top), var(--au-shadow-lg);
+  --au-raised-xl: var(--au-inner-top), var(--au-shadow-xl);
+  --au-shadow-card: var(--au-shadow-lg);
+
+  /* Pressed states — the surface loses its shadow and takes an inset shade. */
+  --au-pressed: inset 0 2px 4px rgba(var(--au-shadow-rgb), 0.16);
+  --au-pressed-soft: inset 0 2px 4px rgba(var(--au-shadow-rgb), 0.08);
+
+  /* Recessed — inputs. The inverse of raised: a well cut into the surface. */
+  --au-recessed: inset 0 2px 4px rgba(var(--au-shadow-rgb), 0.06);
+
+  /* Hover/selection tints, for use inside glass panes. A solid fill would
+     punch an opaque hole through a translucent pane. */
+  --au-tint-hover: rgba(var(--au-tint-rgb), 0.07);
+  --au-tint-active: rgba(var(--au-tint-rgb), 0.11);
+
+  /* Focus ring. Offset outside the control so it never crowds the label. */
+  --au-focus-ring: 0 0 0 4px rgba(var(--au-tint-rgb), 0.22);
+  --au-focus-ring-inverse: 0 0 0 4px rgba(255, 255, 255, 0.28);
+
+  /* ---- The ambient ground ----------------------------------------------
+     What the glass has to blur. Three very low-opacity radial washes: a light
+     lift top-left, the faintest breath of the amber accent top-right, and a
+     navy deepening at the bottom. Kept far below the threshold where it would
+     read as a coloured gradient — it should look like light in a room, not a
+     background treatment.
+
+     Without this the glass has nothing to work on: a translucent pane over a
+     flat fill is just a lighter flat fill. */
+  --au-ground:
+    radial-gradient(1200px 620px at 12% -6%,
+      rgba(255, 255, 255, 0.90), transparent 62%),
+    radial-gradient(940px 520px at 88% 6%,
+      rgba(var(--au-accent-rgb), 0.10), transparent 64%),
+    radial-gradient(1100px 720px at 62% 104%,
+      rgba(var(--au-tint-rgb), 0.07), transparent 62%);
+
+  /* ---- Borders ---------------------------------------------------------- */
+  --au-hairline: 1px solid var(--au-border);
+  --au-hairline-quiet: 1px solid var(--au-border-quiet);
+  --au-hairline-dark: 1px solid var(--au-border-dark);
+  --au-hairline-glass: 1px solid var(--au-glass-border);
+  /* For controls only — inputs, selects, checkboxes. Decorative rules and
+     dividers keep --au-hairline; a boundary the user has to find needs the 3:1
+     of --au-border-strong, which plain --au-border does not reach. */
+  --au-hairline-strong: 1px solid var(--au-border-strong);
+
+  /* ---- Containers ------------------------------------------------------ */
+  /* The page container is deliberately wider than the reference's 1260px. At
+     1260 a 1600px+ display left ~210px of dead gutter down both sides and the
+     header, hero and every section band floated in the middle of the screen.
+     Prose and narrow stay put — those caps are measure, not layout, and a
+     wider column of body text is worse, not better. */
+  --au-container-page: 1600px;
+  --au-container-prose: 900px;
+  --au-container-narrow: 620px;
+
+  /* ---- Motion — ease-out exponential, no bounce ------------------------ */
+  --au-dur-fast: 180ms;
+  --au-dur: 280ms;
+  --au-dur-slow: 420ms;
+  --au-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Named alias for the same curve. The coverflow reads better with the intent
+     spelled out at the call site, where three properties tween at once and
+     "ease" alone says nothing about which direction the energy goes. */
+  --au-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ---- Z-index — semantic scale, never arbitrary ---------------------- */
+  --au-z-dropdown: 100;
+  --au-z-sticky: 200;
+  --au-z-backdrop: 300;
+  --au-z-modal: 400;
+  --au-z-toast: 500;
+  --au-z-tooltip: 600;
+}
+
+/* ==========================================================================
+   Role classes — apply the tokens as a matched set
+   ========================================================================== */
+
+.au-display {
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-display);
+  font-weight: var(--au-weight-regular);
+  line-height: var(--au-leading-display);
+  letter-spacing: var(--au-tracking-display);
+  text-wrap: balance;
+}
+
+.au-h1 {
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-h1);
+  font-weight: var(--au-weight-regular);
+  line-height: var(--au-leading-h1);
+  letter-spacing: var(--au-tracking-h1);
+  text-wrap: balance;
+}
+
+.au-h2 {
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-h2);
+  font-weight: var(--au-weight-regular);
+  line-height: var(--au-leading-h2);
+  letter-spacing: var(--au-tracking-h2);
+  text-wrap: balance;
+}
+
+.au-h3 {
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-h3);
+  font-weight: var(--au-weight-regular);
+  line-height: var(--au-leading-tight);
+  letter-spacing: var(--au-tracking-h3);
+  text-wrap: balance;
+}
+
+.au-h4 {
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-h4);
+  font-weight: var(--au-weight-medium);
+  line-height: var(--au-leading-tight);
+  letter-spacing: -0.015em;
+}
+
+.au-body {
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-body);
+  font-weight: var(--au-weight-regular);
+  line-height: var(--au-leading-body);
+  letter-spacing: var(--au-tracking-body);
+}
+
+/* Uppercase mono label. The reference's eyebrow, nav item and meta treatment.
+   Used as a named system role, not sprinkled above every section. */
+.au-label {
+  font-family: var(--au-font-mono);
+  font-size: var(--au-text-label);
+  font-weight: var(--au-weight-regular);
+  line-height: var(--au-leading-tight);
+  letter-spacing: var(--au-tracking-label);
+  text-transform: uppercase;
+}
+
+/* Part numbers, NSN, NIIN, CAGE codes, quantities.
+   Tabular figures are required so digits align down a column. */
+.au-code {
+  font-family: var(--au-font-mono);
+  font-size: var(--au-text-code);
+  font-weight: var(--au-weight-regular);
+  line-height: 1.35;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}

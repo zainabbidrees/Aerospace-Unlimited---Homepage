@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(artifact-design)",
+      "Skill(artifact-design:*)",
+      "Bash(npx playwright *)",
+      "Bash(npx --yes extract-design-system https://agentwork.com/)",
+      "Bash(npm ls *)",
+      "Bash(node -e \"require\\('playwright'\\)\")",
+      "Bash(npm install *)",
+      "Bash(node probe.js)",
+      "Bash(node -e ' *)",
+      "WebFetch(domain:claude.ai)",
+      "Bash(perl -0pi -e 's|<span>\\\\n\\(\\\\s*\\)<span class=\"t\">|<div>\\\\n$1<div class=\"t\">|g; ' quality.html)",
+      "Bash(perl -0pi -e 's|<span class=\"t\">\\([^<]*\\)</span>|<div class=\"t\">$1</div>|g; s|<span class=\"d\">\\([^<]*\\)</span>|<div class=\"d\">$1</div>|g;' quality.html)",
+      "Bash(perl -0pi -e 's|\\(<div class=\"t\">[^<]*\\)</span>|$1</div>|g; s|\\(<div class=\"d\">[^<]*</div>\\\\n\\\\s*\\)</span>|$1</div>|g;' quality.html)",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 -)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:4173/prototype/contact.html)",
+      "Bash(curl -s http://localhost:4173/)",
+      "Bash(grep -v '^$')",
+      "Bash(sed -i '' -E 's/[[:space:]]*style=\"\"//g' quality.html capabilities.html contact.html)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:4173/prototype/index.html)",
+      "Bash(sed -i '' -E 's/minmax\\\\\\(\\([0-9]+\\)px, ?1fr\\\\\\)/minmax\\(min\\(\\\\1px, 100%\\), 1fr\\)/g' ux.css)",
+      "Bash(sed -i '' -E 's/\\\\.part-row \\\\{ grid-template-columns: 1fr;/.part-row { grid-template-columns: minmax\\(0, 1fr\\);/' ux.css)",
+      "Bash(sed -i '' -E 's/\\\\.results-layout \\\\{ grid-template-columns: 1fr; \\\\}/.results-layout { grid-template-columns: minmax\\(0, 1fr\\); }/' ux.css)",
+      "WebFetch(domain:www.aerospaceunlimited.com)",
+      "Bash(sed -i '' 's|data-page=\"browse-manufacturers.html\"|data-page=\"browse.html\"|' browse-manufacturers.html)",
+      "Bash(sed -i '' 's|data-page=\"browse-aircraft.html\"|data-page=\"browse.html\"|' browse-aircraft.html)",
+      "Bash(sed -i '' 's|data-page=\"quality.html\"|data-page=\"\"|' quality.html)",
+      "Skill(anthropic-skills:impeccable)",
+      "Skill(anthropic-skills:impeccable:*)",
+      "Bash(node \"/Users/zainab.idrees/Library/Application Support/Claude/local-agent-mode-sessions/skills-plugin/2ea8c478-0e68-4f3d-9929-53b57e9f5532/cbfc6859-31cb-4f21-9577-c59b9e87f9c6/skills/impeccable/scripts/context.mjs\")",
+      "Bash(mkdir -p .backup-phase-a)",
+      "Bash(cp design-system/tokens.css design-system/tokens.json DESIGN-TOKENS.md .backup-phase-a/)",
+      "Bash(cp -r .extract-design-system .backup-phase-a/extract-agentwork)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"https://fonts.googleapis.com/css2?family=Mona+Sans:wght@200..900&display=swap\")",
+      "Bash(curl -s \"https://fonts.googleapis.com/css2?family=Mona+Sans:wght@200..900&display=swap\")",
+      "Bash(grep -n \"^/\\\\* =\\\\|^   [A-Z].*$\\\\|^\\\\.[a-z-]*\\\\s*{\\\\|^[a-z]*,\\\\s*$\" assets/ux.css)",
+      "Bash(grep -v \"^\\\\s*$\")"
+    ]
+  }
+}

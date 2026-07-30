@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parts list — Aerospace Unlimited</title>
+<meta name="description" content="Browse parts by category, manufacturer, aircraft model or Federal Supply Class.">
+<link rel="stylesheet" href="assets/ux.css">
+</head>
+<body>
+
+<div data-au-header data-page="browse.html"></div>
+
+<main id="main">
+  <div class="u-page">
+    <ol class="breadcrumb" data-crumb></ol>
+  </div>
+
+  <!-- ======================================================================
+       FILTERED LIST
+
+       One template serves category, manufacturer, aircraft and FSC listings.
+       With billions of part numbers these pages are generated, not authored,
+       so the template has to carry its own weight: a search-within box, a
+       plain-language explanation of what the grouping means, and the same
+       part-row pattern the buyer has already learned elsewhere.
+       ====================================================================== -->
+  <div class="u-page" style="padding-bottom:var(--au-s-7)">
+    <div data-head></div>
+
+    <div class="results-layout" style="margin-top:var(--au-s-6)">
+      <aside class="filters" aria-label="Refine this list">
+        <!-- Search-within. On a generated page holding thousands of rows this
+             is the difference between a usable list and a wall. -->
+        <div class="filter-group">
+          <h3>Search within these parts</h3>
+          <div class="field">
+            <label class="u-visually-hidden" for="within">Search within this list</label>
+            <input id="within" type="search" placeholder="Part number or keyword" data-within data-mono>
+          </div>
+        </div>
+        <div class="filter-group">
+          <h3>Availability</h3>
+          <div data-filter-stock></div>
+        </div>
+        <div class="filter-group">
+          <button class="btn btn-ghost btn-sm" type="button" data-clear-filters>Clear filters</button>
+        </div>
+        <div class="filter-group">
+          <p class="u-caption">Not in this list? We source beyond the listed catalog.</p>
+          <a class="btn btn-secondary btn-sm" style="margin-top:var(--au-s-2)" href="rfq.html">Request a quote</a>
+        </div>
+      </aside>
+
+      <div>
+        <div class="results-bar">
+          <p class="results-count" role="status" aria-live="polite" data-count></p>
+          <label class="u-caption" style="display:flex;align-items:center;gap:var(--au-s-2)">
+            Sort
+            <select data-sort style="min-height:36px;padding:var(--au-s-1) var(--au-s-2);border:1px solid var(--au-border);border-radius:var(--au-radius-sm);background:var(--au-surface)">
+              <option value="availability">Availability first</option>
+              <option value="pn">Part number A–Z</option>
+            </select>
+          </label>
+        </div>
+        <ul class="part-list" data-results></ul>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div data-au-footer></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+document.addEventListener("au:ready", function () {
+  var D = window.AU_DATA;
+  var type = AU.param("type");
+  var id = AU.param("id");
+
+  /* Each grouping type resolves to a title, an explanation of what the
+     grouping actually means, and a predicate. Keeping the explanation in the
+     template means no generated page ever ships without one. */
+  var view = { title: id, sub: "", note: "", parts: [] };
+
+  if (type === "category") {
+    var c = D.CATEGORIES.find(function (x) { return x.slug === id; });
+    if (c) {
+      view.title = c.name;
+      view.sub = "Federal Supply Class " + c.fsc;
+      view.note = "Parts grouped by what they do. FSC " + c.fsc + " is the government supply class covering this category — useful if you are working from a military or federal parts list.";
+      view.parts = D.PARTS.filter(function (p) { return p.category === id; });
+    }
+  } else if (type === "manufacturer") {
+    var m = D.MANUFACTURERS.find(function (x) { return x.name === id; });
+    view.title = id;
+    view.sub = m ? "CAGE code " + m.cage : "";
+    view.note = "Everything we list from this manufacturer. The CAGE code identifies them uniquely across government and commercial supply chains — worth checking against your paperwork before you quote.";
+    view.parts = D.PARTS.filter(function (p) { return p.mfr === id; });
+  } else if (type === "aircraft") {
+    var a = D.AIRCRAFT.find(function (x) { return x.slug === id; });
+    if (a) {
+      view.title = a.name;
+      view.sub = "Parts by aircraft model";
+      view.note = "Parts we hold or source for this platform. Always confirm applicability against the current illustrated parts catalogue for your specific series and effectivity.";
+      view.parts = D.PARTS.filter(function (p) { return (p.aircraft || []).indexOf(id) > -1; });
+    }
+  } else if (type === "fsc") {
+    view.title = "FSC " + id;
+    view.sub = "Federal Supply Class";
+    view.note = "All listed parts within this Federal Supply Class.";
+    view.parts = D.PARTS.filter(function (p) { return p.fsc === id; });
+  }
+
+  document.title = view.title + " — Aerospace Unlimited";
+
+  AU.$("[data-crumb]").innerHTML =
+    '<li><a href="index.html">Home</a></li>' +
+    '<li><a href="browse.html">Catalog</a></li>' +
+    "<li>" + AU.esc(view.title) + "</li>";
+
+  AU.$("[data-head]").innerHTML =
+    '<h1 class="au-h1">' + AU.esc(view.title) + "</h1>" +
+    (view.sub ? '<p class="u-h3 u-muted" style="margin-top:var(--au-s-2)">' + AU.esc(view.sub) + "</p>" : "") +
+    (view.note ? '<p class="u-small u-muted" style="margin-top:var(--au-s-3);max-width:70ch">' + AU.esc(view.note) + "</p>" : "");
+
+  var state = { within: "", stock: new Set(), sort: "availability" };
+
+  var counts = new Map();
+  view.parts.forEach(function (p) { counts.set(p.stock, (counts.get(p.stock) || 0) + 1); });
+  AU.$("[data-filter-stock]").innerHTML = Array.from(counts.entries()).map(function (e) {
+    return '<label class="filter-option"><input type="checkbox" data-facet="stock" value="' + e[0] + '">' +
+      "<span>" + AU.STOCK_LABEL[e[0]] + '</span><span class="count">' + e[1] + "</span></label>";
+  }).join("");
+
+  function apply() {
+    var rows = view.parts.filter(function (p) {
+      if (state.stock.size && !state.stock.has(p.stock)) return false;
+      if (state.within) {
+        var q = AU.norm(state.within);
+        if (AU.norm(p.pn).indexOf(q) < 0 && p.desc.toUpperCase().indexOf(state.within.toUpperCase()) < 0) return false;
+      }
+      return true;
+    });
+
+    if (state.sort === "pn") rows.sort(function (a, b) { return a.pn.localeCompare(b.pn); });
+    else {
+      var order = { in: 0, limited: 1, quote: 2 };
+      rows.sort(function (a, b) { return order[a.stock] - order[b.stock] || a.pn.localeCompare(b.pn); });
+    }
+
+    AU.$("[data-count]").innerHTML = "<strong>" + rows.length + "</strong> " + (rows.length === 1 ? "part" : "parts") + " listed";
+
+    if (!rows.length) {
+      // Even inside a browse list, a dead end converts rather than apologises.
+      AU.$("[data-results]").innerHTML =
+        '<li style="padding:var(--au-s-6);text-align:center">' +
+          '<p class="u-body-strong">Nothing listed matches that.</p>' +
+          '<p class="u-caption" style="margin-top:var(--au-s-2);max-width:44ch;margin-inline:auto">' +
+            "We list a fraction of what we can source. Send us the part number and we will quote it within 15 minutes.</p>" +
+          '<a class="btn btn-primary" style="margin-top:var(--au-s-4)" href="rfq.html?q=' +
+            encodeURIComponent(state.within) + '">Request a quote</a>' +
+        "</li>";
+    } else {
+      AU.renderParts(AU.$("[data-results]"), rows, state.within);
+    }
+  }
+
+  var within = AU.$("[data-within]");
+  within.addEventListener("input", function () { state.within = within.value.trim(); apply(); });
+
+  document.addEventListener("change", function (e) {
+    var cb = e.target.closest("[data-facet]");
+    if (cb) { cb.checked ? state.stock.add(cb.value) : state.stock.delete(cb.value); apply(); }
+    if (e.target.closest("[data-sort]")) { state.sort = e.target.value; apply(); }
+  });
+
+  AU.$("[data-clear-filters]").addEventListener("click", function () {
+    state.stock.clear(); state.within = ""; within.value = "";
+    AU.$$("[data-facet]").forEach(function (cb) { cb.checked = false; });
+    apply();
+  });
+
+  apply();
+});
+</script>
+</body>
+</html>

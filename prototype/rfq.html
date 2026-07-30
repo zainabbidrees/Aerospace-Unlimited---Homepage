@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Request a quote — Aerospace Unlimited</title>
+<meta name="description" content="Request a quote on any aviation or aerospace part. Answer back within 15 minutes, 24/7. No account required.">
+<link rel="stylesheet" href="assets/ux.css">
+</head>
+<body>
+
+<div data-au-header data-page="rfq.html"></div>
+
+<main id="main">
+  <div class="u-page">
+    <ol class="breadcrumb">
+      <li><a href="index.html">Home</a></li>
+      <li>Request a quote</li>
+    </ol>
+  </div>
+
+  <!-- ======================================================================
+       RFQ FORM
+
+       Design rules this form follows, in priority order:
+
+       1. ONE SCREEN. No wizard, no steps. Multi-step forms are where B2B
+          quote requests die, and a buyer at this point has already decided
+          — the form's only job is to get out of the way.
+       2. MINIMUM REQUIRED FIELDS. Part number, quantity, email. Everything
+          else is optional and collapsed. We can ask for a phone number when
+          there is a live quote and the buyer is invested; asking now costs
+          conversions and buys nothing.
+       3. THE PROMISE SITS AT THE BUTTON. Reassurance belongs at the moment
+          of commitment, not only in the hero.
+       4. NO ACCOUNT, EVER. Stated explicitly, because a first-time visitor
+          assumes a wall is coming.
+       ====================================================================== -->
+  <div class="u-page" style="padding-bottom:var(--au-s-7)">
+    <div class="pdp-layout">
+      <div>
+        <h1 class="au-h1" data-title>Request a quote</h1>
+        <p class="u-muted" style="margin-top:var(--au-s-3);max-width:60ch">
+          Tell us what you need and where to send the answer. A named account manager replies
+          within 15 minutes, day or night.
+        </p>
+
+        <form data-validate data-rfq-form action="confirmation.html" method="get" style="margin-top:var(--au-s-6)">
+
+          <!-- ============================================================
+               PART LINES
+
+               A buyer sourcing a work package has 8 lines, not 1. The old
+               site made that eight separate submissions. Lines are added
+               inline, and a paste mode accepts a column straight out of a
+               spreadsheet — which is where these lists actually live.
+               ============================================================ -->
+          <fieldset style="margin-bottom:var(--au-s-6)">
+            <legend class="u-h3" style="font-size:var(--au-text-h3)">1. What do you need?</legend>
+
+            <div role="tablist" aria-label="How to enter parts" style="display:flex;gap:var(--au-s-2);margin-bottom:var(--au-s-4)">
+              <button class="btn btn-quiet btn-sm" type="button" role="tab" aria-selected="true" data-mode-btn="lines">Enter line by line</button>
+              <button class="btn btn-ghost btn-sm" type="button" role="tab" aria-selected="false" data-mode-btn="paste">Paste a list</button>
+            </div>
+
+            <div data-mode="lines">
+              <div data-lines></div>
+              <button class="btn btn-quiet btn-sm" type="button" data-add-line style="margin-top:var(--au-s-3)">+ Add another part</button>
+            </div>
+
+            <div data-mode="paste" hidden>
+              <div class="field" data-label="Parts list">
+                <label for="paste">Paste your list</label>
+                <div class="hint">
+                  One part per line. Add a quantity after a comma, tab or space —
+                  for example <span class="u-mono">MS21042L3, 10</span>. Copying straight from a
+                  spreadsheet column works.
+                </div>
+                <textarea id="paste" data-paste placeholder="MS21042L3, 10&#10;AN960-10L, 250&#10;114E1200-5, 2"></textarea>
+                <div class="error"></div>
+              </div>
+              <button class="btn btn-quiet btn-sm" type="button" data-parse-paste>Convert to lines</button>
+            </div>
+          </fieldset>
+
+          <!-- ============================================================
+               CONTACT
+
+               Email is the only required field here. It is framed as
+               "where do we send the quote" rather than "your email",
+               because the former reads as a delivery address and the
+               latter reads as a marketing capture.
+               ============================================================ -->
+          <fieldset style="margin-bottom:var(--au-s-6)">
+            <legend class="u-h3" style="font-size:var(--au-text-h3)">2. Where should we send it?</legend>
+
+            <div class="field" data-label="Email">
+              <label for="email">Email <span class="required" aria-hidden="true">*</span></label>
+              <input id="email" name="email" type="email" required placeholder="name@company.com" autocomplete="email">
+              <div class="hint">Used only to send your quote. No account is created and no newsletter is sent.</div>
+              <div class="error"></div>
+            </div>
+
+            <!-- Optional detail is collapsed by default. Visible-but-optional
+                 fields still read as work to be done; hiding them makes the
+                 form look as short as it actually is. -->
+            <details style="margin-top:var(--au-s-4)">
+              <summary class="u-small u-body-strong" style="cursor:pointer;padding:var(--au-s-2) 0">
+                Add company and phone details <span class="optional">(optional — speeds up complex quotes)</span>
+              </summary>
+              <div class="field-row" style="margin-top:var(--au-s-4)">
+                <div class="field" data-label="Name">
+                  <label for="name">Your name</label>
+                  <input id="name" name="name" type="text" autocomplete="name">
+                  <div class="error"></div>
+                </div>
+                <div class="field" data-label="Company">
+                  <label for="company">Company</label>
+                  <input id="company" name="company" type="text" autocomplete="organization">
+                  <div class="error"></div>
+                </div>
+              </div>
+              <div class="field-row" style="margin-top:var(--au-s-4)">
+                <div class="field" data-label="Phone">
+                  <label for="phone">Phone</label>
+                  <input id="phone" name="phone" type="tel" autocomplete="tel">
+                  <div class="hint">Only used if we need to clarify something to quote accurately.</div>
+                  <div class="error"></div>
+                </div>
+                <div class="field" data-label="Country">
+                  <label for="country">Ship-to country</label>
+                  <input id="country" name="country" type="text" autocomplete="country-name" placeholder="United States">
+                  <div class="hint">Determines export-compliance handling.</div>
+                  <div class="error"></div>
+                </div>
+              </div>
+            </details>
+          </fieldset>
+
+          <!-- ============================================================
+               URGENCY
+
+               Asked as a plain question rather than a priority dropdown.
+               "Aircraft on ground" is the term the buyer already uses, and
+               ticking it changes the routing, not just a database field.
+               ============================================================ -->
+          <fieldset style="margin-bottom:var(--au-s-6)">
+            <legend class="u-h3" style="font-size:var(--au-text-h3)">3. How urgent is this?</legend>
+            <div class="u-stack">
+              <label class="check">
+                <input type="checkbox" name="aog" value="1" data-aog>
+                <span>
+                  <span class="t">Aircraft on ground (AOG)</span>
+                  <span class="d">Goes straight to the 24/7 desk ahead of the standard queue. Use this for grounded-aircraft situations at any hour.</span>
+                </span>
+              </label>
+              <div class="field" data-label="Needed by" style="max-width:280px">
+                <label for="needby">Needed by <span class="optional">(optional)</span></label>
+                <input id="needby" name="needby" type="date">
+                <div class="error"></div>
+              </div>
+              <div class="field" data-label="Notes">
+                <label for="notes">Anything else we should know? <span class="optional">(optional)</span></label>
+                <textarea id="notes" name="notes" style="font-family:var(--au-font-sans);min-height:90px"
+                  placeholder="Condition requirements, certification requirements, alternates acceptable, target price…"></textarea>
+                <div class="error"></div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- ============================================================
+               SUBMIT
+
+               The promise is restated at the point of commitment, and the
+               button says what will happen rather than "Submit".
+               ============================================================ -->
+          <div class="card" style="background:var(--au-surface-alt)">
+            <button class="btn btn-primary btn-lg btn-block" type="submit">Send request — quote back within 15 minutes</button>
+            <p class="u-caption u-center" style="margin-top:var(--au-s-3)">
+              No account required · We never sell or share your details ·
+              Answered 24/7, including weekends and holidays
+            </p>
+          </div>
+        </form>
+      </div>
+
+      <!-- ================================================================
+           REASSURANCE RAIL
+
+           Runs alongside the form rather than before it. A first-time
+           visitor's objections surface while they are filling fields in,
+           so the answers need to be in peripheral vision at that moment.
+           ================================================================ -->
+      <aside class="rfq-panel">
+        <div class="rfq-panel-head">
+          <h2 class="u-h3">What happens next</h2>
+        </div>
+        <div class="rfq-panel-body">
+          <div class="steps" style="grid-template-columns:1fr;gap:var(--au-s-4)">
+            <div class="step-item" style="padding-top:var(--au-s-4)">
+              <h3 style="font-size:var(--au-text-small);margin-top:var(--au-s-3)">You send this form</h3>
+              <p>It reaches a named account manager immediately — not a shared inbox.</p>
+            </div>
+            <div class="step-item" style="padding-top:var(--au-s-4)">
+              <h3 style="font-size:var(--au-text-small);margin-top:var(--au-s-3)">We reply within 15 minutes</h3>
+              <p>Price, availability, condition and lead time for every line, in writing.</p>
+            </div>
+            <div class="step-item" style="padding-top:var(--au-s-4)">
+              <h3 style="font-size:var(--au-text-small);margin-top:var(--au-s-3)">You decide</h3>
+              <p>No obligation. No follow-up calls unless you ask for one.</p>
+            </div>
+          </div>
+
+          <div class="certs" style="margin-top:var(--au-s-2)">
+            <span class="cert"><span class="mark" aria-hidden="true">✓</span> AS9120B</span>
+            <span class="cert"><span class="mark" aria-hidden="true">✓</span> ISO 9001:2015</span>
+            <span class="cert"><span class="mark" aria-hidden="true">✓</span> FAA AC 00-56B</span>
+          </div>
+        </div>
+        <div class="rfq-panel-foot">
+          Grounded aircraft right now? Call <a href="tel:+17147054780">+1-714-705-4780</a> —
+          answered by a person, 24/7.
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<div data-au-footer></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+document.addEventListener("au:ready", function () {
+  var linesHost = AU.$("[data-lines]");
+  var idx = 0;
+
+  function lineMarkup(pn, qty, condition) {
+    idx++;
+    return '<div class="card" data-line style="padding:var(--au-s-4);margin-bottom:var(--au-s-3)">' +
+      '<div class="field-row">' +
+        '<div class="field" data-label="Part number" style="flex:2">' +
+          '<label for="pn-' + idx + '">Part number <span class="required" aria-hidden="true">*</span></label>' +
+          '<input id="pn-' + idx + '" name="pn" type="text" data-mono required value="' + AU.esc(pn || "") + '" ' +
+            'placeholder="e.g. MS21042L3" autocomplete="off">' +
+          '<div class="error"></div>' +
+        "</div>" +
+        '<div class="field" data-label="Quantity">' +
+          '<label for="qty-' + idx + '">Quantity <span class="required" aria-hidden="true">*</span></label>' +
+          '<input id="qty-' + idx + '" name="qty" type="number" min="1" required value="' + (qty || 1) + '" data-mono>' +
+          '<div class="error"></div>' +
+        "</div>" +
+        '<div class="field" data-label="Condition">' +
+          '<label for="cond-' + idx + '">Condition</label>' +
+          '<select id="cond-' + idx + '" name="condition">' +
+            ["Any condition", "New / Factory Sealed", "New Surplus", "Overhauled / 8130-3", "Serviceable / Traceable"]
+              .map(function (c) { return "<option" + (c === condition ? " selected" : "") + ">" + c + "</option>"; }).join("") +
+          "</select>" +
+          '<div class="error"></div>' +
+        "</div>" +
+      "</div>" +
+      '<button class="btn btn-ghost btn-sm" type="button" data-remove-line style="margin-top:var(--au-s-2)">Remove this line</button>' +
+    "</div>";
+  }
+
+  function addLine(pn, qty, condition) {
+    linesHost.insertAdjacentHTML("beforeend", lineMarkup(pn, qty, condition));
+    syncRemoveButtons();
+    AU.wireForms();
+  }
+
+  // With a single line there is nothing to remove, and offering the control
+  // would let a buyer empty the form entirely.
+  function syncRemoveButtons() {
+    var lines = AU.$$("[data-line]");
+    lines.forEach(function (l) {
+      var btn = AU.$("[data-remove-line]", l);
+      btn.style.display = lines.length > 1 ? "" : "none";
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     PREFILL
+
+     The form is reached from five places and must arrive already knowing
+     what the buyer was looking at. Losing that context — making someone
+     retype a part number they just clicked on — is an avoidable exit.
+     ------------------------------------------------------------------ */
+  var pn = AU.param("pn");
+  var q = AU.param("q");
+  var mode = AU.param("mode");
+  var fromList = AU.Quote.all();
+
+  if (pn) {
+    var part = AU.findPart(pn);
+    AU.$("[data-title]").textContent = "Request a quote for " + pn;
+    addLine(pn, 1, part ? part.condition : "");
+  } else if (q) {
+    AU.$("[data-title]").textContent = "Request a quote";
+    AU.$("[data-lines]").insertAdjacentHTML("beforebegin",
+      '<div class="notice" style="margin-bottom:var(--au-s-4)">' +
+      "We could not find <span class=\"u-mono\">" + AU.esc(q) + "</span> in the listed catalog — " +
+      "that is normal, and it does not mean we cannot get it. It is filled in below; add a quantity and send." +
+      "</div>");
+    addLine(q, 1);
+  } else if (fromList.length) {
+    // Anything already collected in the quote list is carried in, so the
+    // buyer never rebuilds a list they already built.
+    AU.$("[data-title]").textContent = "Request quotes for " + fromList.length + " part" + (fromList.length === 1 ? "" : "s");
+    fromList.forEach(function (i) { addLine(i.pn, i.qty, i.condition); });
+  } else {
+    addLine("", 1);
+  }
+
+  if (mode === "list") {
+    AU.$('[data-mode-btn="paste"]').click();
+  }
+
+  AU.$("[data-add-line]").addEventListener("click", function () {
+    addLine("", 1);
+    var inputs = AU.$$('[data-line] input[name="pn"]');
+    inputs[inputs.length - 1].focus();
+  });
+
+  document.addEventListener("click", function (e) {
+    var rm = e.target.closest("[data-remove-line]");
+    if (rm) { rm.closest("[data-line]").remove(); syncRemoveButtons(); }
+  });
+
+  // --- Entry mode toggle ------------------------------------------------
+  AU.$$("[data-mode-btn]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var target = btn.dataset.modeBtn;
+      AU.$$("[data-mode-btn]").forEach(function (b) {
+        var on = b === btn;
+        b.setAttribute("aria-selected", String(on));
+        b.classList.toggle("btn-quiet", on);
+        b.classList.toggle("btn-ghost", !on);
+      });
+      AU.$$("[data-mode]").forEach(function (panel) {
+        panel.hidden = panel.dataset.mode !== target;
+      });
+    });
+  });
+
+  /* Paste parsing. Accepts comma, tab, semicolon or whitespace between the
+     part number and the quantity, because a pasted spreadsheet column could
+     use any of them and asking the buyer to reformat is not acceptable. */
+  AU.$("[data-parse-paste]").addEventListener("click", function () {
+    var raw = AU.$("[data-paste]").value.trim();
+    if (!raw) return;
+    var parsed = raw.split(/\r?\n/).map(function (line) {
+      var m = line.trim().match(/^(.+?)[\s,;\t]+(\d+)\s*$/);
+      if (m) return { pn: m[1].trim().replace(/[,;]$/, ""), qty: parseInt(m[2], 10) };
+      return line.trim() ? { pn: line.trim(), qty: 1 } : null;
+    }).filter(Boolean);
+
+    if (!parsed.length) return;
+    linesHost.innerHTML = "";
+    parsed.forEach(function (p) { addLine(p.pn, p.qty); });
+    AU.$('[data-mode-btn="lines"]').click();
+    AU.toast(parsed.length + " line" + (parsed.length === 1 ? "" : "s") + " added. Check the quantities and send.");
+  });
+
+  // Clear the quote list once it has been converted into a request, so the
+  // buyer does not come back to a stale list they think is still pending.
+  AU.$("[data-rfq-form]").addEventListener("submit", function (e) {
+    if (e.defaultPrevented) return;
+    AU.Quote.clear();
+  });
+
+  AU.wireForms();
+});
+</script>
+</body>
+</html>

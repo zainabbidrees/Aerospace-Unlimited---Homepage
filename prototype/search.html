@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Search results — Aerospace Unlimited</title>
+<meta name="description" content="Search results across the Aerospace Unlimited catalog.">
+<link rel="stylesheet" href="assets/ux.css">
+</head>
+<body>
+
+<div data-au-header data-page="search.html"></div>
+
+<main id="main">
+  <div class="u-page">
+    <ol class="breadcrumb">
+      <li><a href="index.html">Home</a></li>
+      <li>Search results</li>
+    </ol>
+  </div>
+
+  <!-- ====================================================================
+       QUERY ECHO
+
+       The buyer is told what we understood before they read a single
+       result. If they typed an NSN with the wrong dashes, or a CAGE code
+       we normalised, they see that here rather than silently mistrusting
+       the result list.
+       ==================================================================== -->
+  <div class="u-page">
+    <div data-query-echo></div>
+  </div>
+
+  <div class="u-page" style="padding-bottom:var(--au-s-7)">
+    <div class="results-layout" data-results-layout hidden>
+
+      <!-- ================================================================
+           FILTERS
+
+           Deliberately few. A buyer narrowing a list of aviation parts
+           cares about three things: can I get it, who made it, and what
+           kind of part is it. Every extra facet is a decision that delays
+           the RFQ.
+           ================================================================ -->
+      <aside class="filters" aria-label="Filter results">
+        <div class="filter-group">
+          <h3>Availability</h3>
+          <div data-filter-stock></div>
+        </div>
+        <div class="filter-group">
+          <h3>Manufacturer</h3>
+          <div data-filter-mfr></div>
+        </div>
+        <div class="filter-group">
+          <h3>Category</h3>
+          <div data-filter-cat></div>
+        </div>
+        <div class="filter-group">
+          <button class="btn btn-ghost btn-sm" type="button" data-clear-filters>Clear all filters</button>
+        </div>
+      </aside>
+
+      <div>
+        <div class="results-bar">
+          <p class="results-count" role="status" aria-live="polite" data-count></p>
+          <label class="u-caption" style="display:flex;align-items:center;gap:var(--au-s-2)">
+            Sort
+            <select data-sort style="min-height:36px;padding:var(--au-s-1) var(--au-s-2);border:1px solid var(--au-border);border-radius:var(--au-radius-sm);background:var(--au-surface)">
+              <option value="relevance">Best match</option>
+              <option value="availability">Availability first</option>
+              <option value="pn">Part number A–Z</option>
+            </select>
+          </label>
+        </div>
+
+        <ul class="part-list" data-results></ul>
+
+        <!-- Even on a good result set, the part the buyer is holding may not
+             be listed. This keeps the escape hatch visible at the bottom of
+             every list rather than only on the zero-result page. -->
+        <div class="notice" style="margin-top:var(--au-s-5)">
+          <strong>Not seeing the exact part?</strong>
+          Our listed catalog is a fraction of what we source. Send us the number and we will
+          quote it within 15 minutes.
+          <a href="#" data-rfq-link style="display:inline-block;margin-top:var(--au-s-2)">Request a quote for this search →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================================================================
+         ZERO RESULTS
+
+         The single highest-risk screen on the site. A buyer who searched
+         and found nothing is one click from a competitor. So this state
+         does not apologise and does not dead-end — it leads with an RFQ
+         carrying the exact string they typed, and offers browse routes as
+         the secondary option.
+         ================================================================== -->
+    <div data-no-results hidden>
+      <div class="empty-state">
+        <h2>We do not have <span class="u-mono" data-echo-query></span> listed — but we can almost certainly still get it.</h2>
+        <p>
+          Our website lists a fraction of the 2 billion part numbers in our network. Send us
+          the number and a named account manager will come back with price and availability
+          within 15 minutes.
+        </p>
+        <div class="actions">
+          <a class="btn btn-primary btn-lg" href="#" data-rfq-cta>Request a quote for this part</a>
+          <a class="btn btn-quiet btn-lg" href="tel:+17147054780">Aircraft on ground? Call +1-714-705-4780</a>
+        </div>
+      </div>
+
+      <div style="margin-top:var(--au-s-7)">
+        <h3 class="u-h3">Or check what you typed</h3>
+        <ul class="u-small u-muted" style="margin-top:var(--au-s-3);display:grid;gap:var(--au-s-2)">
+          <li>· Dashes and spaces are ignored — <span class="u-mono">MS21042-L3</span> and <span class="u-mono">MS21042L3</span> both work.</li>
+          <li>· An NSN is 13 digits; a NIIN is the last 9 of it; a CAGE code is 5 characters.</li>
+          <li>· If you only have a description, try two words — for example <span class="u-mono">check valve</span>.</li>
+        </ul>
+      </div>
+
+      <div style="margin-top:var(--au-s-7)">
+        <h3 class="u-h3">Related categories you can browse</h3>
+        <div class="grid grid-4" style="margin-top:var(--au-s-3)" data-suggest-cats></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div data-au-footer></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+document.addEventListener("au:ready", function () {
+  var q = AU.param("q");
+  var header = AU.$("#header-search");
+  if (header) header.value = q;
+  document.title = q ? '"' + q + '" — search results — Aerospace Unlimited' : "Search — Aerospace Unlimited";
+
+  var id = AU.detectIdentifier(q);
+  var all = AU.searchParts(q);
+
+  // --- Query echo -------------------------------------------------------
+  AU.$("[data-query-echo]").innerHTML =
+    '<h1 class="u-h2" style="margin-bottom:var(--au-s-2)">' +
+      (all.length ? "Results for " : "No listed results for ") +
+      '<span class="u-mono">' + AU.esc(q) + "</span></h1>" +
+    // Only mention normalisation when it actually changed something meaningful.
+    // Announcing a pure case change reads as noise and undermines the message.
+    (id ? '<p class="u-caption">Interpreted as <strong>' + AU.esc(id.label) + "</strong>" +
+      (id.normalized.toUpperCase() !== q.trim().toUpperCase()
+        ? ' · matched against <span class="u-mono">' + AU.esc(id.normalized) + "</span>" : "") +
+      "</p>" : "");
+
+  var rfqHref = "rfq.html?q=" + encodeURIComponent(q);
+  AU.$$("[data-rfq-link], [data-rfq-cta]").forEach(function (a) { a.href = rfqHref; });
+  var echo = AU.$("[data-echo-query]");
+  if (echo) echo.textContent = q;
+
+  // --- Zero results -----------------------------------------------------
+  if (!all.length) {
+    AU.$("[data-no-results]").hidden = false;
+    AU.$("[data-suggest-cats]").innerHTML = window.AU_DATA.CATEGORIES.slice(0, 8).map(function (c) {
+      return '<a class="card card-link" href="browse-category.html?type=category&id=' + c.slug + '">' +
+        '<span class="u-small u-body-strong">' + AU.esc(c.name) + "</span>" +
+        '<div class="u-caption" style="margin-top:4px">FSC ' + c.fsc + " · " + c.count.toLocaleString() + " parts</div></a>";
+    }).join("");
+    return;
+  }
+
+  AU.$("[data-results-layout]").hidden = false;
+
+  // --- Facets, counted from the actual result set ------------------------
+  // Counts are shown so a buyer can see the cost of a filter before applying
+  // it, and options that would return nothing are never offered.
+  var state = { stock: new Set(), mfr: new Set(), cat: new Set(), sort: "relevance" };
+
+  function tally(key) {
+    var m = new Map();
+    all.forEach(function (p) { m.set(p[key], (m.get(p[key]) || 0) + 1); });
+    return Array.from(m.entries()).sort(function (a, b) { return b[1] - a[1]; });
+  }
+
+  function facet(host, key, entries, labeller) {
+    AU.$(host).innerHTML = entries.map(function (e) {
+      var val = e[0], n = e[1];
+      return '<label class="filter-option"><input type="checkbox" data-facet="' + key + '" value="' + AU.esc(val) + '">' +
+        "<span>" + AU.esc(labeller ? labeller(val) : val) + '</span><span class="count">' + n + "</span></label>";
+    }).join("");
+  }
+
+  facet("[data-filter-stock]", "stock", tally("stock"), function (v) { return AU.STOCK_LABEL[v]; });
+  facet("[data-filter-mfr]", "mfr", tally("mfr"));
+  facet("[data-filter-cat]", "category", tally("category"), function (v) {
+    var c = window.AU_DATA.CATEGORIES.find(function (x) { return x.slug === v; });
+    return c ? c.name : v;
+  });
+
+  function apply() {
+    var rows = all.filter(function (p) {
+      return (!state.stock.size || state.stock.has(p.stock)) &&
+             (!state.mfr.size   || state.mfr.has(p.mfr)) &&
+             (!state.cat.size   || state.cat.has(p.category));
+    });
+
+    if (state.sort === "pn") rows.sort(function (a, b) { return a.pn.localeCompare(b.pn); });
+    else if (state.sort === "availability") {
+      var order = { in: 0, limited: 1, quote: 2 };
+      rows.sort(function (a, b) { return order[a.stock] - order[b.stock]; });
+    }
+
+    AU.$("[data-count]").innerHTML = "<strong>" + rows.length + "</strong> " +
+      (rows.length === 1 ? "part" : "parts") +
+      (rows.length !== all.length ? " of " + all.length + " matching" : "");
+
+    if (!rows.length) {
+      AU.$("[data-results]").innerHTML =
+        '<li style="padding:var(--au-s-6);text-align:center">' +
+        '<p class="u-body-strong">No parts match these filters.</p>' +
+        '<p class="u-caption" style="margin-top:var(--au-s-2)">Clear a filter to widen the search.</p></li>';
+    } else {
+      AU.renderParts(AU.$("[data-results]"), rows, q);
+    }
+  }
+
+  document.addEventListener("change", function (e) {
+    var cb = e.target.closest("[data-facet]");
+    if (cb) {
+      var bucket = cb.dataset.facet === "category" ? state.cat : state[cb.dataset.facet];
+      cb.checked ? bucket.add(cb.value) : bucket.delete(cb.value);
+      apply();
+    }
+    if (e.target.closest("[data-sort]")) { state.sort = e.target.value; apply(); }
+  });
+
+  AU.$("[data-clear-filters]").addEventListener("click", function () {
+    state.stock.clear(); state.mfr.clear(); state.cat.clear();
+    AU.$$("[data-facet]").forEach(function (cb) { cb.checked = false; });
+    apply();
+  });
+
+  apply();
+});
+</script>
+</body>
+</html>

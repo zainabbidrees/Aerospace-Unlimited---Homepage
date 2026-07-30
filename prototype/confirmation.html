@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Request received — Aerospace Unlimited</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="assets/ux.css">
+</head>
+<body>
+
+<div data-au-header data-page="confirmation.html"></div>
+
+<main id="main">
+  <!-- ======================================================================
+       CONFIRMATION
+
+       Three jobs, in this order:
+
+       1. CONFIRM UNAMBIGUOUSLY. State exactly what was received and where
+          the answer is going. A buyer who is unsure whether a form went
+          through will submit it again, or phone — both are failures.
+       2. MAKE THE PROMISE CONCRETE. "Within 15 minutes" becomes a clock
+          time. A vague promise cannot be checked, so it cannot build trust.
+       3. DO NOT DEAD-END. This is a warm visitor with proven intent. The
+          page keeps working — add more parts, or start a second request.
+       ====================================================================== -->
+  <div class="u-page" style="padding-block:var(--au-s-7) var(--au-s-7)">
+    <div style="max-width:760px">
+
+      <div class="badge badge-accent" style="margin-bottom:var(--au-s-4)">Request received</div>
+      <h1 class="au-h1">Your request is with an account manager now.</h1>
+      <p class="u-h3 u-muted" style="margin-top:var(--au-s-4)" data-eta></p>
+
+      <div class="card" style="margin-top:var(--au-s-6)">
+        <h2 class="u-h3" style="margin-bottom:var(--au-s-4)">What we received</h2>
+        <table class="spec-table" data-summary></table>
+      </div>
+
+      <!-- Deliverability is the most common silent failure for a quote that
+           never "arrives". Naming the sending address up front is cheaper
+           than a chase call 20 minutes later. -->
+      <div class="notice" style="margin-top:var(--au-s-5)">
+        <strong>Quotes arrive from <span class="u-mono">sales@aerospaceunlimited.com</span>.</strong>
+        If nothing has landed in 15 minutes, check your spam folder before assuming it did not
+        send — then call us on <a href="tel:+17147054780">+1-714-705-4780</a>.
+      </div>
+
+      <section style="margin-top:var(--au-s-7)">
+        <h2 class="u-h2">What happens next</h2>
+        <div class="steps" style="margin-top:var(--au-s-5)">
+          <div class="step-item">
+            <h3>We price and check availability</h3>
+            <p>Against stock first, then our supplier network for anything not on the shelf.</p>
+          </div>
+          <div class="step-item">
+            <h3>You get it in writing</h3>
+            <p>Price, quantity available, condition, certification and lead time for every line.</p>
+          </div>
+          <div class="step-item">
+            <h3>Nothing happens until you say so</h3>
+            <p>No obligation and no follow-up calls unless you ask. Reply to the quote to order.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Keep the session alive. A buyer who just quoted one part very often
+           has a second one, and this is the cheapest moment to capture it. -->
+      <section style="margin-top:var(--au-s-7)">
+        <div class="empty-state">
+          <h2>Need to quote anything else?</h2>
+          <p>Requests sent separately are still handled by the same account manager, so nothing gets split up.</p>
+          <div class="actions">
+            <a class="btn btn-primary btn-lg" href="rfq.html">Start another request</a>
+            <a class="btn btn-quiet btn-lg" href="browse.html">Keep browsing the catalog</a>
+          </div>
+        </div>
+      </section>
+
+      <p class="u-caption" style="margin-top:var(--au-s-6)">
+        Situation changed and this is now urgent?
+        <a href="tel:+17147054780">Call the 24/7 AOG desk on +1-714-705-4780</a> and quote your
+        reference number — we will pull it forward.
+      </p>
+    </div>
+  </div>
+</main>
+
+<div data-au-footer></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+document.addEventListener("au:ready", function () {
+  var params = new URLSearchParams(location.search);
+  var pns = params.getAll("pn");
+  var qtys = params.getAll("qty");
+  var email = params.get("email") || "your email address";
+  var aog = params.get("aog") === "1";
+  var needby = params.get("needby");
+
+  /* A reference is generated so the buyer has something to quote on the
+     phone. Deriving it from the clock keeps it short and human-readable. */
+  var now = new Date();
+  var ref = "AU-" + String(now.getFullYear()).slice(2) +
+    String(now.getMonth() + 1).padStart(2, "0") +
+    String(now.getDate()).padStart(2, "0") + "-" +
+    String(Math.floor(now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds())).padStart(5, "0");
+
+  // The promise expressed as a wall-clock time the buyer can actually hold
+  // us to, rather than a duration they have to compute themselves.
+  var eta = new Date(now.getTime() + 15 * 60000);
+  var etaText = eta.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
+  AU.$("[data-eta]").innerHTML = aog
+    ? "Flagged <strong>AOG</strong> and routed to the 24/7 desk ahead of the standard queue. " +
+      "Expect a reply by <strong>" + etaText + "</strong> at the latest."
+    : "Expect a written quote at <strong>" + AU.esc(email) + "</strong> by <strong>" + etaText + "</strong>.";
+
+  function row(k, v, mono) {
+    return "<tr><th>" + k + "</th><td" + (mono ? "" : " data-plain") + ">" + v + "</td></tr>";
+  }
+
+  var lines = pns.length
+    ? pns.map(function (pn, i) {
+        return '<div style="display:flex;justify-content:space-between;gap:var(--au-s-3);padding-block:2px">' +
+          "<span>" + AU.esc(pn) + "</span>" +
+          '<span class="u-faint">qty ' + AU.esc(qtys[i] || "1") + "</span></div>";
+      }).join("")
+    : '<span class="u-faint">As described in your message</span>';
+
+  AU.$("[data-summary]").innerHTML =
+    row("Reference", ref + ' <button class="copy-btn" type="button" data-copy="' + ref + '">Copy</button>', true) +
+    row("Part" + (pns.length === 1 ? "" : "s"), lines, true) +
+    row("Quote goes to", AU.esc(email), false) +
+    (needby ? row("Needed by", AU.esc(needby), false) : "") +
+    row("Priority", aog ? "<strong>AOG — aircraft on ground</strong>" : "Standard — 15 minute response", false) +
+    row("Received", now.toLocaleString(), false);
+});
+</script>
+</body>
+</html>

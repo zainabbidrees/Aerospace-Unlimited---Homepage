@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your quote list — Aerospace Unlimited</title>
+<meta name="description" content="Review the parts you have collected and request quotes for all of them in one go.">
+<link rel="stylesheet" href="assets/ux.css">
+</head>
+<body>
+
+<div data-au-header data-page="quote.html"></div>
+
+<main id="main">
+  <div class="u-page">
+    <ol class="breadcrumb">
+      <li><a href="index.html">Home</a></li>
+      <li>Your quote list</li>
+    </ol>
+  </div>
+
+  <!-- ======================================================================
+       QUOTE LIST — full-page view
+
+       The drawer covers the common case. This page exists for two others:
+       a buyer on a phone where a side drawer is cramped, and a buyer who
+       wants to review a long list properly before sending it. It is kept in
+       sync with the drawer through the same storage, so a part removed here
+       disappears there too.
+       ====================================================================== -->
+  <div class="u-page" style="padding-bottom:var(--au-s-7)">
+    <h1 class="au-h1">Your quote list</h1>
+    <p class="u-muted" style="margin-top:var(--au-s-3);max-width:62ch">
+      Everything you have collected while browsing. Send it as one request and we will quote
+      every line — including anything we have to source in.
+    </p>
+
+    <div style="margin-top:var(--au-s-6)" data-list-root></div>
+  </div>
+</main>
+
+<div data-au-footer></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+document.addEventListener("au:ready", function () {
+  var root = AU.$("[data-list-root]");
+
+  function render() {
+    var items = AU.Quote.all();
+
+    if (!items.length) {
+      // An empty list is a browsing problem, not an error — so it offers
+      // routes rather than an apology.
+      root.innerHTML =
+        '<div class="empty-state">' +
+          "<h2>Your quote list is empty.</h2>" +
+          "<p>Add parts as you browse and request one quote covering all of them. " +
+          "Or skip the list entirely and send us the part numbers directly.</p>" +
+          '<div class="actions">' +
+            '<a class="btn btn-primary btn-lg" href="rfq.html?mode=list">Paste a parts list</a>' +
+            '<a class="btn btn-quiet btn-lg" href="browse.html">Browse the catalog</a>' +
+          "</div>" +
+        "</div>";
+      return;
+    }
+
+    root.innerHTML =
+      '<div class="card" style="padding:0;overflow:hidden">' +
+        '<div style="padding:var(--au-s-4) var(--au-s-5);border-bottom:1px solid var(--au-border);background:var(--au-surface-alt);display:flex;justify-content:space-between;align-items:center;gap:var(--au-s-3);flex-wrap:wrap">' +
+          '<strong class="u-small">' + items.length + " part" + (items.length === 1 ? "" : "s") + " ready to quote</strong>" +
+          '<button class="btn btn-ghost btn-sm" type="button" data-clear-all>Clear the list</button>' +
+        "</div>" +
+        '<div style="padding:0 var(--au-s-5)">' +
+          items.map(function (i) {
+            return '<div class="qline">' +
+              "<div>" +
+                '<a class="pn" href="part.html?pn=' + encodeURIComponent(i.pn) + '">' + AU.esc(i.pn) + "</a>" +
+                '<div class="desc">' + AU.esc(i.desc || "Sourced to order") + "</div>" +
+                (i.condition ? '<div class="u-caption" style="margin-top:2px">' + AU.esc(i.condition) + "</div>" : "") +
+              "</div>" +
+              '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:var(--au-s-2)">' +
+                '<div class="controls">' +
+                  '<label class="u-caption" for="q-' + AU.esc(i.pn) + '">Qty</label>' +
+                  '<input id="q-' + AU.esc(i.pn) + '" type="number" min="1" value="' + i.qty + '" data-qty="' + AU.esc(i.pn) + '">' +
+                "</div>" +
+                '<button class="remove" type="button" data-remove="' + AU.esc(i.pn) + '">Remove</button>' +
+              "</div>" +
+            "</div>";
+          }).join("") +
+        "</div>" +
+        '<div style="padding:var(--au-s-5);border-top:1px solid var(--au-border);background:var(--au-surface-alt)">' +
+          '<a class="btn btn-primary btn-lg btn-block" href="rfq.html">Request quotes for all ' + items.length + " part" + (items.length === 1 ? "" : "s") + "</a>" +
+          '<p class="u-caption u-center" style="margin-top:var(--au-s-3)">' +
+            "One form, every line. Answer back within 15 minutes. No account required.</p>" +
+        "</div>" +
+      "</div>" +
+      '<p class="u-caption" style="margin-top:var(--au-s-4)">' +
+        'Need something not listed on the site? <a href="rfq.html?mode=list">Add it by pasting a list →</a></p>';
+  }
+
+  AU.$("[data-list-root]").addEventListener("click", function (e) {
+    if (e.target.closest("[data-clear-all]")) {
+      var backup = AU.Quote.all();
+      AU.Quote.clear();
+      AU.toast("Quote list cleared.", "Undo", function () { AU.Quote.save(backup); });
+    }
+  });
+
+  AU.Quote.onChange(render);
+  render();
+});
+</script>
+</body>
+</html>

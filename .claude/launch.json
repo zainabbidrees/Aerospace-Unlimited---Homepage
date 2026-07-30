@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "prototype",
+      "url": "http://localhost:4173",
+      "port": 4173,
+      "autoPort": false
+    }
+  ]
+}

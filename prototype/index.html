@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aerospace Unlimited — Aviation &amp; aerospace parts, quoted in 15 minutes</title>
+<meta name="description" content="Search over 2 billion aviation and aerospace part numbers by part number, NSN, NIIN or CAGE code. Quotes returned within 15 minutes, 24/7. AS9120B and ISO 9001:2015 accredited.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://images.unsplash.com">
+<link rel="stylesheet" href="assets/ux.css">
+</head>
+<body>
+
+<!--
+  SECTION INVENTORY — every section maps to one that exists on
+  aerospaceunlimited.com today. Nothing invented. Order changed so the search
+  leads, because that is the path to an RFQ.
+
+    Hero + search ............ existing hero + existing search bar
+    Four feature points ...... existing: Same Day Shipping / Quotes /
+                               AOG Service 24/7 x 365 / Competitive Prices
+    Hot Stock Items .......... existing section, tabbed by airframe using the
+                               existing "Parts by Aircraft / Helicopter Model"
+                               axis — same rows, no new content
+    Top NSN .................. existing section, as a card marquee — same
+                               eight NSNs, ambient client photography
+    Top Manufacturers ........ existing section
+    Top Part Categories ...... existing section, merged with the separate
+                               15-tile grid further down the live page
+    Other Resources .......... existing section (5 items + PMA Parts)
+    A Leading Supplier ....... existing section + its 4 bullet points
+    Certifications & Memberships ... existing section
+
+  VISUAL SYSTEM — Mona Sans, headings at weight 500 and body at 15px/1.667 on
+  eleken.co's measured metrics. Glass and light skeuomorphism on SURFACES
+  (translucent panes over an ambient ground, lit from above); CONTROLS are flat —
+  36px buttons, 10px radius, no shadow. Rounded corners graded 6–16px, 16px being
+  a hard ceiling. Section rhythm ~116px. Exactly ONE accent band on the page.
+  Full-bleed bands stay square-edged. See ../design.md.
+-->
+
+<div data-au-header data-page="index.html" data-header-search="true"></div>
+
+<main id="main">
+
+  <!-- ====================================================================
+       HERO
+
+       Full-bleed photograph with the copy sitting on it and the search bar
+       as a white slab across the bottom — the reference's opening move.
+       The old live headline spends the most valuable line on the page
+       welcoming the visitor; this one names the offer, and the field a buyer
+       actually came for sits directly under it.
+       ==================================================================== -->
+  <section class="hero">
+    <!-- Image is set in CSS so the responsive swap and the crop bias live in
+         one place with the scrim they are tuned against. -->
+    <div class="hero-media" role="img"
+         aria-label="An Airbus A320 taxiing at dusk, airport control tower and terminal lights behind"></div>
+    <div class="hero-scrim" aria-hidden="true"></div>
+
+    <!-- The one place an entrance animation is safe: always above the fold,
+         so it plays on load rather than waiting for a scroll event. -->
+    <div class="u-page hero-enter">
+      <span class="u-label">Aviation &amp; aerospace parts distributor</span>
+      <!-- The break is explicit because the headline is two sentences and
+           `text-wrap: balance` broke it mid-clause ("…Get a / quote in 15
+           minutes."). It is suppressed below 760px, where the measure is too
+           narrow for the second sentence to hold one line anyway. -->
+      <h1>Find the part.<br class="u-br-wide"> Get a quote in 15 minutes.</h1>
+      <p class="lede">
+        Unlimited access to all your aviation supply needs — over 2 billion part numbers,
+        searchable by any identifier you already have.
+      </p>
+
+      <div class="hero-search" data-hero-search></div>
+
+      <div class="chip-row" style="margin-top:var(--au-s-4)">
+        <button class="chip" type="button" data-example="MS21042L3">MS21042L3</button>
+        <button class="chip" type="button" data-example="5310-00-877-5797">5310-00-877-5797</button>
+        <button class="chip" type="button" data-example="99193">99193</button>
+        <button class="chip" type="button" data-example="fuel pump">fuel pump</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       THE FOUR FEATURE POINTS — the live site's own hero icons.
+
+       Built to the supplied reference: heading block holding the left column,
+       icon cards on the right, one of them raised. Rounded corners and shadows
+       are now the site-wide system, so this section is no longer an exception
+       to them — what still makes it distinct is the 600/700 heading weight and
+       the raised lead card against three flat ones.
+
+       Every word here already exists on the site. The eyebrow, headline and
+       paragraph are lifted verbatim from the about page, and the four facts
+       are the ones this section already carried. Nothing was written for it.
+
+       The lead card is the quote turnaround because that is the promise the
+       hero makes one screen above; raising anything else would emphasise a
+       fact the page has not already committed to.
+       ==================================================================== -->
+  <section class="section">
+    <div class="u-page feature-split">
+      <div class="feature-intro">
+        <p class="eyebrow">The short version</p>
+        <h2>An accredited independent distributor, based in Anaheim, California.</h2>
+        <p>
+          Aerospace Unlimited supplies aviation, aerospace and defence parts to operators,
+          MROs, repair stations and government contractors.
+        </p>
+      </div>
+
+      <div class="feature-cards">
+        <article class="feature-card">
+          <span class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                 stroke-linecap="round" stroke-linejoin="round" focusable="false">
+              <path d="M3 8.5 12 4l9 4.5-9 4.5-9-4.5Z"/>
+              <path d="M3 8.5V16l9 4.5 9-4.5V8.5"/>
+              <path d="M12 13v7.5"/>
+            </svg>
+          </span>
+          <span class="k">Shipping</span>
+          <span class="v">Same day</span>
+        </article>
+
+        <article class="feature-card feature-card-lead">
+          <span class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                 stroke-linecap="round" stroke-linejoin="round" focusable="false">
+              <circle cx="12" cy="12" r="8"/>
+              <path d="M12 7.5V12l3 2"/>
+            </svg>
+          </span>
+          <span class="k">Quote turnaround</span>
+          <span class="v">15 minutes</span>
+        </article>
+
+        <article class="feature-card">
+          <span class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                 stroke-linecap="round" stroke-linejoin="round" focusable="false">
+              <path d="M4 13v-1a8 8 0 0 1 16 0v1"/>
+              <rect x="2.5" y="13" width="4" height="6" rx="2"/>
+              <rect x="17.5" y="13" width="4" height="6" rx="2"/>
+              <path d="M19.5 19v.5a3 3 0 0 1-3 3H13"/>
+            </svg>
+          </span>
+          <span class="k">AOG service</span>
+          <span class="v">24/7 &times; 365</span>
+        </article>
+
+        <article class="feature-card">
+          <span class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                 stroke-linecap="round" stroke-linejoin="round" focusable="false">
+              <path d="M12.5 3H20a1 1 0 0 1 1 1v7.5a1 1 0 0 1-.3.7l-8.5 8.5a1 1 0 0 1-1.4 0
+                       l-7.5-7.5a1 1 0 0 1 0-1.4l8.5-8.5a1 1 0 0 1 .7-.3Z"/>
+              <circle cx="16.5" cy="7.5" r="1.5"/>
+            </svg>
+          </span>
+          <span class="k">Pricing</span>
+          <span class="v">Competitive</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       HOT STOCK ITEMS
+
+       The live page lists these as bare text links. As real part rows a
+       visitor can start an RFQ straight from the homepage, and it teaches
+       the row pattern they meet on every later screen.
+       ==================================================================== -->
+  <section class="section">
+    <div class="u-page">
+      <div class="section-head section-head-center">
+        <p class="eyebrow">Ready to ship</p>
+        <h2>Hot stock items</h2>
+        <p>On our shelves in Anaheim, California. Ordered before 3pm PT, shipped the same day.</p>
+      </div>
+
+      <!-- The tab axis is airframe, not category. "Parts by Aircraft /
+           Helicopter Model" is already a live section and a live nav item, and
+           it is the one thing a buyer always knows before they know the part
+           number. Splitting by category instead would have put one or two rows
+           behind each tab; by platform every tab is worth opening. -->
+      <div class="tabbar" role="tablist" aria-label="Hot stock by aircraft platform" data-hot-tabs></div>
+
+      <div class="tab-split">
+        <figure class="tab-media">
+          <!-- Deliberately NOT loading="lazy". Verified in this project's
+               renderer: the viewport-intersection machinery lazy loading rides
+               on never fires here — the same measurement that rules out scroll
+               reveals — so a lazy image below the fold stays permanently
+               unloaded and the column ships as an empty grey box. -->
+          <img src="assets/img/listing.jpg"
+               srcset="assets/img/listing-sm.jpg 800w, assets/img/listing.jpg 1600w"
+               sizes="(max-width: 1000px) 100vw, 40vw"
+               width="1600" height="1067" decoding="async"
+               alt="Two wing-mounted turbofan engines of an in-flight airliner, seen from the cabin above a cloud layer at sunset">
+        </figure>
+
+        <!-- One panel, re-rendered on selection. Nothing is hidden in the DOM,
+             so there is no state in which a tab's content ships blank. -->
+        <div class="tab-panel" role="tabpanel" tabindex="0" data-hot-panel></div>
+      </div>
+
+      <!-- The "Full catalog" link the section head used to carry. The head is
+           centred now and cannot hold it, but the route still has to exist:
+           these tabs are four platforms out of eight, and everything else on
+           the shelf is behind this link. -->
+      <p style="margin-top:var(--au-s-6);text-align:center">
+        <a class="btn btn-secondary" href="browse.html">Full catalog</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       TOP NSN — existing section.
+       ==================================================================== -->
+  <section class="section">
+    <div class="u-page">
+      <div class="section-head section-head-row">
+        <div>
+          <h2>Top NSN</h2>
+          <p>The National Stock Numbers most often requested from us.</p>
+        </div>
+        <a class="btn btn-quiet" href="browse.html#identifiers">NSN / NIIN / CAGE routes</a>
+      </div>
+    </div>
+
+    <!-- Full bleed, outside .u-page. The reference's marquee runs off both
+         edges of the frame; contained inside the page gutter it reads as a row
+         of cards that happens to be cropped, which is a different thing.
+
+         The strip is built and duplicated in the page script. Each card is a
+         real NSN and a real link — the photography is the treatment, the
+         section's content is unchanged. -->
+    <div class="marquee" data-nsn-marquee>
+      <div class="marquee-track" data-nsn-track></div>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       TOP MANUFACTURERS — existing section, with the CAGE code against each
+       name so a buyer holding a nameplate can confirm the entity.
+       ==================================================================== -->
+  <section class="section section-subtle">
+    <div class="u-page">
+      <div class="section-head section-head-row">
+        <div>
+          <h2>Top manufacturers</h2>
+          <p>Naming is ambiguous after decades of acquisitions. The CAGE code is not.</p>
+        </div>
+        <a class="btn btn-quiet" href="browse-manufacturers.html">View more</a>
+      </div>
+      <div class="mfr-grid" data-top-manufacturers></div>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       TOP PART CATEGORIES — existing section.
+
+       The live page carries this AND a separate 15-tile grid lower down,
+       both pointing at the same places. Merged: same destinations, once.
+       ==================================================================== -->
+  <!-- A coverflow on a contained tinted stage, built to a supplied reference.
+       No eyebrow here on purpose: this is the only band with a panel around it,
+       and that containment already announces the section. See the
+       CATEGORY COVERFLOW block in ux.css for what was and was not taken from
+       the reference, and why the FSC code is the visual anchor rather than
+       photography. -->
+  <section class="section cat-section">
+    <div class="u-page">
+      <div class="cat-stage">
+        <div class="cat-stage-head">
+          <h2>Top part categories</h2>
+          <p>Grouped by function, with the matching Federal Supply Class for anyone working from a government parts list.</p>
+        </div>
+
+        <!-- `aria-roledescription` names the widget; the live region announces
+             the focused card so a screen-reader user is told what changed rather
+             than having to hunt for it. -->
+        <div class="cat-view" data-cat-view
+             role="group"
+             aria-roledescription="carousel"
+             aria-label="Top part categories">
+          <div class="cat-track" data-cat-track></div>
+          <p class="u-visually-hidden" aria-live="polite" data-cat-live></p>
+        </div>
+
+        <div class="cat-controls">
+          <button class="cat-nav" type="button" data-cat-prev aria-label="Previous category">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <path d="M14.5 5 8 12l6.5 7"/>
+            </svg>
+          </button>
+          <!-- Plain buttons, not role="tab". A tablist implies tabpanels with
+               `aria-controls` pointing at them, and there are none here — the
+               cards are one rail, not twelve panels. Position is carried by
+               `aria-current` on the active dot, which is what it is for. -->
+          <div class="cat-dots" aria-label="Choose a category" data-cat-dots></div>
+          <button class="cat-nav" type="button" data-cat-next aria-label="Next category">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <path d="M9.5 5 16 12l-6.5 7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       A LEADING SUPPLIER — existing section, including its four bullets.
+
+       This is the page's ONE accent band. The reference drenches a single
+       full-bleed section in yellow for its differentiator moment and uses
+       the colour nowhere else but the CTA.
+       ==================================================================== -->
+  <section class="section section-accent">
+    <div class="u-page">
+      <div class="grid grid-2" style="gap:var(--au-s-9);align-items:start">
+        <div>
+          <h2 style="font-size:var(--au-text-h1);line-height:var(--au-leading-h1);letter-spacing:var(--au-tracking-h1);max-width:20ch">
+            A leading supplier of aviation and aerospace parts
+          </h2>
+          <div class="u-stack" style="margin-top:var(--au-s-6);max-width:60ch">
+            <p>
+              Aerospace Unlimited is an accredited independent distributor of aviation,
+              aerospace and defence parts, owned by ASAP Semiconductor and operating from
+              Anaheim, California. Our catalog reaches more than two billion part numbers,
+              and everything we do is built around customer convenience — finding the part,
+              pricing it quickly, and getting it moving.
+            </p>
+            <p>
+              We are AS9120B, ISO 9001:2015 and FAA AC 00-56B accredited. All orders are
+              fulfilled from the United States under full export-control compliance.
+            </p>
+          </div>
+          <a class="btn btn-secondary" style="margin-top:var(--au-s-6)" href="about.html">More about us</a>
+        </div>
+
+        <!-- The four bullets from the live page, unchanged in substance. -->
+        <div>
+          <p class="u-label">What every customer gets</p>
+          <div class="feature-strip" style="margin-top:var(--au-s-5);grid-template-columns:minmax(0,1fr)">
+            <div><span class="v" style="color:var(--au-accent-ink)">A quick and competitive quote in 15 minutes or less</span></div>
+            <div><span class="v" style="color:var(--au-accent-ink)">Same-day or next-day shipping options</span></div>
+            <div><span class="v" style="color:var(--au-accent-ink)">24/7 &times; 365 customer service</span></div>
+            <div><span class="v" style="color:var(--au-accent-ink)">100% quality assurance</span></div>
+          </div>
+          <a class="btn btn-primary btn-block" style="margin-top:var(--au-s-6);background:var(--au-accent-ink);color:var(--au-accent)" href="rfq.html">Request a quote</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       OTHER RESOURCES — existing section and nav dropdown, same items.
+       ==================================================================== -->
+  <section class="section">
+    <div class="u-page">
+      <div class="section-head">
+        <h2>Other resources</h2>
+        <p>Requirements that are not a stock part number.</p>
+      </div>
+      <div class="res-grid" data-resources></div>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       ASAP SEMICONDUCTOR'S CERTIFICATIONS AND MEMBERSHIPS — existing
+       section. Set on dark as the page's closing statement before the
+       footer, which is also dark, so the two read as one grounded base.
+       ==================================================================== -->
+  <section class="section section-dark">
+    <div class="u-page">
+      <div class="section-head">
+        <h2>ASAP Semiconductor's certifications and memberships</h2>
+        <p>The accreditations a vendor-approval file normally asks for.</p>
+      </div>
+      <div class="certs">
+        <span class="cert">AS9120B</span>
+        <span class="cert">ISO 9001:2015</span>
+        <span class="cert">FAA AC 00-56B</span>
+        <span class="cert">ITAR registered</span>
+        <span class="cert">ESD S20.20 facility</span>
+      </div>
+      <p class="u-caption" style="margin-top:var(--au-s-5)">
+        Certificate copies are available on request &mdash;
+        <!-- No inline colour. This link sits in a .section-dark, and ux.css gives
+             links on a dark ground --au-link-inverse. The inline
+             `color:var(--au-accent)` this replaces beat every stylesheet rule and
+             was left over from the amber palette, where the accent was light; the
+             accent is now Steel Blue and measured 2.38:1 here. -->
+        <a href="quality.html">see quality &amp; certifications</a>.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<div data-au-footer></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+document.addEventListener("au:ready", function () {
+  var D = window.AU_DATA;
+
+  // The hero field is built by the same generator as the header field, so the
+  // two can never drift apart in behaviour or in what they accept.
+  AU.mountSearch(AU.$("[data-hero-search]"), { id: "hero-search" });
+
+  // Example chips fill the field rather than navigating. The buyer watches the
+  // detection line fire, which teaches what the field accepts far faster than
+  // a caption listing six identifier types would.
+  var input = AU.$("#hero-search");
+  AU.$$("[data-example]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      input.value = btn.dataset.example;
+      input.focus();
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+  });
+
+  /* ---- Hot stock, tabbed by airframe --------------------------------------
+
+     "Ready to ship" means in stock, so the pool is the in-stock parts only —
+     showing a quote-required line under that heading would be a promise the
+     section cannot keep.
+
+     The four platforms are chosen by how much ready-to-ship inventory each one
+     actually has, not by catalog size. A tab that opens onto a single row is
+     worse than no tab. */
+  var READY = D.PARTS.filter(function (p) { return p.stock === "in"; });
+
+  var PLATFORMS = D.AIRCRAFT
+    .map(function (a) {
+      return {
+        slug: a.slug,
+        name: a.name,
+        count: a.count,
+        parts: READY.filter(function (p) { return p.aircraft.indexOf(a.slug) !== -1; }),
+      };
+    })
+    .filter(function (a) { return a.parts.length > 1; })
+    // Selected by ready-to-ship depth, then put back in catalog order for
+    // display. Ranking the bar itself by shelf count would open the homepage on
+    // whichever airframe happened to be well stocked that week; catalog order
+    // is stable, and it leads on the platform most of this traffic flies.
+    .sort(function (x, y) { return y.parts.length - x.parts.length || y.count - x.count; })
+    .slice(0, 4)
+    .sort(function (x, y) { return y.count - x.count; });
+
+  var tabbar = AU.$("[data-hot-tabs]");
+  var panel  = AU.$("[data-hot-panel]");
+
+  tabbar.innerHTML = PLATFORMS.map(function (a, i) {
+    return '<button class="tab" type="button" role="tab" id="hot-tab-' + a.slug + '"' +
+      ' aria-controls="hot-panel" aria-selected="' + (i === 0) + '"' +
+      ' tabindex="' + (i === 0 ? "0" : "-1") + '" data-slug="' + a.slug + '">' +
+      AU.esc(a.name) + '<span class="n">' + a.parts.length + "</span></button>";
+  }).join("");
+
+  panel.id = "hot-panel";
+
+  function selectPlatform(slug, moveFocus) {
+    var a = PLATFORMS.filter(function (p) { return p.slug === slug; })[0];
+    if (!a) return;
+
+    AU.$$(".tab", tabbar).forEach(function (btn) {
+      var on = btn.dataset.slug === slug;
+      btn.setAttribute("aria-selected", String(on));
+      btn.tabIndex = on ? 0 : -1;
+      if (on && moveFocus) btn.focus();
+    });
+
+    panel.setAttribute("aria-labelledby", "hot-tab-" + a.slug);
+    panel.innerHTML =
+      "<h3>" + AU.esc(a.name) + "</h3>" +
+      '<p class="u-caption" style="margin-top:var(--au-s-2)">' +
+        a.parts.length + " ready-to-ship " + (a.parts.length === 1 ? "line" : "lines") +
+        " &middot; " + a.count.toLocaleString() + " part numbers in the catalog</p>" +
+      '<ul class="part-list"></ul>';
+
+    // Goes through AU.renderParts so the add-to-quote buttons re-sync with the
+    // quote list — a row injected any other way lies about what is already in it.
+    AU.renderParts(AU.$(".part-list", panel), a.parts);
+  }
+
+  tabbar.addEventListener("click", function (e) {
+    var btn = e.target.closest(".tab");
+    if (btn) selectPlatform(btn.dataset.slug, false);
+  });
+
+  // Arrow keys move between tabs, per the tablist pattern. Without this the
+  // bar is reachable but not operable for anyone not using a pointer.
+  tabbar.addEventListener("keydown", function (e) {
+    var keys = { ArrowLeft: -1, ArrowRight: 1, Home: "first", End: "last" };
+    if (!(e.key in keys)) return;
+    e.preventDefault();
+    var slugs = PLATFORMS.map(function (p) { return p.slug; });
+    var i = slugs.indexOf(AU.$('.tab[aria-selected="true"]', tabbar).dataset.slug);
+    var next = keys[e.key] === "first" ? 0
+             : keys[e.key] === "last"  ? slugs.length - 1
+             : (i + keys[e.key] + slugs.length) % slugs.length;
+    selectPlatform(slugs[next], true);
+  });
+
+  selectPlatform(PLATFORMS[0].slug, false);
+
+  function ruleRow(href, lead, mid, tail) {
+    return '<a href="' + href + '"><div class="rule-row">' +
+      "<div>" + lead + "</div>" +
+      '<div class="u-caption">' + mid + "</div>" +
+      '<div class="idx">' + tail + "</div>" +
+      "</div></a>";
+  }
+
+  /* ---- Top NSN marquee ----------------------------------------------------
+
+     The track holds the eight cards TWICE. The animation runs to exactly -50%,
+     so the moment the first copy has left the frame the second copy is sitting
+     where the first started and the loop is invisible. The second copy is
+     `aria-hidden` and its links are removed from the tab order — it is the same
+     eight NSNs, and a screen reader or a Tab key finding sixteen would be
+     reporting inventory that does not exist. */
+  function nsnCard(n, clone) {
+    return '<a class="nsn-card" href="search.html?q=' + encodeURIComponent(n.nsn) + '"' +
+      (clone ? ' tabindex="-1"' : "") + ">" +
+      '<span class="nsn-card-media">' +
+        '<img src="assets/img/nsn/' + n.img + '.jpg" width="600" height="800" decoding="async"' +
+        ' alt="' + (clone ? "" : AU.esc(n.alt)) + '">' +
+      "</span>" +
+      '<span class="nsn-card-body">' +
+        '<span class="nsn">' + AU.esc(n.nsn) + "</span>" +
+        '<span class="desc">' + AU.esc(n.desc) + "</span>" +
+      "</span></a>";
+  }
+
+  AU.$("[data-nsn-track]").innerHTML =
+    '<div class="marquee-group">' + D.TOP_NSN.map(function (n) { return nsnCard(n, false); }).join("") + "</div>" +
+    '<div class="marquee-group" aria-hidden="true">' + D.TOP_NSN.map(function (n) { return nsnCard(n, true); }).join("") + "</div>";
+
+  /* A two-column directory, not the shared `ruleRow`. At full width a single
+     column of eight rows left the CAGE code stranded in the middle of a 1400px
+     line with the count a third of a screen away from the name it belongs to.
+     Two columns halve the measure so name, code and count read as one row, and
+     eight entries close as four tidy pairs.
+
+     This also separates the section from "Other resources" below, which used the
+     same `ruleRow` and therefore looked like the same list twice. */
+  AU.$("[data-top-manufacturers]").innerHTML = D.MANUFACTURERS.slice(0, 8).map(function (m) {
+    return '<a class="mfr-row" href="browse-category.html?type=manufacturer&id=' + encodeURIComponent(m.name) + '">' +
+      '<span class="mfr-name">' + AU.esc(m.name) + "</span>" +
+      '<span class="mfr-cage">CAGE <b>' + AU.esc(m.cage) + "</b></span>" +
+      '<span class="mfr-count">' + m.count.toLocaleString() + " parts</span></a>";
+  }).join("");
+
+  /* ====================================================================
+     CATEGORY COVERFLOW
+
+     Twelve category cards on a tinted stage, centre one focused. Icons are
+     schematics of the part type — a valve body, a bearing race, a hex bolt —
+     which is a claim we can actually make about a category. Stock photography
+     could not be: we hold eight generic aviation images for twelve categories,
+     so every mapping would be arbitrary.
+     ==================================================================== */
+
+  /* Drawn at 24px on a 1.5 stroke to match the feature-card icons above, so the
+     two icon sets read as one family. */
+  var CAT_ICONS = {
+    valves:
+      '<path d="M5 12h14"/><path d="M9 9v6h6V9z"/><path d="M12 9V4"/><path d="M8.5 4h7"/>',
+    pumps:
+      '<circle cx="12" cy="12" r="5.5"/><path d="M12 6.5v5.5l4 2.5"/><path d="M12 17.5V21"/><path d="M3.5 12H6"/>',
+    bearings:
+      '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><circle cx="12" cy="5.5" r="1"/><circle cx="18.5" cy="12" r="1"/><circle cx="12" cy="18.5" r="1"/><circle cx="5.5" cy="12" r="1"/>',
+    electrical:
+      '<rect x="3.5" y="7" width="17" height="10" rx="2"/><path d="M8 11v2"/><path d="M12 11v2"/><path d="M16 11v2"/>',
+    instruments:
+      '<circle cx="12" cy="12" r="8"/><path d="M12 12l4-3"/><path d="M12 4.5V6"/><path d="M19.5 12H18"/><path d="M12 19.5V18"/><path d="M4.5 12H6"/>',
+    /* A single strut, an axle and two wheels. The first attempt splayed two legs
+       from one point, which at 24px read as a pair of scissors rather than a gear
+       leg — the shape has to survive being 24px tall, so fewer strokes win. */
+    "landing-gear":
+      '<path d="M12 3.5v9"/><path d="M8 12.5h8"/><circle cx="8" cy="17" r="3"/><circle cx="16" cy="17" r="3"/>',
+    hydraulics:
+      '<rect x="3" y="8.5" width="11" height="7" rx="1.5"/><path d="M14 12h4"/><path d="M18 9.5v5"/><path d="M20.5 12H18"/>',
+    fasteners:
+      '<path d="M9 4.5h6l1.5 3-1.5 3H9L7.5 7.5z"/><path d="M12 10.5V20"/><path d="M9.5 16h5"/>',
+    filters:
+      '<path d="M4.5 5h15l-2 6H6.5z"/><path d="M9 11v8"/><path d="M15 11v8"/><path d="M9 15h6"/>',
+    seals:
+      '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/>',
+    switches:
+      '<rect x="3.5" y="9" width="17" height="6" rx="3"/><circle cx="16.5" cy="12" r="2"/>',
+    avionics:
+      '<path d="M12 21V11"/><circle cx="12" cy="8.5" r="2"/><path d="M6.5 13a7 7 0 0 1 0-9"/><path d="M17.5 13a7 7 0 0 0 0-9"/>',
+  };
+
+  function catIcon(slug) {
+    return '<span class="cat-icon" aria-hidden="true">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" ' +
+      'stroke-linecap="round" stroke-linejoin="round" focusable="false">' +
+      (CAT_ICONS[slug] || CAT_ICONS.seals) + "</svg></span>";
+  }
+
+  (function categoryCoverflow() {
+    var view = AU.$("[data-cat-view]");
+    var track = AU.$("[data-cat-track]");
+    var dots = AU.$("[data-cat-dots]");
+    var live = AU.$("[data-cat-live]");
+    var prev = AU.$("[data-cat-prev]");
+    var next = AU.$("[data-cat-next]");
+    if (!view || !track) return;
+
+    var items = D.CATEGORIES;
+    /* 232px, and the number is derived rather than eyeballed.
+
+       The reference occludes its side cards behind the focused one, but its cards
+       are photographs — a cropped photo still reads as a photo. Ours carry text,
+       and partial occlusion turned "Hydraulic Actuators / 1650" into "ydraulic
+       Actuators / I650", which reads as broken rendering, not as depth.
+
+       So rank 1 has to clear the focused card's edge entirely:
+         focused half-width          246 / 2            = 123
+         rank-1 half-width           246 × 0.9 / 2      = 110.7
+         rank-1 left padding         18 × 0.9           =  16.2
+         text starts at              GAP − 110.7 + 16.2 = GAP − 94.5
+         require > 123               →  GAP > 217.5
+       232 clears it with margin at every scale step. Change the card width, the
+       rank-1 scale or the padding and this has to be recomputed. */
+    var GAP = 232;
+    var index = Math.floor(items.length / 2) - 1;   // open near the middle, as the reference does
+
+    /* `draggable="false"` is load-bearing, not tidiness. These cards are
+       anchors, and Chromium starts a NATIVE LINK DRAG on mousedown-plus-move
+       over an <a>. That drag pre-empts the pointer stream: exactly one
+       `pointermove` arrives, the browser fires `pointercancel`, and the rail
+       never moves — the swipe silently did nothing on desktop while working
+       fine under a synthetic event. */
+    track.innerHTML = items.map(function (c) {
+      return '<a class="cat-card" draggable="false" href="browse-category.html?type=category&id=' + c.slug + '">' +
+        catIcon(c.slug) +
+        '<span class="cat-fsc-big">' + c.fsc + "</span>" +
+        '<span class="cat-fsc-label">Federal Supply Class</span>' +
+        '<span class="cat-name">' + AU.esc(c.name) + "</span>" +
+        '<span class="cat-count">' + c.count.toLocaleString() + " parts</span>" +
+        '<span class="cat-go">Browse category' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" ' +
+          'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+          '<path d="M5 12h13"/><path d="M12.5 6 19 12l-6.5 6"/></svg></span>' +
+        "</a>";
+    }).join("");
+
+    dots.innerHTML = items.map(function (c, i) {
+      return '<button class="cat-dot" type="button" data-i="' + i +
+        '" aria-label="' + AU.esc(c.name) + '"></button>';
+    }).join("");
+
+    var cards = AU.$$(".cat-card", track);
+    var dotEls = AU.$$(".cat-dot", dots);
+
+    /* Layout is written straight to the cards rather than translating the track.
+       Translating the track would move all twelve by the same amount, which
+       cannot produce a fan — each rank needs its own offset AND its own scale. */
+    function layout(dragDX) {
+      var dx = dragDX || 0;
+      cards.forEach(function (card, i) {
+        var offset = i - index;
+        var rank = Math.min(Math.abs(offset), 3);
+        // Ranks compound so the fan tightens as it recedes, instead of marching
+        // out in equal steps like a filmstrip.
+        var spread = [0, 1, 1.78, 2.3][rank] * GAP;
+        var x = Math.sign(offset) * spread + dx;
+        card.style.setProperty("--cat-x", x.toFixed(1) + "px");
+        card.dataset.depth = String(rank);
+        // Only the focused card is reachable by keyboard; the rest would be
+        // twelve tab stops through content the user cannot read yet.
+        card.tabIndex = rank === 0 ? 0 : -1;
+        card.setAttribute("aria-hidden", rank === 0 ? "false" : "true");
+      });
+      // The focused card sits dead centre, so its offset is not driven by --cat-x.
+      if (dx && cards[index]) {
+        cards[index].style.setProperty("--cat-x", dx.toFixed(1) + "px");
+        cards[index].style.transform = "translate3d(" + dx.toFixed(1) + "px,0,0) scale(1)";
+      } else if (cards[index]) {
+        cards[index].style.transform = "";
+      }
+      dotEls.forEach(function (d, i) {
+        d.setAttribute("aria-current", i === index ? "true" : "false");
+      });
+      prev.disabled = index === 0;
+      next.disabled = index === items.length - 1;
+    }
+
+    function go(i, announce) {
+      index = Math.max(0, Math.min(items.length - 1, i));
+      layout(0);
+      if (announce) {
+        live.textContent = items[index].name + ", Federal Supply Class " +
+          items[index].fsc + ", " + items[index].count.toLocaleString() + " parts. " +
+          (index + 1) + " of " + items.length + ".";
+      }
+    }
+
+    /* A click on a flanking card focuses it instead of navigating. Following the
+       link would be a trap: the card is 30% opacity and 0.78 scale, so the user
+       cannot read what they are committing to.
+
+       `pressIndex` is load-bearing and the reason is an event-ordering trap.
+       A real mouse click focuses the anchor BEFORE it fires `click`, so the
+       `focusin` handler below had already advanced `index` to the clicked card
+       by the time this ran — `i !== index` was then false, nothing was
+       prevented, and the flanking card navigated after all. Comparing against
+       the index as it was when the pointer went down is what makes the decision
+       reflect what the user could actually see. A synthetic `click()` never
+       focuses anything, so this only reproduces with a real pointer. */
+    var pressIndex = null;
+    var movedSincePress = false;
+    track.addEventListener("click", function (e) {
+      var card = e.target.closest(".cat-card");
+      if (!card) return;
+
+      /* A gesture is not a click. The browser fires `click` whenever pointerdown
+         and pointerup land on the same element, however far the pointer travelled
+         in between — so a vertical swipe to scroll the page that happens to start
+         on a card navigated away from the homepage. Any press that moved more
+         than the 8px slop is treated as a gesture and swallowed. */
+      if (movedSincePress) { e.preventDefault(); movedSincePress = false; return; }
+
+      var i = cards.indexOf(card);
+      var wasActive = pressIndex === null ? index : pressIndex;
+      pressIndex = null;
+      if (i !== wasActive) { e.preventDefault(); go(i, true); }
+    });
+
+    prev.addEventListener("click", function () { go(index - 1, true); });
+    next.addEventListener("click", function () { go(index + 1, true); });
+    dots.addEventListener("click", function (e) {
+      var d = e.target.closest(".cat-dot");
+      if (d) go(Number(d.dataset.i), true);
+    });
+
+    view.addEventListener("keydown", function (e) {
+      var k = e.key;
+      if (k === "ArrowLeft") { e.preventDefault(); go(index - 1, true); }
+      else if (k === "ArrowRight") { e.preventDefault(); go(index + 1, true); }
+      else if (k === "Home") { e.preventDefault(); go(0, true); }
+      else if (k === "End") { e.preventDefault(); go(items.length - 1, true); }
+    });
+
+    /* Pointer drag. Pointer events rather than touch+mouse pairs so one code
+       path covers finger, trackpad and stylus. */
+    var down = null;
+    view.addEventListener("pointerdown", function (e) {
+      if (e.button !== 0) return;
+      // Snapshot the focused index before the browser moves focus to whatever
+      // was pressed — see the `pressIndex` note on the click handler above.
+      pressIndex = index;
+      movedSincePress = false;
+      down = { x: e.clientX, y: e.clientY, id: e.pointerId, locked: false };
+    });
+    view.addEventListener("pointermove", function (e) {
+      if (!down || e.pointerId !== down.id) return;
+      var dx = e.clientX - down.x;
+      var dy = e.clientY - down.y;
+      // Tracked in BOTH axes, and before the horizontal test below bails out —
+      // a vertical swipe has to be remembered as a gesture too, or the click it
+      // produces is indistinguishable from a deliberate tap.
+      if (Math.abs(dx) > 8 || Math.abs(dy) > 8) movedSincePress = true;
+      // Don't claim the gesture until it is clearly horizontal, or a vertical
+      // page scroll that starts on a card gets swallowed.
+      if (!down.locked) {
+        if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 8) { down = null; return; }
+        if (Math.abs(dx) < 8) return;
+        down.locked = true;
+        view.setAttribute("data-dragging", "");
+        view.setPointerCapture(e.pointerId);
+      }
+      layout(Math.max(-GAP, Math.min(GAP, dx)) * 0.72);
+    });
+    function endDrag(e) {
+      if (!down) return;
+      var locked = down.locked;
+      var dx = e.clientX - down.x;
+      down = null;
+      view.removeAttribute("data-dragging");
+      if (!locked) return;
+      // A third of a card's travel commits the step — short enough to feel
+      // responsive, long enough that a stray 20px wobble does not move the rail.
+      if (dx < -GAP / 3) go(index + 1, true);
+      else if (dx > GAP / 3) go(index - 1, true);
+      else layout(0);
+    }
+    /* Belt and braces alongside `draggable="false"`: the icon SVGs and any image
+       added later would still be drag sources, and one escaped drag kills the
+       whole gesture. */
+    view.addEventListener("dragstart", function (e) { e.preventDefault(); });
+
+    view.addEventListener("pointerup", endDrag);
+    view.addEventListener("pointercancel", function () {
+      if (!down) return;
+      down = null; view.removeAttribute("data-dragging"); layout(0);
+    });
+
+    /* Focus follows the rail. Tabbing to a card that is off-centre would leave
+       the focus ring on something unreadable. */
+    track.addEventListener("focusin", function (e) {
+      var card = e.target.closest(".cat-card");
+      if (!card) return;
+      var i = cards.indexOf(card);
+      if (i !== index) go(i, true);
+    });
+
+    /* `data-ready` is what swaps the baseline scroller for the coverflow. It is
+       set last, after the cards exist and the first layout has run, so there is
+       no frame in which the upgraded CSS applies to an empty or unpositioned
+       track. */
+    layout(0);
+    view.setAttribute("data-ready", "");
+  })();
+
+  /* Editorial cards, deliberately unlike the manufacturer directory above. These
+     six are the only items on the page a buyer *reads* rather than scans for a
+     match, so each one gets a numeral, a title and its full note — the numeral
+     is what makes the set legible as a fixed list of capabilities rather than a
+     truncated top-eight. */
+  AU.$("[data-resources]").innerHTML = D.RESOURCES.map(function (r, i) {
+    var href = r.href || ("capabilities.html#" + r.id);
+    return '<a class="res-card" href="' + href + '">' +
+      '<span class="res-num">' + String(i + 1).padStart(2, "0") + "</span>" +
+      '<span class="res-name">' + AU.esc(r.name) + "</span>" +
+      '<span class="res-note">' + AU.esc(r.note) + "</span>" +
+      '<span class="res-go" aria-hidden="true">Explore &rarr;</span></a>';
+  }).join("");
+});
+</script>
+</body>
+</html>

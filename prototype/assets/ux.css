@@ -1,0 +1,2745 @@
+/* ==========================================================================
+   Aerospace Unlimited — stylesheet
+   Layout and rhythm from fleet-template.webflow.io · see ../../design.md
+
+   The four rules that define this system:
+
+     1. MONA SANS, WEIGHT 400. Display, headings, body — all regular. Emphasis
+        comes from size and case. Weight 500 exists only for interface labels.
+     2. GLASS AND LIGHT SKEUOMORPHISM. Translucent surfaces over a blurred
+        ambient ground, lit from above — a 1px white inner highlight on the top
+        edge, a soft layered shadow beneath.
+     3. ROUNDED CORNERS, graded 8px → 28px by surface size, or a full pill.
+        Nothing on the site is square.
+     4. HUGE VERTICAL RHYTHM on a 9px spacing base, with full-bleed
+        photography running edge to edge between the bands.
+
+   Rules 2 and 3 replace the Fleet reference's flat, square treatment at the
+   client's direction. Full-bleed bands (.hero, .page-header, .section-dark,
+   .site-footer) stay square-edged, because a rounded corner on an
+   edge-to-edge band has no outer edge to sit against.
+   ========================================================================== */
+
+@import url("../../design-system/tokens.css");
+@import url("https://fonts.googleapis.com/css2?family=Mona+Sans:ital,wght@0,200..900;1,200..900&family=Fragment+Mono&display=swap");
+
+/* ---- Reset ------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+/* The header is sticky, so in-page anchors reserve its height above them. */
+[id] { scroll-margin-top: 132px; }
+@media (max-width: 760px) { [id] { scroll-margin-top: 1rem; } }
+
+body {
+  margin: 0;
+  background: var(--au-bg);
+  color: var(--au-ink-body);
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-body);
+  font-weight: var(--au-weight-regular);
+  line-height: var(--au-leading-body);
+  letter-spacing: var(--au-tracking-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The ambient ground the glass blurs against.
+
+   A fixed pseudo-element rather than a background on `body`, for two reasons.
+   `background-attachment: fixed` is the obvious alternative but it stutters
+   badly on iOS, and body's background propagates to the canvas, which makes
+   the gradient's sizing follow the viewport in one browser and the document in
+   another. A fixed layer sidesteps both and stays put while content scrolls.
+
+   `z-index: -1` paints it after body's own background but before body's
+   content, so `--au-bg` remains the solid fallback underneath — which matters,
+   because a dozen components still reference `var(--au-bg)` expecting a solid
+   colour. Do not make that token a gradient. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--au-ground);
+  pointer-events: none;
+}
+
+/* Any class that sets `display` outbids the UA's `[hidden]` rule, so `hidden`
+   silently stops working on grid and flex containers. Every state toggle here
+   relies on the attribute, so it is enforced. */
+[hidden] { display: none !important; }
+
+h1, h2, h3, h4, p, figure, ul, ol { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+img, svg { display: block; max-width: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+
+/* Weight 500, per eleken.co. Every heading on their page is 500 — never 700 —
+   which is what lets a 52px display line read as substantial without shouting.
+   This replaces Fleet's weight-400-everywhere rule: 400 at display size in Mona
+   Sans came out thin and unresolved, especially over the hero photograph. */
+h1, h2, h3, h4 {
+  font-weight: var(--au-weight-medium);
+  /* Deep Navy, not Midnight. Headings are the palette's primary brand voice;
+     body copy stays Midnight so the two read as a hierarchy rather than one
+     colour at two sizes. On dark bands the rule further down
+     (`:is(.hero, .page-header, .section-dark) :is(h1, h2, h3, h4)`) takes them
+     back to white — navy on Midnight would be 2.0:1. */
+  color: var(--au-ink-heading);
+  text-wrap: balance;
+}
+
+a { color: inherit; text-decoration-color: var(--au-border); text-underline-offset: 0.2em; }
+
+/* Inline links in running copy take Steel Blue. Structural links — nav, cards,
+   part rows, breadcrumbs, footer, the A–Z bar — keep `color: inherit` above:
+   colouring every anchor would turn a results page into confetti, and each of
+   those components already has a class-plus-type selector that outranks `p a`.
+
+   Not scoped to bare `li`, deliberately. Footer and nav links live in lists, and
+   Steel Blue on Midnight is 2.38:1. On dark bands the `:is(.hero, .page-header,
+   .section-dark) a:not(.btn)` rule outranks this one and they go amber.
+
+   `:where()`, not `:is()`, and it matters. `:is()` takes the specificity of its
+   most specific argument, so `:is(p, .lede, dd) a:not(.btn)` scores (0,3,1) —
+   the `.lede` class plus each `:not(.btn)` — and outranks `.footer-col a`
+   (0,1,1). The first version of this rule did exactly that and painted the
+   footer's links Steel Blue on Midnight: 2.38:1, the precise failure the token
+   file warns about. `:where()` contributes nothing, so this whole selector
+   scores (0,0,1): it beats the bare `a { color: inherit }` above it and loses to
+   every component rule, which is the intent. */
+:where(p, .lede, dd, .u-prose li) a:where(:not(.btn)):where(:not(.chip)) {
+  color: var(--au-link);
+}
+:where(p, .lede, dd, .u-prose li) a:where(:not(.btn)):where(:not(.chip)):hover {
+  color: var(--au-link-hover);
+}
+
+:focus-visible { outline: 2px solid var(--au-ink); outline-offset: 2px; }
+:focus:not(:focus-visible) { outline: none; }
+
+/* ---- Motion -----------------------------------------------------------
+   There is deliberately NO scroll-triggered section reveal on this site.
+
+   Two reasons, and the first is a measured fact rather than a preference:
+   IntersectionObserver callbacks are not delivered in every rendering
+   context (they were verified not to fire at all in this project's headless
+   renderer). Any reveal that starts a section at `opacity: 0` and waits for
+   an observer therefore ships that section permanently blank to crawlers,
+   screenshot pipelines, background tabs, and anyone with JS disabled. The
+   content is the product; it does not get gated behind an event.
+
+   The second is that one identical fade applied to fifteen sections is not
+   design, it is a reflex — and this reference's character is stillness and
+   flat contrast, not entrance choreography.
+
+   So motion lives in two places where it cannot strand anything:
+     · the hero, which animates on load and is always above the fold
+     · interaction — hover, focus, nav panels, toasts, field states
+
+   Everything below the fold renders final and visible on first paint. */
+
+/* The hero entrance animates TRANSFORM ONLY — never opacity.
+
+   This is the safety property that matters. Animations were verified not to
+   advance in this project's headless renderer, and `animation-fill-mode: both`
+   holds the `from` keyframe when time never moves. Had `from` included
+   `opacity: 0`, the hero would ship permanently invisible. Because `from` only
+   offsets position, the worst case is content sitting 12px lower than
+   intended — fully legible, fully present. Never animate a property whose
+   failure state is "gone". */
+.hero-enter > * {
+  animation: au-rise var(--au-dur-slow) var(--au-ease) both;
+}
+.hero-enter > *:nth-child(1) { animation-delay: 40ms; }
+.hero-enter > *:nth-child(2) { animation-delay: 100ms; }
+.hero-enter > *:nth-child(3) { animation-delay: 160ms; }
+.hero-enter > *:nth-child(4) { animation-delay: 220ms; }
+.hero-enter > *:nth-child(5) { animation-delay: 280ms; }
+
+@keyframes au-rise {
+  from { transform: translateY(12px); }
+  to   { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .hero-enter > * { animation: none; opacity: 1; transform: none; }
+}
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+/* The page gutter is fluid above ~1080px and flat below it. `max()` picks the
+   27px step until 2.5vw overtakes it, so phones and tablets are untouched while
+   a wide display gets a gutter proportionate to the screen instead of the
+   hairline 27px the wider container would otherwise leave. */
+.u-page   { max-width: var(--au-container-page);   margin-inline: auto; padding-inline: max(var(--au-s-5), 2.5vw); }
+.u-prose  { max-width: var(--au-container-prose);  margin-inline: auto; padding-inline: var(--au-s-5); }
+.u-narrow { max-width: var(--au-container-narrow); margin-inline: auto; padding-inline: var(--au-s-5); }
+
+.u-visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.u-mono {
+  font-family: var(--au-font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.u-muted { color: var(--au-ink-muted); }
+.u-faint { color: var(--au-ink-muted); }
+
+.u-caption {
+  font-size: var(--au-text-caption);
+  line-height: 1.35;
+  color: var(--au-ink-muted);
+}
+.u-small { font-size: var(--au-text-small); line-height: var(--au-leading-body); }
+.u-body-strong { font-weight: var(--au-weight-medium); color: var(--au-ink); }
+.u-h2 { font-size: var(--au-text-h2); line-height: var(--au-leading-h2); letter-spacing: var(--au-tracking-h2); }
+.u-h3 { font-size: var(--au-text-h3); line-height: var(--au-leading-tight); letter-spacing: var(--au-tracking-h3); }
+.u-stack > * + * { margin-top: var(--au-s-3); }
+.u-center { text-align: center; }
+
+/* A break that only applies where there is room for the line it creates. Below
+   760px it collapses so the browser can wrap on its own. */
+.u-br-wide { display: none; }
+@media (min-width: 761px) { .u-br-wide { display: inline; } }
+
+/* The reference's signature meta treatment: uppercase mono, open tracking. */
+.u-label {
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-eyebrow);
+  font-weight: var(--au-weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--au-ink-muted);
+}
+
+.skip-link {
+  position: absolute; left: var(--au-s-3); top: var(--au-s-3);
+  transform: translateY(-200%);
+  background: var(--au-ink); color: var(--au-ink-inverse);
+  padding: var(--au-s-2) var(--au-s-4);
+  border-radius: var(--au-radius-sm);
+  box-shadow: var(--au-shadow-lg);
+  z-index: var(--au-z-tooltip);
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-label);
+  text-transform: uppercase;
+  letter-spacing: var(--au-tracking-label);
+}
+.skip-link:focus { transform: translateY(0); }
+
+/* ==========================================================================
+   Header
+   ========================================================================== */
+
+/* The one surface glass was invented for: it is sticky, so the page genuinely
+   passes underneath it and the blur has live content to work on. */
+.site-header {
+  position: sticky; top: 0; z-index: var(--au-z-sticky);
+  background: var(--au-glass-fill-strong);
+  -webkit-backdrop-filter: var(--au-glass-blur);
+  backdrop-filter: var(--au-glass-blur);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: var(--au-shadow-sm);
+}
+
+/* Without a fallback the header is a 60%-alpha white bar with whatever is
+   behind it showing through unblurred — legible, but the text sits on moving
+   content. Firefox shipped backdrop-filter by default in 103; this covers
+   anything older. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .site-header { background: var(--au-surface); }
+}
+
+.header-main .u-page {
+  display: flex; align-items: center; gap: var(--au-s-5);
+  min-height: 76px;
+}
+
+.logo {
+  font-size: var(--au-text-h3);
+  letter-spacing: var(--au-tracking-h3);
+  color: var(--au-ink);
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.header-actions { display: flex; align-items: center; gap: var(--au-s-3); margin-left: auto; flex-shrink: 0; }
+
+/* The phone number is text, not a third button. Three buttons side by side
+   read as three competing decisions. */
+.header-phone {
+  font-family: var(--au-font-mono);
+  font-size: var(--au-text-label);
+  font-variant-numeric: tabular-nums;
+  color: var(--au-ink-muted);
+  text-decoration: none; white-space: nowrap;
+}
+.header-phone:hover { color: var(--au-ink); }
+@media (max-width: 1180px) { .header-phone { display: none; } }
+
+/* No `overflow` here, deliberately: `overflow-x: auto` forces the other axis
+   to auto too, which turns this into a scroll container and clips the
+   dropdown panels out of existence. */
+.header-nav .u-page {
+  display: flex; align-items: center; gap: var(--au-s-1);
+  flex-wrap: wrap; padding-bottom: var(--au-s-2);
+}
+
+.nav-item { position: relative; }
+
+/* Sentence case, not uppercase. Uppercase at 0.06em tracking gave the nav more
+   visual weight than the wordmark beside it, which is the wrong hierarchy for a
+   utility row — the nav should be quiet and the search field should lead. */
+.nav-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: var(--au-s-2) var(--au-s-3);
+  min-height: 36px;
+  border: 0; background: transparent;
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-small);
+  font-weight: var(--au-weight-medium);
+  letter-spacing: -0.005em;
+  text-transform: none;
+  color: var(--au-ink-muted);
+  text-decoration: none; white-space: nowrap; cursor: pointer;
+  transition: color var(--au-dur-fast) var(--au-ease);
+}
+.nav-link:hover { color: var(--au-ink); }
+
+/* Current page is marked with a rule under the label, not a filled pill —
+   the reference has no filled interface chrome anywhere.
+
+   A transparent border on every nav link, coloured only on the current one,
+   so the marker costs no layout shift. Done with a border rather than an
+   inset box-shadow specifically so the site can hold its "zero box-shadow"
+   property literally — that flatness is the system's defining trait and it is
+   worth being able to assert it without an asterisk. */
+.nav-link { border-bottom: 1px solid transparent; }
+.nav-link[aria-current="page"] { color: var(--au-ink); border-bottom-color: var(--au-ink); }
+
+.nav-caret {
+  width: 0; height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid currentColor;
+  opacity: 0.6;
+  transition: transform var(--au-dur-fast) var(--au-ease);
+}
+.nav-link-toggle[aria-expanded="true"] { color: var(--au-ink); }
+.nav-link-toggle[aria-expanded="true"] .nav-caret { transform: rotate(180deg); }
+
+.nav-panel {
+  position: absolute; top: calc(100% + 8px); left: 0;
+  z-index: var(--au-z-dropdown);
+  min-width: 300px;
+  padding: var(--au-s-2);
+  background: var(--au-glass-fill-strong);
+  -webkit-backdrop-filter: var(--au-glass-blur);
+  backdrop-filter: var(--au-glass-blur);
+  border: var(--au-hairline-glass);
+  border-radius: var(--au-radius-md);
+  box-shadow: var(--au-raised-lg);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .nav-panel { background: var(--au-surface); }
+}
+.nav-panel-grid { display: grid; gap: 1px; }
+.nav-panel-grid[data-cols="2"] { grid-template-columns: repeat(2, minmax(190px, 1fr)); }
+
+/* A translucent tint, not `--au-bg`. A solid grey hover inside a glass panel
+   punches an opaque hole through the pane and kills the effect. */
+.nav-panel-link {
+  display: block; padding: var(--au-s-3);
+  border-radius: var(--au-radius-sm);
+  text-decoration: none;
+  transition: background var(--au-dur-fast) var(--au-ease);
+}
+.nav-panel-link:hover { background: var(--au-tint-hover); }
+.nav-panel-link .t { display: block; font-size: var(--au-text-small); color: var(--au-ink); }
+.nav-panel-link .d { display: block; margin-top: 3px; font-size: var(--au-text-caption); color: var(--au-ink-muted); }
+
+.nav-panel-foot {
+  display: block; margin-top: var(--au-s-2);
+  padding: var(--au-s-3);
+  border-top: var(--au-hairline-quiet);
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-label);
+  letter-spacing: var(--au-tracking-label);
+  text-transform: uppercase;
+  color: var(--au-ink);
+  text-decoration: none;
+}
+.nav-panel-foot:hover { text-decoration: underline; }
+
+@media (max-width: 760px) {
+  .nav-panel { position: static; min-width: 0; margin-top: var(--au-s-1); }
+  .nav-panel-grid[data-cols="2"] { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ==========================================================================
+   Buttons — uppercase mono labels, rounded, raised
+
+   A pressed state is where skeuomorphism earns its keep: on :active the
+   surface loses its shadow, drops 1px and takes an inset shade, so the control
+   physically depresses. That is the whole point of the idiom — the affordance
+   is felt, not just seen.
+   ========================================================================== */
+
+/* Buttons are eleken.co's, measured: 36px tall, 10px radius, 13px at weight 500,
+   sentence case, `letter-spacing: normal`, 9px/16px padding, and NO SHADOW.
+
+   The no-shadow part is the deliberate departure from this system's own
+   skeuomorphism. Glass and lift stay on *surfaces* — cards, panels, dropdowns —
+   because that is what gives the page depth. Controls are flat, because a raised
+   pill next to a raised card next to a raised badge flattens all three: if
+   everything lifts, nothing reads as lifted. eleken's buttons are flat and they
+   are the crispest thing on their page. */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px;
+  /* 16px, eleken's exact horizontal padding. Not a --au-s-* step: the spacing
+     scale is on a 9px base (18px is the nearest) and this value comes from the
+     reference, not from our rhythm. */
+  padding: 0 16px;
+  min-height: 36px;
+  border: 1px solid transparent;
+  border-radius: var(--au-radius-sm);
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-btn);
+  font-weight: var(--au-weight-medium);
+  letter-spacing: normal;
+  text-transform: none;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--au-dur-fast) var(--au-ease),
+              border-color var(--au-dur-fast) var(--au-ease),
+              color var(--au-dur-fast) var(--au-ease);
+}
+.btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; transform: none; }
+
+/* Flat fill, no sheen, no shadow. The accent sheen and the raised shadow both go:
+   eleken's filled button is a plain colour block, and the gradient was the last
+   thing making these read as glossy rather than crisp. Hover darkens; active
+   nudges 1px. Nothing lifts.
+
+   The sheen token stays defined and is still used by the accent *band* and the
+   empty state, where a large flat area does want the dimensional gradient. */
+.btn-primary {
+  background: var(--au-accent);
+  color: var(--au-accent-ink);
+}
+.btn-primary:hover:not(:disabled) { background: var(--au-accent-hover); }
+.btn-primary:active:not(:disabled) { transform: translateY(1px); }
+
+/* Deep Navy — the darkest, heaviest button. Reserved for the one place a second
+   filled button is genuinely warranted alongside the accent. */
+.btn-secondary {
+  background: var(--au-navy); color: var(--au-ink-inverse); border-color: transparent;
+}
+.btn-secondary:hover:not(:disabled) { background: var(--au-midnight); }
+.btn-secondary:active:not(:disabled) { transform: translateY(1px); }
+
+/* Outline: a light fill with a 1px hairline, exactly as eleken pairs
+   #F9F7F3 with a 1px #E4E4E4 border. Hover firms the border; it does not lift. */
+.btn-quiet {
+  background: var(--au-surface);
+  color: var(--au-ink); border-color: var(--au-border);
+}
+.btn-quiet:hover:not(:disabled) { border-color: var(--au-border-strong); }
+.btn-quiet:active:not(:disabled) { transform: translateY(1px); }
+
+.btn-ghost { background: transparent; color: var(--au-ink-muted); padding-inline: var(--au-s-2); }
+.btn-ghost:hover:not(:disabled) { color: var(--au-ink); background: var(--au-tint-hover); }
+
+/* A link that behaves like a button. This is what a *secondary* action next to a
+   filled primary should look like — the two used to be competing filled slabs,
+   which is why every part row read as two decisions instead of one. */
+.btn-text {
+  background: transparent; border-color: transparent;
+  color: var(--au-link);
+  padding-inline: var(--au-s-2);
+  min-height: 34px;
+}
+.btn-text:hover:not(:disabled) { color: var(--au-link-hover); text-decoration: underline; text-underline-offset: 0.24em; }
+/* Confirmed state — colour and the tick carry it, not extra weight. */
+.btn-text.is-added { color: var(--au-stock-in); }
+.btn-text.is-added:hover { color: var(--au-stock-in); }
+
+.btn-aog {
+  background: var(--au-surface);
+  color: var(--au-ink); border-color: var(--au-border);
+}
+.btn-aog:hover { border-color: var(--au-border-strong); }
+.btn-aog .dot {
+  width: 6px; height: 6px; border-radius: var(--au-radius-circle);
+  background: var(--au-stock-out); flex-shrink: 0;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--au-stock-out) 20%, transparent);
+}
+
+/* eleken's own two filled sizes are 36px and 40px, so `lg` is 40 rather than the
+   46 that was here. 13px holds at both — they do not scale the label. */
+.btn-lg { min-height: 40px; padding-inline: var(--au-s-5); }
+.btn-sm { min-height: 32px; padding-inline: var(--au-s-3); font-size: var(--au-text-caption); }
+
+/* `nowrap` keeps buttons crisp on desktop, so it is released only where width is
+   actually scarce. */
+@media (max-width: 760px) {
+  .btn {
+    white-space: normal;
+    max-width: 100%;
+    height: auto;
+    padding-block: var(--au-s-2);
+    text-wrap: balance;
+  }
+}
+
+/* Full-width buttons carry sentence-length labels, so they opt out of the
+   global nowrap rather than overflowing their own box. */
+.btn-block {
+  width: 100%; white-space: normal; text-wrap: balance;
+  height: auto; padding-block: var(--au-s-3);
+  text-transform: none;
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-small);
+  letter-spacing: var(--au-tracking-body);
+}
+
+/* On dark and on the accent band, buttons invert. */
+.section-dark .btn-quiet, .section-dark .btn-secondary {
+  color: var(--au-ink-inverse); border-color: var(--au-border-dark);
+}
+.section-dark .btn-quiet:hover, .section-dark .btn-secondary:hover {
+  background: var(--au-ink-inverse); color: var(--au-ink); border-color: var(--au-ink-inverse);
+}
+/* Two accent grounds, not one. `.section-accent` is the full-bleed band and
+   `.empty-state` is the accent-filled panel used for zero-result and dead-end
+   recoveries — both fill with --au-accent, so buttons on either must invert the
+   same way. `.empty-state` was missing from this list, which put a light-ground
+   Midnight label on the Steel Blue panel at 2.38:1.
+
+   `.btn-ghost` is included now too. It was absent, so it kept --au-ink-muted and
+   measured 1.35:1 on the accent — the worst result in the audit. */
+:is(.section-accent, .empty-state) :is(.btn-secondary, .btn-quiet, .btn-aog) {
+  /* `background: transparent` for the same reason as the dark-ground rule above:
+     `.btn-quiet` and `.btn-aog` carry a solid --au-surface fill on light grounds,
+     and repainting only the text left a white label on a white pill — 1.00:1,
+     completely invisible. Clearing the fill is what makes these read as outline
+     buttons on the accent. */
+  background: transparent;
+  color: var(--au-accent-ink); border-color: var(--au-accent-ink);
+}
+:is(.section-accent, .empty-state) :is(.btn-secondary, .btn-quiet, .btn-aog):hover {
+  background: var(--au-accent-ink); color: var(--au-accent);
+}
+:is(.section-accent, .empty-state) .btn-ghost { color: var(--au-accent-ink); }
+:is(.section-accent, .empty-state) .btn-ghost:hover {
+  color: var(--au-accent-ink); background: rgba(255, 255, 255, 0.16);
+}
+
+.quote-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 20px; height: 20px; padding-inline: 5px;
+  border-radius: var(--au-radius-pill);
+  background: var(--au-accent-ink); color: var(--au-accent);
+  font-size: 11px; font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   Search
+   ========================================================================== */
+
+.search { position: relative; flex: 1; min-width: 240px; }
+
+/* Capped so the header row stays balanced — an input stretched across 900px of
+   empty header looks unfinished. */
+.header-main .search { max-width: 520px; }
+
+/* Between tablet and small-desktop the logo, search and actions cannot share
+   one row without the search collapsing. It drops to its own full-width row
+   rather than shrinking; it is the most-used control on the site and must
+   never be the thing that gives way. */
+@media (max-width: 1180px) {
+  .header-main .u-page { flex-wrap: wrap; padding-block: var(--au-s-3); }
+  .header-main .search { order: 3; flex-basis: 100%; max-width: none; }
+}
+
+/* On a phone the header's two buttons are dropped entirely — the fixed bottom
+   bar already carries AOG and the quote action into the thumb zone, and
+   duplicating them here is what pushed the row past the viewport. */
+@media (max-width: 760px) {
+  .header-actions { display: none; }
+
+  /* The header was stacking to ~478px of a 812px screen and pushing the search
+     field — the single most important control on the site — below the fold.
+     Every value here is bought back from that: a smaller wordmark, tighter
+     rows, and denser nav labels. */
+  .logo { font-size: var(--au-text-h4); }
+  .header-main .u-page { min-height: 0; gap: var(--au-s-3); }
+  .header-nav .u-page { gap: 0; padding-bottom: var(--au-s-1); }
+  .nav-link {
+    min-height: 34px;
+    padding: var(--au-s-2) var(--au-s-2);
+    font-size: 0.8125rem;
+    letter-spacing: 0.04em;
+  }
+}
+
+/* Inputs are the inverse of buttons: recessed, not raised. The inner shadow at
+   the top edge reads as a well cut into the surface, which is the correct
+   affordance for something you type into. */
+.search-field {
+  display: flex; align-items: center;
+  background: var(--au-surface);
+  /* A control, so it takes the strong hairline — the site's primary input must
+     not be outlined at 1.84:1. Matches `.field input` and the focus state below. */
+  border: var(--au-hairline-strong);
+  border-radius: var(--au-radius-sm);
+  box-shadow: var(--au-recessed);
+  transition: border-color var(--au-dur-fast) var(--au-ease),
+              box-shadow var(--au-dur-fast) var(--au-ease);
+}
+.search-field:focus-within {
+  border-color: var(--au-border-strong);
+  box-shadow: var(--au-recessed), var(--au-focus-ring);
+}
+.search-field input {
+  flex: 1; min-width: 0;
+  padding: var(--au-s-3);
+  min-height: 46px;
+  border: 0; background: transparent; outline: none;
+  font-family: var(--au-font-mono);
+  font-size: var(--au-text-code);
+  font-variant-numeric: tabular-nums;
+  color: var(--au-ink);
+}
+.search-field input::placeholder {
+  font-family: var(--au-font-sans);
+  color: var(--au-ink-muted);   /* 5.09:1 — placeholders need real contrast */
+  font-variant-numeric: normal;
+  text-transform: none;
+}
+/* Concentric again, at the header's scale: the field is 10px and the button is
+   inset 4px, so the button takes 6px. It was inheriting the same 10px as its
+   container, which is the identical defect as the hero — just small enough to
+   read as slightly-wrong rather than obviously broken. */
+.search-field .search-submit {
+  margin: 4px;
+  border-radius: var(--au-radius-xs);   /* 6px = 10px field − 4px inset */
+}
+
+.search-kbd {
+  margin-right: var(--au-s-2); padding: 2px 6px;
+  border: var(--au-hairline-quiet);
+  border-radius: var(--au-radius-xs);
+  background: var(--au-surface);
+  box-shadow: var(--au-shadow-xs), var(--au-inner-top);
+  font-family: var(--au-font-sans);
+  font-size: 11px;
+  color: var(--au-ink-muted);
+}
+@media (max-width: 900px) { .search-kbd { display: none; } }
+
+/* Hero variant — a wide slab against the photograph, and the best glass on the
+   site: it sits directly on a photograph, so the blur has real detail to work
+   with rather than a near-flat ground.
+
+   THE CONCENTRIC RULE, and the bug it fixes.
+
+   This field was 70px tall with a 28px radius, holding a 12px-radius submit
+   button inset 7px. For an inner box to follow an outer curve, its radius must
+   equal the outer radius minus the gap: 28 − 7 = 21px. At 12px the button's
+   corner was 9px too tight, so its straight edge cut clean across the field's
+   arc at the top-right and bottom-right — the most conspicuous defect on the
+   page, and exactly the kind of thing that reads as machine-generated.
+
+   The geometry is now derived rather than guessed, and it is checked in the
+   prototype's own audit:
+     field   64px tall, radius 16px  (the scale ceiling, from eleken)
+     button  52px tall, radius 10px  (eleken's own button radius)
+     inset    6px  →  16 − 6 = 10 ✓ concentric
+
+   Change any one of the three and the other two have to move with it. */
+.search-hero .search-field {
+  border-color: rgba(255, 255, 255, 0.55);
+  border-radius: var(--au-radius-lg);
+  background: var(--au-glass-fill-strong);
+  -webkit-backdrop-filter: var(--au-glass-blur);
+  backdrop-filter: var(--au-glass-blur);
+  box-shadow: var(--au-inner-top), var(--au-shadow-lg);
+}
+.search-hero .search-field:focus-within {
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow: var(--au-inner-top), var(--au-shadow-lg),
+              var(--au-focus-ring-inverse);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .search-hero .search-field { background: var(--au-surface); }
+}
+.search-hero .search-field input {
+  min-height: 62px;
+  font-size: var(--au-text-h4);
+  padding-inline: var(--au-s-4);
+}
+.search-hero .search-field .search-submit {
+  margin: 6px;
+  min-height: 52px;
+  padding-inline: var(--au-s-5);
+  border-radius: var(--au-radius-sm);   /* 10px = 16px field − 6px inset */
+}
+
+.search-detect {
+  min-height: 22px; margin-top: var(--au-s-3);
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-caption);
+  letter-spacing: 0.02em;
+  color: var(--au-ink-muted);
+}
+.search-detect strong { color: var(--au-ink); font-weight: var(--au-weight-regular); }
+.hero .search-detect { color: var(--au-ink-inverse-muted); }
+.hero .search-detect strong { color: var(--au-ink-inverse); }
+
+.search-suggest {
+  position: absolute; inset-inline: 0; top: calc(100% + 6px);
+  z-index: var(--au-z-dropdown);
+  background: var(--au-glass-fill-strong);
+  -webkit-backdrop-filter: var(--au-glass-blur);
+  backdrop-filter: var(--au-glass-blur);
+  border: var(--au-hairline-glass);
+  border-radius: var(--au-radius-md);
+  box-shadow: var(--au-raised-lg);
+  overflow: hidden;
+  max-height: 60vh; overflow-y: auto;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .search-suggest { background: var(--au-surface); }
+}
+.search-suggest[hidden] { display: none; }
+.search-suggest li + li { border-top: var(--au-hairline-quiet); }
+.search-suggest button {
+  display: flex; align-items: baseline; gap: var(--au-s-3);
+  width: 100%; padding: var(--au-s-3) var(--au-s-4);
+  background: transparent; border: 0; text-align: left; cursor: pointer;
+}
+.search-suggest button:hover,
+.search-suggest button[aria-selected="true"] { background: var(--au-tint-hover); }
+.search-suggest .s-primary {
+  font-family: var(--au-font-mono); font-size: var(--au-text-code);
+  font-variant-numeric: tabular-nums; color: var(--au-ink);
+}
+.search-suggest .s-secondary { font-size: var(--au-text-caption); color: var(--au-ink-muted); flex: 1; }
+.search-suggest .s-kind {
+  font-family: var(--au-font-sans); font-size: 11px;
+  text-transform: uppercase; letter-spacing: var(--au-tracking-label);
+  color: var(--au-ink-muted);
+}
+.search-suggest .s-fallback { background: var(--au-accent); }
+.search-suggest .s-fallback .s-secondary { color: var(--au-accent-ink); }
+
+.chip-row { display: flex; flex-wrap: wrap; gap: var(--au-s-2); align-items: center; }
+.chip {
+  display: inline-flex; align-items: center; gap: var(--au-s-2);
+  padding: var(--au-s-1) var(--au-s-3);
+  background: var(--au-glass-fill);
+  -webkit-backdrop-filter: var(--au-glass-blur-sm);
+  backdrop-filter: var(--au-glass-blur-sm);
+  border: var(--au-hairline-glass);
+  border-radius: var(--au-radius-pill);
+  box-shadow: var(--au-shadow-xs);
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-caption);
+  text-decoration: none; cursor: pointer;
+  color: var(--au-ink-muted);
+  transition: border-color var(--au-dur-fast) var(--au-ease),
+              box-shadow var(--au-dur-fast) var(--au-ease),
+              color var(--au-dur-fast) var(--au-ease);
+}
+.chip:hover { color: var(--au-ink); box-shadow: var(--au-raised); }
+
+/* Over the photograph the chips are the dark-ground variant of the same pane —
+   low-alpha white rather than white-heavy, or they turn milky. */
+.hero .chip {
+  background: var(--au-glass-fill-dark);
+  border-color: var(--au-glass-border-dark);
+  color: rgba(255, 255, 255, 0.82);
+  box-shadow: var(--au-inner-top-dark);
+}
+.hero .chip:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  color: var(--au-ink-inverse);
+  box-shadow: var(--au-inner-top-dark), var(--au-shadow-md);
+}
+
+/* ==========================================================================
+   Sections — the vertical rhythm is the signature
+   ========================================================================== */
+
+.section { padding-block: var(--au-section-y); }
+.section-tight { padding-block: var(--au-section-y-tight); }
+.section-subtle { background: var(--au-surface); border-block: var(--au-hairline); }
+.section-surface { background: var(--au-surface); }
+
+/* Exactly one accent band per page. Never two. */
+.section-accent { background: var(--au-accent); color: var(--au-accent-ink); }
+.section-accent h1, .section-accent h2, .section-accent h3, .section-accent h4 { color: var(--au-accent-ink); }
+/* Muted text on the accent band is a white at reduced strength, not a dark ink
+   at reduced strength. The accent is dark now; the amber system's dark-on-light
+   values would be invisible here. */
+.section-accent .u-muted, .section-accent .u-caption, .section-accent .u-label { color: rgba(255, 255, 255, 0.78); }
+
+.section-dark { background: var(--au-surface-dark); color: var(--au-ink-inverse); }
+
+/* Interior page header — the hero's inverted ground without the photograph or
+   the full-viewport height. Interior pages need to say what the page is and
+   then get out of the way; they were briefly inheriting the homepage's 86vh
+   photographic hero, which left a screen of empty black above the text. */
+.page-header {
+  background: var(--au-surface-dark);
+  color: var(--au-ink-inverse);
+  padding-block: var(--au-section-y-tight);
+}
+.page-header h1 {
+  font-size: var(--au-text-h1);
+  line-height: var(--au-leading-h1);
+  letter-spacing: var(--au-tracking-h1);
+  max-width: 28ch;
+}
+.page-header .lede {
+  margin-top: var(--au-s-5);
+  font-size: var(--au-text-h4);
+  color: var(--au-ink-inverse-muted);
+  max-width: 64ch;
+}
+
+/* ---- Everything that changes on an inverted ground ---------------------
+   Grouped with :is() so the three dark surfaces cannot drift apart. Adding a
+   fourth dark surface later means adding it here once, not hunting for
+   fifteen scattered overrides. */
+:is(.hero, .page-header, .section-dark) :is(h1, h2, h3, h4) { color: var(--au-ink-inverse); }
+/* `.site-footer` belongs in this one. It is a dark surface like the others, but
+   it was never listed, so muted text inside it fell through to --au-ink-muted
+   and a few spots got patched by hand instead (see `.footer-col .u-caption`,
+   now redundant). Under the grey palette that fallback was merely poor —
+   #666 on #29292b, about 3:1. Under the navy palette it is #5f6880 on Deep
+   Navy: dark on dark, roughly 1.6:1, and the Fallen Heroes card's caption
+   became unreadable. Listed here it resolves to Silver Mist: 9.72:1 on
+   Midnight, 5.62:1 on the Deep Navy cards.
+
+   Only this rule gains `.site-footer`, not the whole group — the group's
+   `a:not(.btn)` rule would repaint every footer link amber, and the footer's
+   own link colour is deliberate. */
+:is(.hero, .page-header, .section-dark, .site-footer) :is(.u-muted, .u-caption, .u-label) { color: var(--au-ink-inverse-muted); }
+:is(.hero, .page-header, .section-dark) .u-body-strong { color: var(--au-ink-inverse); }
+
+/* Eyebrows are accent-coloured on light grounds, and Steel Blue on Midnight is
+   2.38:1 — a fail. Eyebrows appear on eight pages, so the dark-ground correction
+   belongs here rather than at each call site.
+
+   Two grounds, two answers, because one colour does not clear both:
+     · Midnight / Deep Navy → Horizon. Keeps the accent role instead of
+       flattening to grey. 10.41:1 and 6.02:1.
+     · The accent band itself → white at 0.86. Horizon measures only 4.37:1 on
+       Steel Blue, which fails AA; white lands at 6.05:1. The accent band is
+       Steel Blue, so an accent-coloured eyebrow has nothing to contrast with. */
+:is(.hero, .page-header, .section-dark) :is(.eyebrow, .section-head .eyebrow) {
+  color: var(--au-link-inverse);
+}
+.section-accent :is(.eyebrow, .section-head .eyebrow) {
+  color: rgba(255, 255, 255, 0.86);
+}
+/* The dark-ground pane. A white-heavy fill over near-black goes milky, so the
+   fill drops to low-alpha white and the inner highlight nearly vanishes. */
+:is(.hero, .page-header, .section-dark) .card {
+  background: var(--au-glass-fill-dark);
+  border-color: var(--au-glass-border-dark);
+  box-shadow: var(--au-inner-top-dark), var(--au-shadow-md);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :is(.hero, .page-header, .section-dark) .card { background: var(--au-surface-dark-alt); }
+}
+:is(.hero, .page-header, .section-dark) .card-link:hover {
+  border-color: rgba(255, 255, 255, 0.32);
+  box-shadow: var(--au-inner-top-dark), var(--au-shadow-lg);
+}
+:is(.hero, .page-header, .section-dark) :is(.feature-strip, .feature-strip > *, .rule-list, .rule-list > *) {
+  border-color: var(--au-border-dark);
+}
+:is(.hero, .page-header, .section-dark) .feature-strip .k { color: var(--au-ink-inverse-muted); }
+:is(.hero, .page-header, .section-dark) .feature-strip .v { color: var(--au-ink-inverse); }
+:is(.hero, .page-header, .section-dark) .cert {
+  border-color: var(--au-border-dark); color: var(--au-ink-inverse);
+}
+:is(.hero, .page-header, .section-dark) .cert .mark { color: var(--au-ink-inverse-muted); }
+:is(.hero, .page-header, .section-dark) .step-item { border-color: var(--au-ink-inverse); }
+:is(.hero, .page-header, .section-dark) .spec-table :is(th, td) { border-color: var(--au-border-dark); }
+:is(.hero, .page-header, .section-dark) .spec-table td { color: var(--au-ink-inverse); }
+/* Horizon, not the accent. The accent is Steel Blue, which measures 2.38:1 on
+   Midnight — a link painted with it on a dark band is effectively invisible.
+
+   `.site-footer` is in this list. It is a dark ground like the rest, and
+   without it the inline-prose rule near the top of this file (Steel Blue, at
+   specificity 0,0,1) was the only thing colouring footer body links — putting
+   Steel Blue on Midnight at 2.38:1. This outranks it at (0,2,1) and also beats
+   `.footer-col a`, so every footer link now reads as one colour; the
+   `.footer-col a:hover` white still wins on hover, being later and equal. */
+:is(.hero, .page-header, .section-dark, .site-footer) a:not(.btn) { color: var(--au-link-inverse); }
+
+/* `.site-footer` again: the Fallen Heroes and survey cards are Deep Navy, and an
+   outline button there kept the light-ground `color: var(--au-ink)` — Midnight on
+   Deep Navy, 1.73:1.
+
+   `background: transparent` is load-bearing. `.btn-quiet` carries a solid
+   `--au-surface` fill on light grounds, and this rule only ever repainted the
+   text — so on dark the button became white-on-white, a 1.00:1 invisible label.
+   It survived earlier only because the fill used to be a gradient, which left
+   `backgroundColor` transparent and let the dark band show through. Any
+   light-ground fill added to these classes has to be cleared here too. */
+:is(.hero, .page-header, .section-dark, .site-footer) :is(.btn-quiet, .btn-secondary, .btn-aog) {
+  background: transparent;
+  color: var(--au-ink-inverse); border-color: var(--au-border-dark);
+}
+:is(.hero, .page-header, .section-dark, .site-footer) :is(.btn-quiet, .btn-secondary, .btn-aog):hover {
+  background: var(--au-ink-inverse); color: var(--au-ink); border-color: var(--au-ink-inverse);
+}
+:is(.hero, .page-header, .section-dark, .site-footer) .btn-ghost { color: var(--au-ink-inverse-muted); }
+:is(.hero, .page-header, .section-dark, .site-footer) .btn-ghost:hover { color: var(--au-ink-inverse); }
+
+.section-head { margin-bottom: var(--au-s-7); max-width: 56ch; }
+.section-head h2 { font-size: var(--au-text-h2); line-height: var(--au-leading-h2); letter-spacing: var(--au-tracking-h2); }
+.section-head p { margin-top: var(--au-s-4); color: var(--au-ink-muted); max-width: 68ch; }
+/* A section head's standfirst carries --au-ink-muted, which is tuned for the
+   light ground and measures 3.22:1 on Midnight. It is a bare `p` rather than a
+   `.u-muted`, so the dark-context muted rule above never caught it. */
+:is(.hero, .page-header, .section-dark, .site-footer) .section-head p {
+  color: var(--au-ink-inverse-muted);
+}
+/* The eyebrow carries a short rule before it. The rule is the section's own
+   marker — it aligns to the headline's left edge and gives the label something
+   to sit against, so a 12px line of grey text does not float unanchored above a
+   40px headline. */
+.section-head .eyebrow {
+  display: flex; align-items: center; gap: var(--au-s-3);
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-eyebrow);
+  font-weight: var(--au-weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--au-accent);
+  margin-bottom: var(--au-s-4);
+}
+.section-head .eyebrow::before {
+  content: "";
+  width: 26px; height: 1px; flex: none;
+  background: currentColor;
+  opacity: 0.5;
+}
+/* Centred heads put the rule on both sides so the label stays symmetrical. */
+.section-head-center .eyebrow { justify-content: center; }
+.section-head-center .eyebrow::after {
+  content: "";
+  width: 26px; height: 1px; flex: none;
+  background: currentColor;
+  opacity: 0.5;
+}
+.section-head-row {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: var(--au-s-5); flex-wrap: wrap; max-width: none;
+}
+.section-head-row > div { max-width: 56ch; }
+
+.grid { display: grid; gap: var(--au-s-5); }
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); }
+.grid-3 { grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); }
+.grid-4 { grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); }
+
+/* Cards: glass panes, rounded, lit from above. */
+.card {
+  background: var(--au-glass-fill);
+  -webkit-backdrop-filter: var(--au-glass-blur);
+  backdrop-filter: var(--au-glass-blur);
+  border: var(--au-hairline-glass);
+  border-radius: var(--au-radius-lg);
+  box-shadow: var(--au-raised);
+  padding: var(--au-s-5);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .card { background: var(--au-surface); }
+}
+.card-link {
+  text-decoration: none; display: block;
+  transition: box-shadow var(--au-dur-fast) var(--au-ease),
+              transform var(--au-dur-fast) var(--au-ease),
+              border-color var(--au-dur-fast) var(--au-ease);
+}
+/* A 2px lift, not 8px. The card should feel like it responds to the cursor, not
+   like it jumps at it. */
+.card-link:hover {
+  border-color: rgba(255, 255, 255, 0.95);
+  box-shadow: var(--au-raised-lg);
+  transform: translateY(-2px);
+}
+
+/* A hairline-divided list is the reference's real idiom for grouped items —
+   used instead of a card grid wherever the items are peers in a list. */
+.rule-list { border-top: var(--au-hairline); }
+.rule-list > * { border-bottom: var(--au-hairline); padding-block: var(--au-s-5); }
+.rule-list a { text-decoration: none; display: block; }
+.rule-row {
+  display: grid; gap: var(--au-s-4);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto;
+  align-items: baseline;
+}
+.rule-row .idx {
+  font-family: var(--au-font-sans); font-size: var(--au-text-label);
+  letter-spacing: var(--au-tracking-label); color: var(--au-ink-muted);
+}
+@media (max-width: 760px) { .rule-row { grid-template-columns: minmax(0, 1fr); } }
+
+.breadcrumb {
+  display: flex; flex-wrap: wrap; gap: var(--au-s-2);
+  padding-block: var(--au-s-5);
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--au-ink-muted);
+}
+.breadcrumb a { text-decoration: none; }
+.breadcrumb a:hover { color: var(--au-ink); text-decoration: underline; }
+.breadcrumb li { display: flex; gap: var(--au-s-2); }
+.breadcrumb li::after { content: "/"; margin-left: var(--au-s-2); color: var(--au-border); }
+.breadcrumb li:last-child::after { content: none; }
+
+/* ==========================================================================
+   Hero — full-bleed photography, copy sitting on it
+   ========================================================================== */
+
+.hero {
+  position: relative;
+  min-height: min(86vh, 820px);
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding-block: var(--au-s-9) var(--au-s-8);
+  background: var(--au-surface-dark);
+  color: var(--au-ink-inverse);
+  overflow: hidden;
+  isolation: isolate;
+}
+.hero-media {
+  position: absolute; inset: 0; z-index: -2;
+  background-image: url("img/hero.jpg");
+  background-size: cover;
+  /* 58% across, not centre. The frame is narrower than the 3:2 source, so
+     `cover` crops horizontally; biasing right pushes the nose, control tower and
+     terminal lights clear of the copy instead of parking the empty mid-fuselage
+     in the middle of the composition.
+
+     Both JPEGs are unmodified-orientation crops of the client photograph, whose
+     full-resolution master sits beside them as `hero-source-original.png`. The
+     aircraft faces LEFT, so this bias hands the subject the right of the frame
+     and the copy is placed opposite it in the left column — see
+     `.hero > .u-page` below. The image is deliberately NOT mirrored: flipping an
+     airframe puts doors, engine and gear on the wrong side, which this audience
+     notices.
+
+     Regenerate both with (from this directory):
+       sips -s format jpeg -s formatOptions 72 --resampleWidth 2400 \
+         hero-source-original.png --out hero.jpg
+       sips -s format jpeg -s formatOptions 70 --resampleWidth 1200 \
+         hero-source-original.png --out hero-sm.jpg */
+  background-position: 58% 50%;
+  background-repeat: no-repeat;
+}
+@media (max-width: 760px) {
+  /* A quarter of the bytes, and at this width the detail is invisible anyway.
+     Biased further right so the nose survives the much narrower crop. */
+  .hero-media { background-image: url("img/hero-sm.jpg"); background-position: 66% 50%; }
+}
+
+/* A scrim, not decoration. The copy sits bottom-left and the photograph's
+   brightest area — the white fuselage — runs straight through it, so white
+   text would otherwise land on white.
+
+   One diagonal gradient rather than two stacked ones: crossing a horizontal
+   and a vertical scrim multiplies their opacity in the shared corner, which
+   drove the copy corner to ~0.96 black and flattened the photo into a box.
+   A single bottom-left-to-top-right ramp protects the text and leaves the
+   sky, tower and lights legible.
+
+   The ramp runs to the top RIGHT because the copy sits bottom-left. It is tied
+   to the copy's side: if the copy ever moves back to the right, this becomes
+   `to top left` and the crop bias above returns to 42%/34%. */
+.hero-scrim {
+  position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(
+    to top right,
+    rgba(var(--au-shadow-rgb), 0.94) 0%,
+    rgba(var(--au-shadow-rgb), 0.86) 18%,
+    rgba(var(--au-shadow-rgb), 0.58) 42%,
+    rgba(var(--au-shadow-rgb), 0.24) 68%,
+    rgba(var(--au-shadow-rgb), 0.10) 100%
+  );
+}
+/* Portrait viewports crop to a tall sliver where a diagonal leaves the lower
+   copy unprotected, so it becomes a straight bottom-up ramp. */
+@media (max-width: 760px) {
+  .hero-scrim {
+    background: linear-gradient(
+      to top,
+      rgba(var(--au-shadow-rgb), 0.94) 0%,
+      rgba(var(--au-shadow-rgb), 0.82) 34%,
+      rgba(var(--au-shadow-rgb), 0.5) 66%,
+      rgba(var(--au-shadow-rgb), 0.3) 100%
+    );
+  }
+}
+.hero h1 {
+  font-size: var(--au-text-display);
+  line-height: var(--au-leading-display);
+  letter-spacing: var(--au-tracking-display);
+  color: var(--au-ink-inverse);
+  max-width: 22ch;
+}
+/* Brighter than the standard muted-on-dark value. Elsewhere that sits on a
+   flat Midnight where a muted inverse is comfortable; here it crosses the
+   photograph's brightest region — the white fuselage — where it thinned out.
+   Over an image we do not control, hero body copy gets close to full white. */
+.hero .lede {
+  margin-top: var(--au-s-5);
+  font-size: var(--au-text-h4);
+  color: rgba(255, 255, 255, 0.88);
+  max-width: 52ch;
+}
+.hero .u-label {
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: var(--au-s-5);
+  display: block;
+}
+.hero .chip { border-color: rgba(255, 255, 255, 0.32); color: rgba(255, 255, 255, 0.82); }
+.hero .chip:hover { border-color: var(--au-ink-inverse); color: var(--au-ink-inverse); }
+.hero-search { margin-top: var(--au-s-7); max-width: 720px; }
+
+/* `.hero` is a column flex container, so its child is a flex item whose
+   automatic minimum size is its content's min-content width. Without
+   `min-width: 0` the item stayed 465px wide inside a 375px viewport — and
+   because `.hero` clips with `overflow: hidden`, the document's scrollWidth
+   still read 375 and the overflow went unreported. */
+.hero > .u-page { min-width: 0; max-width: min(var(--au-container-page), 100%); }
+
+/* The copy occupies the LEFT half, and the crop bias above moves the aircraft
+   out from under it. The photograph faces left, so its subject — nose, control
+   tower, terminal lights — sits ahead of the airframe; pushing the crop to 58%
+   carries that subject into the right half and leaves the left open for text.
+
+   A two-column grid rather than a plain max-width on the block: the headline,
+   lede and search field each cap at a different width (22ch, 52ch, 720px), so
+   left to themselves they would set three different measures. One 620px column
+   gives all five lines a single shared measure in one place, so the caps below
+   are released to `none`.
+
+   `width: 100%` is load-bearing. `.u-page` carries `margin-inline: auto`, and
+   auto cross-axis margins suppress flex stretch, so this item is shrink-to-fit
+   inside the column-flex `.hero`. Without it the grid's max-content is just the
+   620px column, the item collapses to 728px and the `1fr` measures 0 — which
+   reads as centred rather than aligned to the page gutter.
+
+   The column is capped proportionally as well as absolutely: at 620px flat, a
+   ~800px viewport left the empty column 72px wide and the copy was back in the
+   middle of the frame. */
+.hero > .u-page {
+  display: grid;
+  grid-template-columns: minmax(0, min(620px, 58%)) minmax(0, 1fr);
+  column-gap: var(--au-s-7);
+  width: 100%;
+}
+.hero > .u-page > * { grid-column: 1; }
+.hero h1,
+.hero .lede,
+.hero .hero-search { max-width: none; }
+
+@media (max-width: 760px) {
+  /* The 240px search floor plus a nowrap submit button was what could not
+     shrink. On a phone the field takes the full row anyway, so the floor is
+     released and the oversized hero input steps down to body size. */
+  .search { min-width: 0; }
+  .search-hero .search-field input {
+    min-height: 54px;
+    font-size: var(--au-text-body);
+    padding-inline: var(--au-s-4);
+  }
+  .search-hero .search-field .search-submit { min-height: 46px; }
+
+  /* Let content set the hero's height instead of reserving 86vh. On a phone a
+     viewport-height hero is mostly photograph, and it was burying the search
+     field a full screen down. */
+  .hero {
+    min-height: 0;
+    padding-block: var(--au-s-7) var(--au-s-6);
+  }
+  .hero .lede { font-size: var(--au-text-small); margin-top: var(--au-s-4); }
+  .hero .u-label { margin-bottom: var(--au-s-4); }
+  .hero-search { margin-top: var(--au-s-5); }
+
+  /* The empty second column collapses. At this width the crop is a tall sliver
+     with no open half to sit opposite, and the scrim is already a straight
+     bottom-up ramp, so the copy takes the full measure. */
+  .hero > .u-page {
+    grid-template-columns: minmax(0, 1fr);
+    column-gap: 0;
+  }
+  .hero > .u-page > * { grid-column: 1; }
+}
+
+/* The four feature points, as a hairline-divided strip. Deliberately not the
+   big-number stat row — that pattern is a SaaS cliché and these are plain
+   service facts, not metrics. */
+.feature-strip {
+  display: grid; gap: 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
+  border-top: var(--au-hairline);
+}
+.feature-strip > * {
+  padding: var(--au-s-5) var(--au-s-5) var(--au-s-5) 0;
+  border-bottom: var(--au-hairline);
+}
+.feature-strip .k {
+  display: block;
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-label);
+  letter-spacing: var(--au-tracking-label);
+  text-transform: uppercase;
+  color: var(--au-ink-muted);
+}
+.feature-strip .v { display: block; margin-top: var(--au-s-2); font-size: var(--au-text-h4); color: var(--au-ink); }
+.section-dark .feature-strip, .section-dark .feature-strip > * { border-color: var(--au-border-dark); }
+.section-dark .feature-strip .k { color: var(--au-ink-inverse-muted); }
+.section-dark .feature-strip .v { color: var(--au-ink-inverse); }
+
+/* ==========================================================================
+   Feature split — homepage only, built to a supplied reference
+
+   The reference is a two-column composition: a heading block holding the
+   column on the left, feature items on the right with an icon above each, and
+   one item lifted out of the flow as a raised card.
+
+   This is the one place the flat rules are suspended. It uses the 24px radius,
+   the card shadow and the 600/700 weights, all of which the rest of the site
+   deliberately refuses. Everything here is scoped to `.feature-split` so the
+   exception cannot leak: `.feature-strip` above is untouched and still carries
+   the about page.
+   ========================================================================== */
+.feature-split {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: var(--au-s-8);
+  align-items: start;
+}
+
+.feature-intro .eyebrow {
+  display: flex; align-items: center; gap: var(--au-s-3);
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-eyebrow);
+  font-weight: var(--au-weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--au-accent);
+  margin-bottom: var(--au-s-4);
+}
+.feature-intro .eyebrow::before {
+  content: ""; width: 26px; height: 1px; flex: none;
+  background: currentColor; opacity: 0.5;
+}
+/* The reference's headline is its loudest element, and weight is how it gets
+   there. This is the deliberate departure from the 400-everywhere rule. */
+.feature-intro h2 {
+  font-size: var(--au-text-h2);
+  line-height: var(--au-leading-h2);
+  letter-spacing: var(--au-tracking-h2);
+  font-weight: var(--au-weight-bold);
+  max-width: 18ch;
+}
+.feature-intro p {
+  margin-top: var(--au-s-5);
+  color: var(--au-ink-muted);
+  max-width: 46ch;
+}
+
+/* Two-up, not the reference's three. There are four service facts and none of
+   them is filler, so the grid takes the count rather than the count being cut
+   to fit the grid. */
+.feature-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--au-s-4);
+}
+/* The lead card is raised and the other three sit flat — that contrast is the
+   device. Both halves needed rebuilding: the flat three were `rgba(255,255,255,
+   0.34)` with a white border, which on the warm-paper ground gave them no edge
+   and no fill worth seeing, so all four cards read as pale rectangles. The flat
+   ones now carry a proper hairline and a legible fill; the lead card keeps the
+   glass, and the gap between them is what carries the emphasis. */
+.feature-card {
+  position: relative;
+  padding: var(--au-s-5) var(--au-s-5) var(--au-s-6);
+  border-radius: var(--au-radius-card);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(var(--au-tint-rgb), 0.10);
+  transition: box-shadow var(--au-dur-fast) var(--au-ease),
+              transform var(--au-dur-fast) var(--au-ease);
+}
+/* The lead card is the quote promise, so it gets a bar of the accent along its
+   top edge — the one mark that says "this is the one".
+
+   The bar is an INSET SHADOW, not a `::before` and not a thick `border-top`. A
+   positioned pseudo-element has to be clipped by the card's 22px radius to sit
+   inside the corners, and with `backdrop-filter` on the same element that clip
+   did not apply — the bar rendered full-width and square-ended, reading as a
+   detached line floating above the card. An inset shadow follows the border
+   radius natively, costs no layout, and cannot come apart from the box. */
+.feature-card-lead {
+  background: var(--au-glass-fill-strong);
+  -webkit-backdrop-filter: var(--au-glass-blur);
+  backdrop-filter: var(--au-glass-blur);
+  border-color: var(--au-glass-border);
+  box-shadow: inset 0 3px 0 var(--au-accent), var(--au-raised-lg);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .feature-card-lead { background: var(--au-surface); }
+}
+.feature-icon {
+  display: grid;
+  place-items: center;
+  width: 42px; height: 42px;
+  border-radius: var(--au-radius-sm);
+  /* A tinted chip, not a solid fill — at full strength it reads as a second
+     accent and starts competing with the CTA. */
+  background: rgba(var(--au-accent-rgb), 0.10);
+  border: 1px solid rgba(var(--au-accent-rgb), 0.20);
+  color: var(--au-accent);
+}
+.feature-card-lead .feature-icon {
+  background: var(--au-accent);
+  border-color: transparent;
+  color: var(--au-ink-inverse);
+  box-shadow: var(--au-shadow-sm);
+}
+.feature-icon svg { width: 20px; height: 20px; display: block; }
+.feature-card .k {
+  display: block;
+  margin-top: var(--au-s-5);
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-eyebrow);
+  font-weight: var(--au-weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--au-ink-muted);
+}
+.feature-card .v {
+  display: block;
+  margin-top: 6px;
+  font-size: var(--au-text-h3);
+  line-height: var(--au-leading-tight);
+  letter-spacing: var(--au-tracking-h3);
+  font-weight: var(--au-weight-medium);
+  color: var(--au-ink-heading);
+}
+
+@media (max-width: 1000px) {
+  /* The heading block stops holding a column and becomes a header. Below this
+     the intro column is too narrow to carry a display headline without the
+     measure collapsing to three or four words a line. */
+  .feature-split { grid-template-columns: minmax(0, 1fr); gap: var(--au-s-7); }
+  .feature-intro h2 { max-width: 24ch; }
+}
+@media (max-width: 560px) {
+  .feature-cards { grid-template-columns: minmax(0, 1fr); gap: var(--au-s-2); }
+  .feature-card { padding: var(--au-s-5); }
+}
+
+/* ==========================================================================
+   Tabbed split — homepage hot stock, built to a supplied reference
+
+   The reference is a centred heading, a pill tab bar beneath it, and then a
+   two-column body: a photograph on the left, the selected tab's content on
+   the right.
+
+   The COMPOSITION is taken from the reference. The PALETTE is not — the
+   reference's tinted purple belongs to its own brand, and importing it would
+   leave one section on the page reading as if it came from another site.
+   Surfaces here use this site's own radii, glass and raised shadows.
+   ========================================================================== */
+
+/* Centred variant of the standard section head. Used only where a tab bar
+   follows, because the bar is symmetrical and a left-aligned head above a
+   centred bar looks like a mistake rather than a choice. */
+.section-head-center {
+  max-width: 74ch;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+.section-head-center p { margin-left: auto; margin-right: auto; }
+
+.tabbar {
+  display: flex;
+  gap: var(--au-s-1);
+  margin-bottom: var(--au-s-7);
+  padding: var(--au-s-1);
+  background: var(--au-glass-fill);
+  -webkit-backdrop-filter: var(--au-glass-blur-sm);
+  backdrop-filter: var(--au-glass-blur-sm);
+  border: var(--au-hairline-glass);
+  border-radius: var(--au-radius-pill);
+  box-shadow: var(--au-recessed);
+  /* Four tabs will not fit a phone. They scroll rather than wrap, so the bar
+     stays one pill instead of becoming two stacked half-pills. */
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabbar::-webkit-scrollbar { display: none; }
+
+.tab {
+  flex: 1 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--au-s-2);
+  padding: var(--au-s-3) var(--au-s-5);
+  border: 0;
+  border-radius: var(--au-radius-pill);
+  background: transparent;
+  color: var(--au-ink-muted);
+  font-size: var(--au-text-small);
+  letter-spacing: var(--au-tracking-body);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--au-dur-fast) var(--au-ease),
+              color var(--au-dur-fast) var(--au-ease);
+}
+.tab:hover { color: var(--au-ink); }
+
+/* The reference marks the active tab with a tint of its accent. Ours is Runway
+   Amber, which at full strength reads as a second accent band competing with
+   the CTA and at low strength is invisible on white — so the fill is ink, which
+   passes contrast outright. The selected pill is the raised element inside a
+   recessed track: it lifts out of the bar rather than just changing colour. */
+/* Deep Navy, not Midnight. A near-black pill on a warm-paper page was the
+   heaviest object in the section and pulled the eye off the part rows it exists
+   to introduce; the brand navy sits in the same family as everything around it. */
+.tab[aria-selected="true"] {
+  background: var(--au-navy);
+  color: var(--au-ink-inverse);
+  box-shadow: var(--au-inner-top-dark), var(--au-shadow-md);
+}
+
+/* The reference puts a glyph in front of each tab label. An icon per aircraft
+   type would be four near-identical silhouettes, so the slot carries the
+   in-stock count instead — real information, same rhythm. */
+.tab .n {
+  font-family: var(--au-font-mono);
+  font-size: var(--au-text-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--au-ink-muted);
+}
+.tab[aria-selected="true"] .n { color: var(--au-ink-inverse-muted); }
+
+.tab-split {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: var(--au-s-7);
+  /* Stretch, not start. Each tab holds a different number of rows, so a
+     fixed-ratio photograph would leave a different-sized hole under itself on
+     every tab. The image takes its height from whichever panel is showing. */
+  align-items: stretch;
+}
+
+.tab-media {
+  position: relative;
+  margin: 0;
+  /* The photograph is absolutely positioned inside, so it contributes no
+     intrinsic height and can never be the item that sets the row height —
+     which is what makes the stretch above resolve instead of going circular.
+     The floor is here so a one-row tab cannot squash it to a letterbox. */
+  min-height: 360px;
+  border: var(--au-hairline-glass);
+  border-radius: var(--au-radius-lg);
+  overflow: hidden;
+  background: var(--au-surface-alt);
+  box-shadow: var(--au-raised-md);
+}
+.tab-media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  /* `height` set explicitly, not left to `auto`: the intrinsic `height`
+     attribute on the tag is a presentation hint, and auto lets it win. */
+  height: 100%;
+  object-fit: cover;
+  /* The engines sit left of centre in the client photograph; biasing the crop
+     left keeps both nacelles in frame as the column narrows. */
+  object-position: 40% 50%;
+}
+.tab-panel > h3 {
+  font-size: var(--au-text-h3);
+  line-height: var(--au-leading-tight);
+  letter-spacing: var(--au-tracking-h3);
+}
+.tab-panel .part-list { margin-top: var(--au-s-5); }
+
+/* At roughly half width the three-column part row cannot hold its identifier
+   block, its metadata and two buttons on one line. The metadata drops to a
+   second line and runs horizontally, which keeps the row two lines deep
+   instead of the four a full stack would cost. */
+.tab-panel .part-row { grid-template-columns: minmax(0, 1fr) auto; row-gap: var(--au-s-3); }
+.tab-panel .part-id      { grid-column: 1; grid-row: 1; }
+.tab-panel .part-actions { grid-column: 2; grid-row: 1; }
+.tab-panel .part-meta    { grid-column: 1 / -1; grid-row: 2; flex-direction: row; flex-wrap: wrap; gap: var(--au-s-4); }
+
+@media (max-width: 1000px) {
+  .tab-split { grid-template-columns: minmax(0, 1fr); gap: var(--au-s-6); }
+  /* Single column — there is no panel to match, so the photograph goes back to
+     sizing itself. Landscape, because a 5:4 block this wide pushes the part
+     rows an entire screen down. */
+  .tab-media { min-height: 0; aspect-ratio: 16 / 9; }
+}
+@media (max-width: 760px) {
+  .tab { flex: 0 0 auto; padding: var(--au-s-3) var(--au-s-4); }
+  .tab-panel .part-row { grid-template-columns: minmax(0, 1fr); }
+  .tab-panel :is(.part-id, .part-actions, .part-meta) { grid-column: 1; grid-row: auto; }
+}
+
+/* ==========================================================================
+   Marquee — homepage Top NSN, built to a supplied reference
+
+   A full-bleed strip of tilted portrait cards drifting sideways, running off
+   both edges of the viewport.
+
+   Two things make it behave. The track holds the card set TWICE and travels to
+   exactly -50%, so the second copy arrives where the first began and the seam
+   never lands in frame. And the spacing between cards is `margin-right` on the
+   card, not `gap` on the flex row — with `gap` the two halves are separated by
+   one extra gap that the halves themselves do not contain, the -50% lands half
+   a gap out, and the loop visibly hitches once per cycle.
+   ========================================================================== */
+
+.marquee {
+  /* Hidden, not auto. A transform does not move an element's scrollable area,
+     so a scrollable marquee mid-travel scrolls into empty space where the
+     translated content used to be. Under reduced motion the animation is off,
+     nothing is translated, and it becomes a scroller — see below. */
+  overflow: hidden;
+  /* Room for the hover lift and its shadow. The cards no longer tilt, so this is
+     only the 3px translate plus the shadow's spread — not the old tilt clearance. */
+  padding-block: var(--au-s-2);
+
+  /* The rail runs full-bleed and fades at both edges, so a card leaving frame
+     dissolves instead of being guillotined by a hard container edge. */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: au-marquee 72s linear infinite;
+}
+.marquee-group { display: flex; }
+
+/* Pause on hover and on keyboard focus. Focus matters more than hover: a card
+   tabbed to inside a moving strip would otherwise slide out from under the
+   focus ring while it is being read. */
+.marquee:hover .marquee-track,
+.marquee:focus-within .marquee-track { animation-play-state: paused; }
+
+@keyframes au-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* A stalled marquee shows a static row of cards — legible, and still the
+   section's real content. Nothing here starts hidden or transparent, so there
+   is no state in which the strip is blank. */
+
+/* NO TILT.
+
+   These cards were rotated −2deg / +1.5deg / −1deg on alternating children. On
+   screen it read as a scrapbook of stickers: corners at three different angles,
+   captions stepping up and down the baseline, and the whole strip looking like a
+   rendering fault rather than a decision. It is the wrong register entirely for a
+   distributor whose product is traceable parts and export compliance.
+
+   The rail is precise instead, and that precision is now the section's character
+   — it is the only band on the page that moves, and uniform cards travelling in
+   a straight line read as a conveyor, which is at least about this business. */
+.nsn-card {
+  /* Load-bearing. `.nsn-card-body` is a SIBLING of `.nsn-card-media`, not a
+     child, so without a positioning context here the absolutely-positioned label
+     escapes to the nearest positioned ancestor — every card's label then stacks
+     in one spot at the far left of the rail. */
+  position: relative;
+  flex: 0 0 auto;
+  /* The floor is set by the NSN, not by the layout: sixteen mono characters at
+     the code size need ~144px, and a wrapped part identifier is a misread
+     waiting to happen. */
+  width: clamp(196px, 17vw, 248px);
+  margin-right: var(--au-s-4);
+  text-decoration: none;
+  transition: translate var(--au-dur-fast) var(--au-ease);
+}
+.nsn-card:hover, .nsn-card:focus-visible { translate: 0 -3px; }
+
+/* One card, not a photo with a caption floating under it. The label sits on the
+   image behind a scrim, so the card is a single object with one silhouette —
+   which is what lets a row of them read as a rail. */
+.nsn-card-media {
+  position: relative;
+  display: block;
+  border-radius: var(--au-radius-md);
+  overflow: hidden;
+  background: var(--au-surface-alt);
+  border: 1px solid rgba(var(--au-tint-rgb), 0.12);
+  box-shadow: var(--au-shadow-sm);
+  transition: box-shadow var(--au-dur-fast) var(--au-ease);
+}
+.nsn-card:hover .nsn-card-media { box-shadow: var(--au-shadow-lg); }
+
+.nsn-card-media img {
+  display: block;
+  width: 100%;
+  /* Explicit, not auto: the intrinsic `height` attribute on the tag is a
+     presentation hint and auto lets it beat the ratio. */
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+/* The scrim is on the media, so it can never drift away from the text it makes
+   legible. */
+.nsn-card-media::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(to top,
+    rgba(var(--au-shadow-rgb), 0.88) 0%,
+    rgba(var(--au-shadow-rgb), 0.55) 34%,
+    rgba(var(--au-shadow-rgb), 0.06) 68%);
+}
+
+.nsn-card-body {
+  position: absolute; inset-inline: 0; bottom: 0;
+  z-index: 1;
+  padding: var(--au-s-3) var(--au-s-4);
+}
+.nsn-card-body .nsn {
+  display: block;
+  font-family: var(--au-font-mono);
+  font-size: var(--au-text-small);
+  font-variant-numeric: tabular-nums;
+  /* An NSN broken across two lines reads as two numbers. The card is sized to
+     fit one; this is the guarantee that it stays that way. */
+  white-space: nowrap;
+  color: var(--au-ink-inverse);
+}
+.nsn-card-body .desc {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--au-text-caption);
+  color: rgba(255, 255, 255, 0.76);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.nsn-card:hover .nsn { text-decoration: underline; text-underline-offset: 0.2em; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* The global reduce rule collapses animation-duration to 0.01ms, which on an
+     `infinite` animation is a strobe rather than a stop. The name has to go.
+     With nothing translating, the strip can safely become a real scroller. */
+  .marquee-track { animation-name: none; }
+  .marquee { overflow-x: auto; }
+  /* The duplicate exists only to hide the loop seam. With no loop it is eight
+     phantom cards a scrolling reader has to get past. */
+  .marquee-group[aria-hidden="true"] { display: none; }
+  /* The edge fade implies motion that is no longer happening, and it dims the
+     first and last card of a strip the reader now scrolls by hand. */
+  .marquee { -webkit-mask-image: none; mask-image: none; }
+}
+
+/* ==========================================================================
+   Manufacturer directory — homepage "Top manufacturers"
+
+   Two columns of hairline rows. The section's own copy says the CAGE code is the
+   unambiguous identifier, so the code is a real chip rather than caption text,
+   and the count is right-aligned and tabular so eight figures form a column the
+   eye can compare down.
+   ========================================================================== */
+
+.mfr-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--au-s-7);
+  border-top: 1px solid rgba(var(--au-tint-rgb), 0.14);
+}
+@media (max-width: 820px) { .mfr-grid { grid-template-columns: minmax(0, 1fr); } }
+
+.mfr-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--au-s-4);
+  padding: var(--au-s-4) var(--au-s-2);
+  border-bottom: 1px solid rgba(var(--au-tint-rgb), 0.14);
+  text-decoration: none;
+  transition: background var(--au-dur-fast) var(--au-ease),
+              padding-inline var(--au-dur-fast) var(--au-ease);
+}
+.mfr-row:hover { background: var(--au-tint-hover); }
+.mfr-name {
+  font-size: var(--au-text-h4);
+  font-weight: var(--au-weight-medium);
+  letter-spacing: -0.015em;
+  color: var(--au-ink-heading);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.mfr-cage {
+  font-size: var(--au-text-caption);
+  color: var(--au-ink-muted);
+  white-space: nowrap;
+}
+.mfr-cage b {
+  font-family: var(--au-font-mono);
+  font-weight: var(--au-weight-regular);
+  font-variant-numeric: tabular-nums;
+  color: var(--au-ink);
+}
+/* Sans, not mono. A count is a quantity, not an identifier — mono earns its place
+   on part numbers and CAGE codes because those get compared character by
+   character. Fragment Mono also sets a full-width comma, so "184,320" came out
+   visibly gapped. Mona Sans has tabular figures, so the column still aligns. */
+.mfr-count {
+  font-size: var(--au-text-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--au-ink-muted);
+  text-align: right;
+  min-width: 9ch;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Resource cards — homepage "Other resources"
+
+   Numbered, and the numerals are earned: this is a fixed, complete set of
+   capabilities rather than a top-N sample, so the count is real information. The
+   arrow travels on hover, which is the only place on the page that happens.
+   ========================================================================== */
+
+.res-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--au-s-3);
+}
+@media (max-width: 1000px) { .res-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px)  { .res-grid { grid-template-columns: minmax(0, 1fr); } }
+
+.res-card {
+  display: flex; flex-direction: column;
+  gap: var(--au-s-2);
+  padding: var(--au-s-5) var(--au-s-5) var(--au-s-4);
+  background: var(--au-glass-fill);
+  border: var(--au-hairline-glass);
+  border-radius: var(--au-radius-lg);
+  box-shadow: var(--au-raised);
+  text-decoration: none;
+  transition: box-shadow var(--au-dur-fast) var(--au-ease),
+              transform var(--au-dur-fast) var(--au-ease);
+}
+.res-card:hover { box-shadow: var(--au-raised-lg); transform: translateY(-2px); }
+
+.res-num {
+  font-family: var(--au-font-mono);
+  font-size: var(--au-text-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--au-accent);
+}
+.res-name {
+  font-size: var(--au-text-h4);
+  font-weight: var(--au-weight-medium);
+  line-height: var(--au-leading-tight);
+  letter-spacing: -0.015em;
+  color: var(--au-ink-heading);
+  text-wrap: balance;
+}
+.res-note {
+  font-size: var(--au-text-small);
+  line-height: var(--au-leading-body);
+  color: var(--au-ink-muted);
+  flex: 1;
+}
+.res-go {
+  margin-top: var(--au-s-2);
+  font-size: var(--au-text-caption);
+  font-weight: var(--au-weight-medium);
+  color: var(--au-link);
+}
+.res-go::after {
+  content: "";
+  display: inline-block; width: 0;
+  transition: width var(--au-dur-fast) var(--au-ease);
+}
+.res-card:hover .res-go::after { width: 5px; }
+
+/* ==========================================================================
+   Category tiles — homepage "Top part categories"
+
+   Explicitly four across, not `auto-fit`. There are twelve categories, and
+   auto-fit resolved to five columns on a wide display, which left a final row of
+   two tiles stranded beside three empty cells. Four columns divides twelve
+   exactly, so the block always closes as a filled rectangle.
+
+   The distinguishing detail is the FSC code, so it is a bordered chip rather
+   than a third line of caption text — that is what keeps this section from
+   reading as the same card list as "Other resources" further down.
+   ========================================================================== */
+
+/* ==========================================================================
+   CATEGORY COVERFLOW — a contained tinted stage with a focused centre card
+
+   Composition follows a supplied reference: a tinted rounded panel holding a
+   centred heading, a row of cards with the middle one enlarged and sharp while
+   its neighbours fall back and dim, and circular prev/next controls beneath.
+
+   Two things in that reference were deliberately NOT taken.
+
+   Its cards are photographs. We have eight generic aviation images and twelve
+   categories, so any mapping is arbitrary — putting a flight-deck photo on
+   "Seals, Gaskets & O-Rings" asserts the picture shows that category's parts.
+   The visual anchor is the FSC code instead, which is real, is unique per
+   category, and is genuinely characteristic of this trade: a buyer working from
+   a government parts list navigates by Federal Supply Class. A four-digit
+   number set large in the mono face is the honest hero here.
+
+   Its floating avatar pills ("Own anywhere 💙") are the reference's own
+   consumer-social voice. On a distributor selling export-controlled parts to
+   MROs and government contractors they would read as pasted in from another
+   product.
+
+   PRE-UPGRADE BASELINE, and what it does and does not cover.
+
+   Without `[data-ready]` the track is a plain horizontal scroller with every
+   card at full size and full opacity, and the prev/next controls are hidden
+   because they would do nothing. That covers two real failure modes: the frame
+   before the controller runs, and the controller throwing after the cards are in
+   the DOM — in both cases the reader gets a scrollable row of twelve legible
+   cards rather than a stack of overlapping ghosts.
+
+   It does NOT survive JavaScript being disabled outright, because the cards
+   themselves are rendered from `AU_DATA` — as is every other section on this
+   page. That is a property of the prototype as a whole, not of this component,
+   and it is the thing to fix if the real build needs to work without JS.
+
+   What matters either way: no card starts at `opacity: 0` or `display: none`
+   waiting for a script, a transition, or an IntersectionObserver. Transitions do
+   not advance in headless renderers and observers do not always fire, which is
+   the same reason this site has no scroll-triggered section reveals.
+   ========================================================================== */
+
+/* The stage is the only tinted, contained panel on the page — that containment
+   is what distinguishes this section from the six other bands. */
+/* The panel is NARROWER than the rail, and the cards overflow it on both sides —
+   the reference's most distinctive structural move. It reads as a lit stage with
+   the row passing in front of it, rather than a box with a row inside. The clip
+   therefore cannot live here; it moves to the section (below), so the fan is cut
+   off at the viewport rather than at the panel edge. */
+.cat-stage {
+  position: relative;
+  /* Wide enough that the heading holds one line and the standfirst two, narrow
+     enough that the rank-1 cards clearly break its edges. At 720px the heading
+     wrapped and the panel read as cramped rather than as a stage. */
+  max-width: 900px;
+  margin-inline: auto;
+  border-radius: var(--au-radius-lg);
+  background:
+    radial-gradient(120% 100% at 50% 0%,
+      rgba(var(--au-accent-rgb), 0.10) 0%, transparent 62%),
+    var(--au-wash);
+  border: 1px solid rgba(var(--au-tint-rgb), 0.10);
+  padding-block: var(--au-s-7) var(--au-s-6);
+}
+
+/* Clipping at the section keeps the overflowing cards from widening the
+   document — without this the rank-2 cards push `scrollWidth` past the viewport
+   and the whole page scrolls sideways. */
+.cat-section { overflow: hidden; }
+
+.cat-stage-head {
+  max-width: 42ch;
+  margin-inline: auto;
+  padding-inline: var(--au-s-5);
+  text-align: center;
+}
+.cat-stage-head h2 {
+  font-size: var(--au-text-h2);
+  line-height: var(--au-leading-h2);
+  letter-spacing: var(--au-tracking-h2);
+}
+/* `balance` rather than the default: at this measure the last line was dropping
+   to a single word, and it split "Federal Supply Class" across two lines, which
+   breaks a term of art the sentence depends on. */
+.cat-stage-head p {
+  margin-top: var(--au-s-3);
+  color: var(--au-ink-body);
+  margin-inline: auto;
+  max-width: 46ch;
+  text-wrap: balance;
+}
+
+/* ---- The rail ----------------------------------------------------------
+   `perspective` on the viewport rather than the track: set on the track it
+   would be shared by all cards from one origin and the depth would shear as the
+   row translates. */
+.cat-view {
+  position: relative;
+  margin-top: var(--au-s-6);
+  perspective: 1400px;
+}
+
+.cat-track {
+  display: flex;
+  align-items: center;
+  gap: var(--au-s-4);
+  padding-inline: var(--au-s-5);
+  /* Baseline: a real scroller. Momentum scrolling on touch, snap points so it
+     still feels deliberate before the upgrade lands. */
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.cat-track::-webkit-scrollbar { display: none; }
+.cat-card { scroll-snap-align: center; }
+
+/* ---- Upgraded state ---------------------------------------------------- */
+.cat-view[data-ready] .cat-track {
+  /* The transform layout takes over, so the scroller must go — a translated
+     track inside a scroll container leaves a phantom scrollable region. */
+  overflow: visible;
+  scroll-snap-type: none;
+  gap: 0;
+  justify-content: center;
+  /* Cards are absolutely placed from the centre; the row only needs height. */
+  min-height: 322px;
+  padding-inline: 0;
+  touch-action: pan-y;   /* horizontal drag is ours, vertical stays the page's */
+  /* A drag across cards would otherwise select their text, which leaves the
+     whole rail highlighted blue mid-swipe. */
+  user-select: none;
+  -webkit-user-select: none;
+}
+.cat-view[data-ready] .cat-card {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 246px;
+  margin-left: -123px;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  transition:
+    transform 620ms var(--au-ease-out-expo),
+    opacity 480ms var(--au-ease-out-expo),
+    filter 480ms var(--au-ease-out-expo);
+}
+/* Mid-drag the card follows the finger, so the easing has to come off or every
+   frame fights a 620ms tween and the drag feels like syrup. */
+.cat-view[data-dragging] .cat-card { transition: none; }
+
+/* ---- The card ---------------------------------------------------------- */
+.cat-card {
+  flex: 0 0 auto;
+  width: 246px;
+  min-height: 322px;
+  display: flex;
+  flex-direction: column;
+  padding: var(--au-s-5) var(--au-s-4) var(--au-s-4);
+  background: var(--au-surface);
+  border: 1px solid rgba(var(--au-tint-rgb), 0.10);
+  border-radius: var(--au-radius-md);
+  box-shadow: var(--au-shadow-sm);
+  text-decoration: none;
+  overflow: hidden;
+}
+
+/* Depth states. Written as data attributes rather than nth-child because the
+   active index moves — the controller relabels, the CSS just responds. */
+.cat-view[data-ready] .cat-card[data-depth="0"] {
+  transform: translate3d(0, 0, 0) scale(1);
+  opacity: 1;
+  z-index: 3;
+  box-shadow: var(--au-shadow-lg);
+  border-color: rgba(var(--au-tint-rgb), 0.16);
+}
+.cat-view[data-ready] .cat-card[data-depth="1"] {
+  transform: translate3d(var(--cat-x, 0), 12px, 0) scale(0.9);
+  opacity: 0.66;
+  z-index: 2;
+}
+/* Rank 2 is DEPTH, not content.
+
+   At 0.3 opacity and 1.5px blur its headings were still legible, and because
+   each rank overlaps the one in front, that left two sets of category names and
+   part counts crossing each other — "Electrical Conne…" running straight through
+   the card in front of it. Dropping to 0.14 with a real blur makes it read as a
+   receding edge, which is the only job it has. */
+.cat-view[data-ready] .cat-card[data-depth="2"] {
+  transform: translate3d(var(--cat-x, 0), 22px, 0) scale(0.8);
+  opacity: 0.14;
+  filter: blur(3px);
+  z-index: 1;
+}
+/* Beyond ±2: parked behind the third rank, not `display: none`. Removing them
+   from the flow would make every step re-layout instead of re-transform. */
+.cat-view[data-ready] .cat-card[data-depth="3"] {
+  transform: translate3d(var(--cat-x, 0), 26px, 0) scale(0.74);
+  opacity: 0;
+  filter: blur(4px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Only the focused card is a pointer target; the flanking ones advance the rail
+   instead of navigating, which the controller wires up. */
+.cat-view[data-ready] .cat-card[data-depth="0"]:hover {
+  transform: translate3d(0, -4px, 0) scale(1);
+}
+.cat-view[data-ready] .cat-card:not([data-depth="0"]) { cursor: pointer; }
+
+/* ---- Card interior ---------------------------------------------------- */
+.cat-icon {
+  display: grid; place-items: center;
+  width: 46px; height: 46px;
+  flex: none;
+  border-radius: var(--au-radius-sm);
+  background: rgba(var(--au-accent-rgb), 0.08);
+  border: 1px solid rgba(var(--au-accent-rgb), 0.16);
+  color: var(--au-accent);
+}
+.cat-icon svg { width: 24px; height: 24px; }
+.cat-card[data-depth="0"] .cat-icon {
+  background: var(--au-accent);
+  border-color: transparent;
+  color: var(--au-ink-inverse);
+}
+
+/* The FSC numeral is the card's hero. Tabular so the twelve codes sit on the
+   same rhythm as the rail advances. */
+.cat-fsc-big {
+  display: block;
+  margin-top: var(--au-s-5);
+  font-family: var(--au-font-mono);
+  font-size: 2.75rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--au-ink-heading);
+}
+.cat-fsc-label {
+  display: block;
+  margin-top: 6px;
+  font-size: var(--au-text-caption);
+  color: var(--au-ink-muted);
+}
+.cat-name {
+  display: block;
+  margin-top: auto;
+  padding-top: var(--au-s-5);
+  font-size: var(--au-text-h4);
+  font-weight: var(--au-weight-medium);
+  line-height: var(--au-leading-tight);
+  letter-spacing: -0.015em;
+  color: var(--au-ink-heading);
+  text-wrap: balance;
+}
+.cat-count {
+  display: block;
+  margin-top: 4px;
+  font-size: var(--au-text-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--au-ink-muted);
+}
+/* The call to action belongs to the focused card only — twelve simultaneous
+   "Browse" links would be twelve competing decisions. */
+.cat-go {
+  display: flex; align-items: center; gap: 5px;
+  margin-top: var(--au-s-4);
+  font-size: var(--au-text-btn);
+  font-weight: var(--au-weight-medium);
+  color: var(--au-link);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity var(--au-dur-fast) var(--au-ease),
+              transform var(--au-dur-fast) var(--au-ease);
+}
+.cat-card[data-depth="0"] .cat-go { opacity: 1; transform: none; }
+.cat-go svg { width: 14px; height: 14px; }
+.cat-card[data-depth="0"]:hover .cat-go svg { transform: translateX(2px); }
+.cat-go svg { transition: transform var(--au-dur-fast) var(--au-ease); }
+
+/* ---- Controls ---------------------------------------------------------- */
+.cat-controls {
+  display: flex; align-items: center; justify-content: center;
+  gap: var(--au-s-4);
+  margin-top: var(--au-s-6);
+}
+/* Hidden until the upgrade: they do nothing without the controller, and a dead
+   button is worse than no button. */
+.cat-view:not([data-ready]) ~ .cat-controls { display: none; }
+
+.cat-nav {
+  display: grid; place-items: center;
+  width: 38px; height: 38px;
+  border-radius: var(--au-radius-circle);
+  background: var(--au-surface);
+  border: 1px solid rgba(var(--au-tint-rgb), 0.16);
+  color: var(--au-ink-heading);
+  cursor: pointer;
+  transition: border-color var(--au-dur-fast) var(--au-ease),
+              background var(--au-dur-fast) var(--au-ease),
+              color var(--au-dur-fast) var(--au-ease);
+}
+.cat-nav:hover:not(:disabled) {
+  border-color: transparent;
+  background: var(--au-accent);
+  color: var(--au-ink-inverse);
+}
+.cat-nav:disabled { opacity: 0.35; cursor: not-allowed; }
+.cat-nav svg { width: 16px; height: 16px; }
+
+/* Dots, not a counter: twelve is few enough to show position directly. */
+.cat-dots { display: flex; align-items: center; gap: 6px; }
+.cat-dot {
+  width: 6px; height: 6px; padding: 0;
+  border: 0; border-radius: var(--au-radius-circle);
+  background: rgba(var(--au-tint-rgb), 0.28);
+  cursor: pointer;
+  transition: background var(--au-dur-fast) var(--au-ease),
+              width var(--au-dur) var(--au-ease-out-expo);
+}
+.cat-dot:hover { background: rgba(var(--au-tint-rgb), 0.5); }
+.cat-dot[aria-current="true"] {
+  width: 20px;
+  border-radius: var(--au-radius-pill);
+  background: var(--au-accent);
+}
+
+/* ---- Responsive -------------------------------------------------------- */
+@media (max-width: 760px) {
+  .cat-view[data-ready] .cat-track { min-height: 300px; }
+  .cat-view[data-ready] .cat-card { width: 220px; margin-left: -110px; }
+  .cat-card { width: 220px; min-height: 300px; }
+  .cat-fsc-big { font-size: 2.25rem; }
+  /* Third rank costs more than it earns on a narrow screen — it is off-frame
+     anyway, and blurring two extra layers on a phone is wasted work. */
+  .cat-view[data-ready] .cat-card[data-depth="2"] { opacity: 0; filter: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Position still has to change — that IS the component — so what goes is the
+     travel: state changes land instantly, and the depth cues drop to opacity
+     alone with no blur and no scale. */
+  .cat-view[data-ready] .cat-card {
+    transition: opacity 1ms linear;
+    filter: none !important;
+  }
+  .cat-view[data-ready] .cat-card[data-depth="1"] { transform: translate3d(var(--cat-x, 0), 0, 0) scale(0.9); }
+  .cat-view[data-ready] .cat-card[data-depth="2"] { transform: translate3d(var(--cat-x, 0), 0, 0) scale(0.9); }
+  .cat-view[data-ready] .cat-card[data-depth="3"] { transform: translate3d(var(--cat-x, 0), 0, 0) scale(0.9); }
+  .cat-view[data-ready] .cat-card[data-depth="0"]:hover { transform: none; }
+  .cat-dot { transition: none; }
+}
+
+/* ==========================================================================
+   Part rows — the atom of the catalog
+   ========================================================================== */
+
+.part-list { border-top: var(--au-hairline); background: transparent; }
+.part-list > li { border-bottom: var(--au-hairline); }
+
+/* NO backdrop-filter here, deliberately. A results page renders 50+ of these,
+   and each blurred pane is its own compositing layer re-filtered every scroll
+   frame — it drops frames badly on a mid-range laptop. The rows get the rounded
+   corner, the gradient and the shadow on hover, which is the whole visible
+   effect at this scale anyway. Glass is for bounded surfaces, not lists. */
+.part-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.4fr) auto;
+  gap: var(--au-s-5);
+  align-items: center;
+  padding: var(--au-s-5) var(--au-s-4);
+  border-radius: var(--au-radius-md);
+  transition: background var(--au-dur-fast) var(--au-ease),
+              box-shadow var(--au-dur-fast) var(--au-ease);
+}
+.part-row:hover {
+  background: var(--au-glass-fill-strong);
+  box-shadow: var(--au-raised);
+}
+
+.part-id { min-width: 0; }
+.part-id .pn {
+  font-family: var(--au-font-mono);
+  font-size: var(--au-text-code);
+  font-variant-numeric: tabular-nums;
+  color: var(--au-ink);
+  text-decoration: none;
+}
+.part-id .pn:hover { text-decoration: underline; }
+.part-id .desc {
+  font-size: var(--au-text-small); color: var(--au-ink-muted); margin-top: 3px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.part-id mark { background: var(--au-accent); color: var(--au-accent-ink); }
+
+.part-meta {
+  display: flex; flex-direction: column; gap: 3px;
+  font-size: var(--au-text-caption); color: var(--au-ink-muted); min-width: 0;
+}
+.part-meta .row { display: flex; gap: var(--au-s-2); }
+.part-meta .k {
+  font-family: var(--au-font-sans); text-transform: uppercase;
+  letter-spacing: 0.04em; min-width: 46px;
+}
+.part-meta .v { font-family: var(--au-font-mono); font-variant-numeric: tabular-nums; color: var(--au-ink); }
+
+.part-actions { display: flex; align-items: center; gap: var(--au-s-2); }
+
+@media (max-width: 760px) {
+  .part-row { grid-template-columns: minmax(0, 1fr); align-items: stretch; }
+  .part-actions .btn { flex: 1; }
+}
+
+/* Stock status carries a text label as well as a colour — colour alone fails
+   colour-blind buyers and print. */
+.stock {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+/* Round, with a soft halo of its own colour — a 7px square dot was the last
+   sharp edge left in the row. */
+.stock::before {
+  content: ""; width: 7px; height: 7px; flex-shrink: 0;
+  background: currentColor;
+  border-radius: var(--au-radius-circle);
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 20%, transparent);
+}
+.stock[data-stock="in"]      { color: var(--au-stock-in); }
+.stock[data-stock="limited"] { color: var(--au-stock-limited); }
+.stock[data-stock="quote"]   { color: var(--au-ink-muted); }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px var(--au-s-2);
+  background: var(--au-glass-fill);
+  border: var(--au-hairline-glass);
+  border-radius: var(--au-radius-xs);
+  box-shadow: var(--au-shadow-xs);
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--au-ink-muted);
+}
+.badge-accent {
+  background: var(--au-accent-sheen), var(--au-accent);
+  border-color: transparent;
+  color: var(--au-accent-ink);
+  box-shadow: var(--au-raised);
+}
+
+/* ==========================================================================
+   Forms
+   ========================================================================== */
+
+.field { display: flex; flex-direction: column; gap: var(--au-s-2); }
+.field > label {
+  font-size: var(--au-text-small);
+  font-weight: var(--au-weight-medium);
+  color: var(--au-ink);
+}
+.field .hint { font-size: var(--au-text-caption); color: var(--au-ink-muted); }
+
+/* Recessed, like `.search-field`. Inputs are wells, not raised surfaces —
+   the inset shade at the top edge is the affordance. */
+.field input, .field select, .field textarea {
+  padding: var(--au-s-3);
+  min-height: 48px;
+  background: var(--au-surface);
+  border: 1px solid var(--au-border-strong);
+  border-radius: var(--au-radius-sm);
+  box-shadow: var(--au-recessed);
+  outline: none; width: 100%;
+  color: var(--au-ink);
+  transition: border-color var(--au-dur-fast) var(--au-ease),
+              box-shadow var(--au-dur-fast) var(--au-ease);
+}
+.field input::placeholder, .field textarea::placeholder { color: var(--au-ink-muted); }
+.field textarea {
+  min-height: 132px; resize: vertical;
+  font-family: var(--au-font-mono); font-size: var(--au-text-code);
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--au-link);
+  box-shadow: var(--au-recessed), var(--au-focus-ring);
+}
+.field input[data-mono] { font-family: var(--au-font-mono); font-variant-numeric: tabular-nums; }
+
+.field .error {
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-caption);
+  color: var(--au-stock-out);
+}
+.field .error:empty { display: none; }
+.field[data-invalid="true"] input,
+.field[data-invalid="true"] select,
+.field[data-invalid="true"] textarea { border-color: var(--au-stock-out); }
+
+.field-row { display: grid; gap: var(--au-s-4); grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); }
+
+.required { color: var(--au-ink); }
+.optional { color: var(--au-ink-muted); font-weight: var(--au-weight-regular); }
+
+fieldset { border: 0; padding: 0; margin: 0; }
+legend { padding: 0; font-size: var(--au-text-h3); letter-spacing: var(--au-tracking-h3); margin-bottom: var(--au-s-4); color: var(--au-ink); }
+
+.check {
+  display: flex; gap: var(--au-s-3); align-items: flex-start;
+  padding: var(--au-s-4);
+  border: var(--au-hairline-glass);
+  border-radius: var(--au-radius-md);
+  cursor: pointer;
+  background: var(--au-glass-fill);
+  box-shadow: var(--au-raised);
+  transition: border-color var(--au-dur-fast) var(--au-ease),
+              box-shadow var(--au-dur-fast) var(--au-ease);
+}
+.check:hover { box-shadow: var(--au-raised-md); }
+.check input { width: 18px; height: 18px; min-height: 0; margin-top: 2px; flex-shrink: 0; accent-color: var(--au-ink); }
+.check:has(input:checked) {
+  border-color: transparent;
+  background: var(--au-accent-sheen), var(--au-accent);
+  box-shadow: var(--au-raised-md);
+}
+.check .t { display: block; font-size: var(--au-text-small); font-weight: var(--au-weight-medium); color: var(--au-ink); }
+.check .d { display: block; margin-top: 3px; font-size: var(--au-text-caption); color: var(--au-ink-muted); }
+/* Checked fills with the accent, which is dark, so both lines invert. The
+   label was previously left at --au-ink because the accent used to be light. */
+.check:has(input:checked) .t { color: var(--au-accent-ink); }
+.check:has(input:checked) .d { color: rgba(255, 255, 255, 0.78); }
+
+.qty-input { max-width: 130px; }
+
+/* ==========================================================================
+   Empty / recovery states — the highest-risk screens on the site
+   ========================================================================== */
+
+.empty-state {
+  border: 1px solid transparent;
+  border-radius: var(--au-radius-lg);
+  background: var(--au-accent-sheen), var(--au-accent);
+  color: var(--au-accent-ink);
+  box-shadow: var(--au-raised-lg);
+  padding: var(--au-s-8) var(--au-s-5);
+  text-align: center;
+}
+.empty-state h1, .empty-state h2 {
+  font-size: var(--au-text-h2); line-height: var(--au-leading-h2);
+  letter-spacing: var(--au-tracking-h2); color: var(--au-accent-ink);
+}
+.empty-state p { margin-top: var(--au-s-4); color: rgba(255, 255, 255, 0.82); max-width: 62ch; margin-inline: auto; }
+.empty-state .actions { margin-top: var(--au-s-6); display: flex; gap: var(--au-s-3); justify-content: center; flex-wrap: wrap; }
+.empty-state .actions .btn { white-space: normal; max-width: 100%; height: auto; padding-block: var(--au-s-3); }
+.empty-state .actions .btn-primary { background: var(--au-accent-ink); color: var(--au-accent); }
+.empty-state .actions .btn-primary:hover { background: var(--au-accent-hover); }
+
+/* A full border and a tinted ground. Never a coloured side stripe. */
+.notice {
+  border: var(--au-hairline-glass);
+  border-radius: var(--au-radius-md);
+  background: var(--au-glass-fill);
+  -webkit-backdrop-filter: var(--au-glass-blur-sm);
+  backdrop-filter: var(--au-glass-blur-sm);
+  box-shadow: var(--au-raised);
+  padding: var(--au-s-5);
+  font-size: var(--au-text-small);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .notice { background: var(--au-surface); }
+}
+.notice strong { font-weight: var(--au-weight-medium); color: var(--au-ink); }
+
+/* ==========================================================================
+   Results layout
+   ========================================================================== */
+
+.results-layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: var(--au-s-7); align-items: start; }
+@media (max-width: 900px) { .results-layout { grid-template-columns: minmax(0, 1fr); } }
+
+.filters { position: sticky; top: 132px; }
+@media (max-width: 900px) { .filters { position: static; } }
+.filter-group + .filter-group { margin-top: var(--au-s-5); padding-top: var(--au-s-5); border-top: var(--au-hairline); }
+.filter-group h3 {
+  font-family: var(--au-font-sans); font-size: var(--au-text-label);
+  letter-spacing: var(--au-tracking-label); text-transform: uppercase;
+  color: var(--au-ink-muted); margin-bottom: var(--au-s-3);
+}
+.filter-option { display: flex; align-items: center; gap: var(--au-s-2); padding: 4px 0; font-size: var(--au-text-small); color: var(--au-ink-body); cursor: pointer; }
+.filter-option input { accent-color: var(--au-ink); width: 16px; height: 16px; min-height: 0; }
+.filter-option .count { margin-left: auto; font-family: var(--au-font-mono); font-size: var(--au-text-caption); color: var(--au-ink-muted); font-variant-numeric: tabular-nums; }
+
+.results-bar { display: flex; align-items: center; justify-content: space-between; gap: var(--au-s-4); flex-wrap: wrap; margin-bottom: var(--au-s-4); }
+.results-count { font-family: var(--au-font-sans); font-size: var(--au-text-label); text-transform: uppercase; letter-spacing: 0.04em; color: var(--au-ink-muted); }
+.results-count strong { color: var(--au-ink); font-weight: var(--au-weight-regular); font-variant-numeric: tabular-nums; }
+
+/* ==========================================================================
+   Part detail
+   ========================================================================== */
+
+.pdp-layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: var(--au-s-8); align-items: start; }
+@media (max-width: 900px) { .pdp-layout { grid-template-columns: minmax(0, 1fr); } }
+
+.pdp-head h1 {
+  font-family: var(--au-font-mono);
+  font-size: var(--au-text-h1);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  word-break: break-word;
+}
+.pdp-head .sub { margin-top: var(--au-s-3); font-size: var(--au-text-h3); color: var(--au-ink-muted); }
+.pdp-badges { display: flex; gap: var(--au-s-2); flex-wrap: wrap; margin-top: var(--au-s-5); align-items: center; }
+
+.spec-table { width: 100%; border-collapse: collapse; font-size: var(--au-text-small); }
+.spec-table th, .spec-table td { text-align: left; padding: var(--au-s-4) 0; border-bottom: var(--au-hairline); vertical-align: top; }
+.spec-table th {
+  font-family: var(--au-font-sans); font-weight: var(--au-weight-regular);
+  font-size: var(--au-text-label); text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--au-ink-muted); width: 220px;
+}
+.spec-table td { font-family: var(--au-font-mono); font-variant-numeric: tabular-nums; color: var(--au-ink); }
+.spec-table td[data-plain] { font-family: var(--au-font-sans); }
+
+@media (max-width: 640px) {
+  .spec-table th, .spec-table td { display: block; width: auto; }
+  .spec-table th { border-bottom: 0; padding-bottom: 0; }
+  .spec-table td { padding-top: var(--au-s-1); }
+}
+
+.copy-btn {
+  border: 0; background: transparent; cursor: pointer;
+  border-radius: var(--au-radius-xs);
+  color: var(--au-ink-muted);
+  font-family: var(--au-font-sans); font-size: var(--au-text-caption);
+  text-transform: uppercase; letter-spacing: 0.04em;
+  padding: 2px 6px; margin-left: var(--au-s-2);
+}
+.copy-btn:hover { color: var(--au-ink); text-decoration: underline; }
+
+/* `overflow: hidden` is load-bearing now that the panel is rounded — the head
+   and foot are full-bleed bands inside it, and without the clip their square
+   corners poke out past the panel's radius. */
+.rfq-panel {
+  position: sticky; top: 132px;
+  border: var(--au-hairline-glass);
+  border-radius: var(--au-radius-lg);
+  background: var(--au-glass-fill-strong);
+  -webkit-backdrop-filter: var(--au-glass-blur);
+  backdrop-filter: var(--au-glass-blur);
+  box-shadow: var(--au-raised-lg);
+  overflow: hidden;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .rfq-panel { background: var(--au-surface); }
+}
+@media (max-width: 900px) { .rfq-panel { position: static; } }
+.rfq-panel-head { padding: var(--au-s-5); border-bottom: var(--au-hairline); }
+.rfq-panel-body { padding: var(--au-s-5); display: flex; flex-direction: column; gap: var(--au-s-4); }
+.rfq-panel-foot { padding: var(--au-s-4) var(--au-s-5); border-top: var(--au-hairline); background: var(--au-bg); font-size: var(--au-text-caption); color: var(--au-ink-muted); }
+
+/* ==========================================================================
+   Quote drawer
+   ========================================================================== */
+
+.drawer-scrim { position: fixed; inset: 0; z-index: var(--au-z-backdrop); background: rgba(var(--au-shadow-rgb), 0.5); }
+.drawer-scrim[hidden] { display: none; }
+
+/* Only the left corners round — the other three are flush against the viewport
+   edge and have nothing to sit against. */
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: var(--au-z-modal);
+  width: min(460px, 100%);
+  background: var(--au-glass-fill-strong);
+  -webkit-backdrop-filter: var(--au-glass-blur);
+  backdrop-filter: var(--au-glass-blur);
+  border-left: var(--au-hairline-glass);
+  border-radius: var(--au-radius-lg) 0 0 var(--au-radius-lg);
+  box-shadow: var(--au-shadow-xl);
+  display: flex; flex-direction: column;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .drawer { background: var(--au-bg); }
+}
+.drawer[hidden] { display: none; }
+.drawer-head { display: flex; align-items: center; justify-content: space-between; gap: var(--au-s-3); padding: var(--au-s-5); border-bottom: var(--au-hairline); }
+.drawer-head h2 { font-size: var(--au-text-h3); letter-spacing: var(--au-tracking-h3); }
+.drawer-body { flex: 1; overflow-y: auto; padding: 0 var(--au-s-5); }
+.drawer-foot { padding: var(--au-s-5); border-top: var(--au-hairline); }
+
+.qline { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--au-s-3); padding-block: var(--au-s-4); border-bottom: var(--au-hairline); }
+.qline .pn { font-family: var(--au-font-mono); font-size: var(--au-text-code); font-variant-numeric: tabular-nums; color: var(--au-ink); }
+.qline .desc { font-size: var(--au-text-caption); color: var(--au-ink-muted); }
+.qline .controls { display: flex; align-items: center; gap: var(--au-s-2); }
+.qline input {
+  width: 68px; min-height: 38px; padding: var(--au-s-1) var(--au-s-2); text-align: center;
+  border: 1px solid var(--au-border-strong); border-radius: var(--au-radius-xs);
+  box-shadow: var(--au-recessed);
+  font-family: var(--au-font-mono); font-variant-numeric: tabular-nums;
+  background: var(--au-surface);
+}
+.qline .remove {
+  border: 0; background: transparent; cursor: pointer;
+  color: var(--au-ink-muted);
+  font-family: var(--au-font-sans); font-size: var(--au-text-caption);
+  text-transform: uppercase; letter-spacing: 0.04em;
+  text-decoration: underline; padding: 4px;
+}
+.qline .remove:hover { color: var(--au-stock-out); }
+
+/* ==========================================================================
+   Toast
+   ========================================================================== */
+
+.toast-region {
+  position: fixed; left: 50%; bottom: var(--au-s-6); transform: translateX(-50%);
+  z-index: var(--au-z-toast);
+  display: flex; flex-direction: column; gap: var(--au-s-2);
+  width: min(540px, calc(100% - 2rem));
+  pointer-events: none;
+}
+/* Dark glass — it floats over live content, so it blurs what it covers rather
+   than blocking it out. */
+.toast {
+  display: flex; align-items: center; gap: var(--au-s-3);
+  padding: var(--au-s-4);
+  background: color-mix(in srgb, var(--au-ink) 88%, transparent);
+  -webkit-backdrop-filter: var(--au-glass-blur);
+  backdrop-filter: var(--au-glass-blur);
+  border: 1px solid var(--au-glass-border-dark);
+  border-radius: var(--au-radius-md);
+  box-shadow: var(--au-inner-top-dark), var(--au-shadow-xl);
+  color: var(--au-ink-inverse);
+  font-size: var(--au-text-small);
+  pointer-events: auto;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .toast { background: var(--au-ink); }
+}
+.toast .grow { flex: 1; min-width: 0; }
+.toast button {
+  border: 0; background: transparent; cursor: pointer;
+  /* The toast sits on 88% Midnight, so the accent would be 2.38:1 here. */
+  color: var(--au-link-inverse);
+  font-family: var(--au-font-sans); font-size: var(--au-text-label);
+  text-transform: uppercase; letter-spacing: var(--au-tracking-label);
+  text-decoration: underline; padding: 4px 6px;
+}
+.toast button:hover { color: var(--au-ink-inverse); }
+
+/* ==========================================================================
+   Steps — only where the content genuinely IS a sequence
+   ========================================================================== */
+
+.steps { counter-reset: step; display: grid; gap: var(--au-s-6); grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); }
+.step-item { counter-increment: step; padding-top: var(--au-s-5); border-top: 1px solid var(--au-ink); }
+.step-item::before {
+  content: counter(step, decimal-leading-zero);
+  display: block;
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-label);
+  letter-spacing: var(--au-tracking-label);
+  color: var(--au-ink-muted);
+}
+.step-item h3 { margin-top: var(--au-s-4); font-size: var(--au-text-h3); letter-spacing: var(--au-tracking-h3); }
+.step-item p { margin-top: var(--au-s-3); font-size: var(--au-text-small); color: var(--au-ink-muted); }
+.section-dark .step-item { border-color: var(--au-ink-inverse); }
+
+/* Trust marks */
+.certs { display: flex; flex-wrap: wrap; gap: var(--au-s-3); align-items: center; }
+.cert {
+  display: inline-flex; align-items: center; gap: var(--au-s-2);
+  padding: var(--au-s-2) var(--au-s-3);
+  background: var(--au-glass-fill);
+  border: var(--au-hairline-glass);
+  border-radius: var(--au-radius-pill);
+  box-shadow: var(--au-raised);
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--au-ink);
+}
+.cert .mark { color: var(--au-ink-muted); font-size: 11px; }
+.section-dark .cert {
+  background: var(--au-glass-fill-dark);
+  border-color: var(--au-glass-border-dark);
+  color: var(--au-ink-inverse);
+  box-shadow: var(--au-inner-top-dark);
+}
+.section-accent .cert {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: var(--au-accent-ink);
+  box-shadow: var(--au-inner-top);
+}
+
+/* A–Z index */
+.az-bar { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: var(--au-s-5); }
+.az-bar a {
+  display: grid; place-items: center;
+  min-width: 36px; height: 36px;
+  background: var(--au-glass-fill);
+  border: var(--au-hairline-glass);
+  border-radius: var(--au-radius-sm);
+  box-shadow: var(--au-shadow-xs);
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-small);
+  text-decoration: none;
+  color: var(--au-ink);
+  transition: box-shadow var(--au-dur-fast) var(--au-ease),
+              background var(--au-dur-fast) var(--au-ease);
+}
+.az-bar a:hover {
+  background: var(--au-accent-sheen), var(--au-accent);
+  border-color: transparent;
+  /* The hover fill is dark, so the letter has to invert with it. */
+  color: var(--au-accent-ink);
+  box-shadow: var(--au-raised);
+}
+/* Disabled letters stay readable. WCAG exempts disabled controls from the
+   contrast floor, but a 0.4 opacity grey on grey was illegible enough that the
+   index looked broken rather than complete — and telling the buyer the index
+   IS complete is the whole reason empty letters are rendered at all. */
+.az-bar a[aria-disabled="true"] { color: var(--au-ink-muted); opacity: 0.62; pointer-events: none; }
+
+.index-group { margin-bottom: var(--au-s-7); }
+.index-group h3 {
+  font-family: var(--au-font-sans); font-size: var(--au-text-h3);
+  padding-bottom: var(--au-s-3); border-bottom: 1px solid var(--au-ink);
+  margin-bottom: var(--au-s-4);
+}
+.index-list { columns: 3 220px; column-gap: var(--au-s-7); }
+.index-list li { break-inside: avoid; padding-block: 4px; }
+.index-list a { font-size: var(--au-text-small); text-decoration: none; }
+.index-list a:hover { text-decoration: underline; }
+.index-list .count { font-family: var(--au-font-mono); color: var(--au-ink-muted); font-size: var(--au-text-caption); font-variant-numeric: tabular-nums; }
+
+/* ==========================================================================
+   Footer — inverted, per the reference's closing band
+   ========================================================================== */
+
+.site-footer {
+  background: var(--au-surface-dark);
+  color: var(--au-ink-inverse);
+  padding-block: var(--au-s-8) var(--au-s-6);
+}
+.site-footer h3 {
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-label);
+  letter-spacing: var(--au-tracking-label);
+  text-transform: uppercase;
+  color: var(--au-ink-inverse-muted);
+  margin-bottom: var(--au-s-4);
+}
+.footer-grid { display: grid; gap: var(--au-s-7); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.footer-grid > .footer-col:first-child { grid-column: 1 / -1; }
+@media (min-width: 620px) { .footer-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 960px) {
+  .footer-grid { grid-template-columns: 1.6fr repeat(4, minmax(0, 1fr)); }
+  .footer-grid > .footer-col:first-child { grid-column: auto; }
+}
+.footer-col li { padding-block: 4px; }
+.footer-col a { font-size: var(--au-text-small); text-decoration: none; color: var(--au-ink-inverse-muted); }
+.footer-col a:hover { color: var(--au-ink-inverse); }
+.footer-col .u-caption { color: var(--au-ink-inverse-muted); }
+
+.footer-extra {
+  display: grid; gap: var(--au-s-5);
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  margin-top: var(--au-s-8);
+}
+.footer-extra .card { background: var(--au-surface-dark-alt); border-color: var(--au-border-dark); }
+.footer-extra .card h3 { color: var(--au-ink-inverse); font-family: var(--au-font-sans); font-size: var(--au-text-h4); text-transform: none; letter-spacing: -0.015em; }
+.footer-extra .card a:not(.btn) { color: var(--au-link-inverse); }
+
+.footer-bottom {
+  margin-top: var(--au-s-7); padding-top: var(--au-s-5);
+  border-top: var(--au-hairline-dark);
+  display: flex; justify-content: space-between; gap: var(--au-s-4); flex-wrap: wrap;
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-caption);
+  text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--au-ink-inverse-muted);
+}
+
+/* ==========================================================================
+   Mobile action bar
+   ========================================================================== */
+
+/* Top corners only — the bar is flush to the bottom of the viewport. */
+.mobile-bar {
+  position: fixed; inset-inline: 0; bottom: 0; z-index: var(--au-z-sticky);
+  display: none; gap: var(--au-s-2);
+  padding: var(--au-s-3);
+  background: var(--au-glass-fill-strong);
+  -webkit-backdrop-filter: var(--au-glass-blur);
+  backdrop-filter: var(--au-glass-blur);
+  border-top: var(--au-hairline-glass);
+  border-radius: var(--au-radius-lg) var(--au-radius-lg) 0 0;
+  box-shadow: var(--au-shadow-xl);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .mobile-bar { background: var(--au-bg); }
+}
+.mobile-bar .btn {
+  flex: 1 1 auto; min-width: 0; min-height: 46px;
+  padding-inline: var(--au-s-2);
+  font-size: var(--au-text-caption);
+  gap: var(--au-s-1);
+}
+@media (max-width: 760px) {
+  .mobile-bar { display: flex; }
+  body { padding-bottom: 74px; }
+  .header-actions .label-desktop { display: none; }
+  .site-header { position: static; }
+  .filters { top: auto; }
+  .rfq-panel { position: static; }
+}
+
+/* Prototype-only annotation ribbon */
+.proto-note {
+  background: var(--au-ink); color: var(--au-ink-inverse);
+  font-family: var(--au-font-sans); font-size: var(--au-text-caption);
+  text-transform: uppercase; letter-spacing: 0.04em;
+  padding: var(--au-s-2) var(--au-s-5); text-align: center;
+}

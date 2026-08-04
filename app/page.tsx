@@ -3,12 +3,12 @@ import { CATEGORIES, MANUFACTURERS, RESOURCES } from "@/lib/data";
 import { num } from "@/lib/format";
 import { CategoryScroller } from "@/components/home/CategoryScroller";
 import { CertMarquee } from "@/components/home/CertMarquee";
-import { FeatureReveal } from "@/components/home/FeatureReveal";
 import { HeroParallax } from "@/components/home/HeroParallax";
 import { HeroSearch } from "@/components/home/HeroSearch";
 import { HotStock } from "@/components/home/HotStock";
 import { ManufacturerStage } from "@/components/home/ManufacturerStage";
 import { NsnMarquee } from "@/components/home/NsnMarquee";
+import { ScrollReveal } from "@/components/home/ScrollReveal";
 
 /*
   SECTION INVENTORY — every section maps to one that exists on
@@ -99,6 +99,11 @@ const MANUFACTURERS_BY_STOCK = [...MANUFACTURERS].sort((a, b) => b.count - a.cou
 export default function HomePage() {
   return (
     <>
+      {/* Mounts one shared IntersectionObserver that plays the [data-reveal]
+          entrances. Renders nothing and only arms after mount, so the no-JS /
+          screenshot path keeps every band visible. See ScrollReveal.tsx. */}
+      <ScrollReveal />
+
       {/* ====================================================================
            HERO
 
@@ -122,7 +127,7 @@ export default function HomePage() {
             so it plays on load rather than waiting for a scroll event. */}
         <HeroParallax />
         <div className="u-page hero-enter">
-          <span className="u-label">Aviation &amp; aerospace parts distributor</span>
+          <span className="eyebrow">Aviation &amp; aerospace parts distributor</span>
           {/* Two sentences, each its own line so the headline arrives line by
               line on load. The lines are block spans rather than a `<br>`, which
               lets each carry its own entrance delay; the measure holds both
@@ -142,89 +147,69 @@ export default function HomePage() {
       </section>
 
       {/* ====================================================================
-           THE FOUR FEATURE POINTS — the live site's own hero icons.
+           ABOUT ASAP — the live site's "short version" section, rebuilt to a
+           supplied Figma design (node 3209:596).
 
-           Rebuilt to the second supplied reference, which is a different
-           composition from the first: the whole section is one white card on the
-           page ground, media holds the LEFT column as overlapping shots floating
-           in a recessed well, and the copy plus a 2x2 grid of icon chips holds
-           the right. The chips are horizontal — tile, then two lines of text —
-           not the icon-over-value cards this section used before.
+           Two columns on the page ground, no card: a left column of eyebrow +
+           display headline (with "distributor" set in the accent) + lede + one
+           wide photograph, and a right column of the four service facts stacked
+           and hairline-divided, each with a short vertical accent tick. The four
+           facts are the ones this section has always carried; the copy is the
+           design's, trimmed to it. See the .about block in ux.css.
 
-           Every word here already exists on the site. The eyebrow, headline and
-           paragraph are lifted verbatim from the about page, and the four facts
-           are the ones this section already carried. Nothing was written for it,
-           and the photographs are the client's own, already in /img/nsn.
-
-           The four chips are now equal. The reference's grid gets its strength
-           from being even, and the quote promise it used to single out is the
-           hero headline one screen above — it does not need saying twice.
+           The photograph is TREATMENT, not evidence — a flight-deck-on-approach
+           scene carrying the section's mood, so it takes a scene-only alt and no
+           caption. See au-stock-photography-scope. Entrance uses the shared
+           [data-reveal] observer (ScrollReveal), same as the rest of the page.
            ==================================================================== */}
       <section className="section">
         <div className="u-page">
-        <div className="feature-block">
-        <FeatureReveal />
-        <div className="feature-shell">
-        <div className="feature-split">
-          <div className="feature-intro">
-            <p className="eyebrow">The short version</p>
-            <h2>An accredited independent distributor, based in Anaheim, California.</h2>
-            <p className="feature-lede">
-              Aerospace Unlimited supplies aviation, aerospace and defence parts to operators,
-              MROs, repair stations and government contractors.
-            </p>
-            {/* CTAs added in this redesign to anchor the left column, both to
-                routes that already exist — the quote flow and the about page.
-                No new copy or claims; labels are the site's own. */}
-            <div className="feature-actions">
-              <Link className="btn btn-primary btn-lg" href="/rfq">
-                Request a quote <span aria-hidden="true">→</span>
-              </Link>
-              <Link className="btn btn-quiet btn-lg" href="/about">
-                About us
-              </Link>
+          <div className="about">
+            <div className="about-intro" data-reveal="up">
+              <p className="eyebrow">About ASAP</p>
+              <h2 className="about-title">
+                An accredited{" "}
+                <span className="about-title-accent">distributor</span>, based in
+                California.
+              </h2>
+              <p className="about-lede">
+                Aerospace Unlimited supplies aviation, aerospace and defence parts
+                to operators, MROs, repair stations and government contractors.
+                Unlimited access to all your aviation supplies.
+              </p>
+              <figure className="about-media">
+                <img
+                  src="/img/feature-flightdeck.jpg"
+                  alt="The view from an airliner flight deck on final approach, runway lights ahead and the instrument panel glowing"
+                  width={1600}
+                  height={906}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </figure>
             </div>
+
+            {/* The four service facts, stacked as the design's right-hand rail.
+                Same four the section always carried, value over label. */}
+            <ul className="about-stats" data-reveal="stagger">
+              <li>
+                <span className="about-stat-value">Same Day</span>
+                <span className="about-stat-label">Shipping</span>
+              </li>
+              <li>
+                <span className="about-stat-value">15 Min</span>
+                <span className="about-stat-label">Quote turnaround</span>
+              </li>
+              <li>
+                <span className="about-stat-value">24/7</span>
+                <span className="about-stat-label">AOG service</span>
+              </li>
+              <li>
+                <span className="about-stat-value">Competitive</span>
+                <span className="about-stat-label">Pricing</span>
+              </li>
+            </ul>
           </div>
-
-          {/* One large photograph anchors the composition — treatment, not
-              evidence: an airliner being loaded with cargo, carrying the
-              section's mood without claiming to picture a specific job, so it
-              takes no caption. */}
-          <figure className="feature-portrait">
-            <img
-              src="/img/feature-cargo.jpg"
-              alt="A wide-body airliner on the ramp being loaded with air cargo, a shrink-wrapped freight pallet rising on a loader to the forward cargo door"
-              width={1600}
-              height={1066}
-              loading="lazy"
-              decoding="async"
-            />
-          </figure>
-        </div>
-        </div>
-
-        {/* The four service facts, restated as a record beneath the card — the
-            reference's stat row. Same four facts the section always carried,
-            value over label. */}
-        <ul className="feature-stats">
-          <li>
-            <span className="fs-value">Same day</span>
-            <span className="fs-label">Shipping</span>
-          </li>
-          <li>
-            <span className="fs-value">15 min</span>
-            <span className="fs-label">Quote turnaround</span>
-          </li>
-          <li>
-            <span className="fs-value">24/7</span>
-            <span className="fs-label">AOG service · 365 days</span>
-          </li>
-          <li>
-            <span className="fs-value">Competitive</span>
-            <span className="fs-label">Pricing</span>
-          </li>
-        </ul>
-        </div>
         </div>
       </section>
 
@@ -237,7 +222,7 @@ export default function HomePage() {
            ==================================================================== */}
       <section className="section">
         <div className="u-page">
-          <div className="section-head section-head-center">
+          <div className="section-head section-head-center" data-reveal="up">
             <p className="eyebrow">Ready to ship</p>
             <h2>Hot stock items</h2>
             <p>
@@ -257,7 +242,7 @@ export default function HomePage() {
            ==================================================================== */}
       <section className="section">
         <div className="u-page">
-          <div className="section-head section-head-row">
+          <div className="section-head section-head-row" data-reveal="up">
             <div>
               <h2>Top NSN</h2>
               <p>The National Stock Numbers most often requested from us.</p>
@@ -289,7 +274,7 @@ export default function HomePage() {
            ==================================================================== */}
       <section className="section section-subtle">
         <div className="u-page">
-          <div className="section-head section-head-center">
+          <div className="section-head section-head-center" data-reveal="up">
             <h2>Top manufacturers</h2>
             <p>Naming is ambiguous after decades of acquisitions. The CAGE code is not.</p>
           </div>
@@ -349,7 +334,7 @@ export default function HomePage() {
           {/* Left-aligned head; the standfirst carries the aggregate the old
               pinned photo used to caption. Summed from the twelve, never typed —
               so it cannot drift from the counts the steps state individually. */}
-          <div className="section-head cat-head">
+          <div className="section-head cat-head" data-reveal="up">
             <h2>Top part categories</h2>
             <p>
               Grouped by function, with the matching Federal Supply Class for anyone
@@ -388,7 +373,7 @@ export default function HomePage() {
            ==================================================================== */}
       <section className="section">
         <div className="u-page">
-          <div className="section-head">
+          <div className="section-head" data-reveal="up">
             <h2>Other resources</h2>
             <p>Requirements that are not a stock part number.</p>
           </div>
@@ -412,7 +397,7 @@ export default function HomePage() {
 
               Keyed by index, not by `id`: two of these six share the id "pma"
               deliberately. See lib/data.ts → RESOURCES. */}
-          <div className="res-strip">
+          <div className="res-strip" data-reveal="up">
             {RESOURCES.map((r, i) => (
               <Link
                 className="res-slat"
@@ -454,7 +439,7 @@ export default function HomePage() {
            ==================================================================== */}
       <section className="section section-dark">
         <div className="u-page">
-          <div className="section-head">
+          <div className="section-head" data-reveal="up">
             <h2>ASAP Semiconductor&rsquo;s certifications and memberships</h2>
             <p>The accreditations a vendor-approval file normally asks for.</p>
           </div>

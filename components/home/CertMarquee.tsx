@@ -48,10 +48,18 @@ function CertCard({ c, clone }: { c: Cert; clone: boolean }) {
   return (
     <div className="cert-card">
       {/* eslint-disable-next-line @next/next/no-img-element */}
+      {/* NOT loading="lazy". Measured 2026-08-03: with it, only the cards inside
+          the viewport are ever fetched, and the rest resolve one at a time as the
+          rail carries them in — 16 of 32 images still unloaded on arrival, and
+          ~25s before the last one appears. The visible result is white cards
+          scrolling past a visitor who is looking straight at them. fetchPriority
+          low instead, so all sixteen marks are fetched but never compete with
+          anything above the fold. See au-motion-safety, which bans the attribute
+          on this project outright for the same class of reason. */}
       <img
         src={`/img/certs/${c.img}.png`}
         alt={clone ? "" : c.label}
-        loading="lazy"
+        fetchPriority="low"
         decoding="async"
       />
     </div>

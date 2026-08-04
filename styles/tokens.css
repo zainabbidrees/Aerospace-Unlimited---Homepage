@@ -150,6 +150,12 @@
   --au-ink-heading: var(--au-navy);     /* 9.53:1 on --au-bg */
   --au-ink-body: #333a45;           /* 11.6:1 — navy-tinted, not neutral grey */
   --au-ink-muted: #5f6880;          /* 5.11:1 on --au-bg */
+  /* Muted ink for text on a Wash-tinted panel. --au-ink-muted is calibrated
+     against --au-bg and drops to 4.35:1 on --au-wash — a darker surface — so it
+     fails there for anything under 24px. This clears it: 5.78:1 on --au-wash,
+     and 5.04:1 even under a Steel corner glow at 0.10. Same family, two steps
+     down; it is not a second grey. */
+  --au-ink-muted-wash: #4d5668;     /* 5.78:1 on --au-wash */
   --au-ink-inverse: #ffffff;
   /* Silver Mist, not Sky Steel. Sky Steel is the palette's stated caption
      colour for dark sections and holds up on Midnight (5.36:1), but on a Deep

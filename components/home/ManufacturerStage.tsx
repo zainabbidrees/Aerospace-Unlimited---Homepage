@@ -64,7 +64,7 @@ export function ManufacturerStage({
 
   return (
     <>
-      <div className="mfr-stage">
+      <div className="mfr-stage" data-reveal="up">
         {items.map((m, i) => {
           const s = scenes[m.cage];
           const isActive = i === active;

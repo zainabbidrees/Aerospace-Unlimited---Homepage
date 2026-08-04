@@ -37,7 +37,21 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"https://fonts.googleapis.com/css2?family=Mona+Sans:wght@200..900&display=swap\")",
       "Bash(curl -s \"https://fonts.googleapis.com/css2?family=Mona+Sans:wght@200..900&display=swap\")",
       "Bash(grep -n \"^/\\\\* =\\\\|^   [A-Z].*$\\\\|^\\\\.[a-z-]*\\\\s*{\\\\|^[a-z]*,\\\\s*$\" assets/ux.css)",
-      "Bash(grep -v \"^\\\\s*$\")"
+      "Bash(grep -v \"^\\\\s*$\")",
+      "Bash(curl -s -o /dev/null -w \"about: %{http_code}\\\\n\" http://localhost:4173/about)",
+      "Read(//private/tmp/**)",
+      "Bash(curl -s -o /dev/null -w \"status: %{http_code}\\\\n\" http://localhost:4173/about)",
+      "Bash(find /private/var/folders /tmp /private/tmp \"$HOME/.claude\" \"$HOME/Library/Caches\" -type f \\\\\\( -iname \"*.png\" -o -iname \"*.jpg\" -o -iname \"*.jpeg\" -o -iname \"*.webp\" \\\\\\) -mmin -25 2>/dev/null | grep -viE \"scratchpad|node_modules|/public/img/\" | head -40)",
+      "Bash(find \"$HOME/Downloads\" \"$HOME/Desktop\" \"$HOME/Documents\" /private/var/folders -type f \\\\\\( -iname \"*.png\" -o -iname \"*.jpg\" -o -iname \"*.jpeg\" \\\\\\) -mmin -90 2>/dev/null | grep -viE \"node_modules|/public/img/|scratchpad|/tasks/\" | head -40; echo \"--- clipboard/paste dirs ---\"; ls -lat /private/var/folders/*/*/T/ 2>/dev/null | grep -iE \"png|jpg|jpeg|image|paste|claude\" | head -20)",
+      "Bash(sips -g pixelWidth -g pixelHeight clip.png)",
+      "Bash(sips -s format jpeg -s formatOptions 82 clip.png --out \"/Users/zainab.idrees/Documents/Structure- Aerospace Unlimited/public/img/hq-anaheim.jpg\")",
+      "Bash(sips -g pixelWidth -g pixelHeight -g format \"/Users/zainab.idrees/Documents/Structure- Aerospace Unlimited/public/img/hq-anaheim.jpg\")",
+      "Bash([ -f \"$SRC\" ])",
+      "Bash(sips -g pixelWidth -g pixelHeight '/Users/zainab.idrees/Downloads/ChatGPT Image Jul 23, 2026, 05_16_41 PM.png')",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:4173/about)",
+      "Bash(curl -s -o /dev/null -w \"hit1: %{http_code}\\\\n\" \"http://localhost:4173/about?x=$\\(date +%s\\)\")",
+      "Bash(curl -s -o /dev/null -w \"about: %{http_code}\\\\n\" \"http://localhost:4173/about?x=$\\(date +%s\\)\")",
+      "Bash(lsof -nP -iTCP -sTCP:LISTEN)"
     ]
   }
 }

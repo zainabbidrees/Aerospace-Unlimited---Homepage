@@ -615,3 +615,151 @@ download, but that is an assumption rather than something verified here.
 - ~~Confirm the client is happy inheriting a **yellow** accent from the reference~~ —
   **resolved 2026-07-28.** The palette is now sampled from the client's own hero photograph and
   is entirely cool; the accent is Steel Blue. See **Colour** above.
+
+---
+
+## The inner pages (2026-08-04)
+
+Six routes, scraped from the live site and rebuilt on this visual system.
+
+| Route | Live source | Mode |
+|---|---|---|
+| `/browse` | `/part-types/`, `/fscs/`, `/manufacturers/`, `/nsn-parts/`, `/niin-parts-inner/`, `/cage-codes/` | Persuade → Operate |
+| `/browse/manufacturers` | `/manufacturers/` | Operate |
+| `/browse/aircraft` | "Parts by Aircraft / Helicopter Model" | Operate |
+| `/browse/<axis>/<id>` | the listing tables behind all of the above | Operate |
+| `/capabilities` | `/gse-tooling/`, `/pma-parts/`, `/pma-supplements/`, `/salvaged-aircraft-parts/`, "Aircraft Repair Capabilities" | Read → Persuade |
+| `/blog`, `/blog/<slug>` | `/blog/` and its 5 pages of posts | Read |
+
+### What the live IA got wrong, and what was kept
+
+Six of the live site's ten top-level nav slots are identifier lookups with nothing
+anywhere explaining which to pick — a database schema handed to the buyer. Nothing
+was removed; the choice is made on one page instead, and each route is restated as
+an answer to the only question the buyer can answer: **what do you have in front
+of you right now?** The four routes lead with "You know what the part does", not
+with "Part Types".
+
+Three live devices were replaced rather than restyled:
+
+**The identifier pages assume you already know what the digits mean.** A buyer who
+has only ever called it "the part number" learns nothing from a page titled NIIN.
+So `/browse` takes one real NSN apart — `5310-00-877-5797`, the self-locking nut
+`MS21042L3` — with brackets under the FSC and the NIIN. It is the site's only
+diagram, and it earns that because the relationship *between* two identifiers is
+the content: the NIIN is literally inside the NSN, and no prose makes that as clear
+as a bracket does. **The digits, both brackets and both labels sit on one shared
+four-column grid**, so a bracket physically cannot drift off the digits it
+describes; getting that span wrong is the one way this diagram could teach
+something false. The whole thing is `aria-hidden` with a plain sentence beside it —
+read aloud, the brackets came out as a scatter of disconnected digits.
+
+**Part types and FSCs were an A–Z of link text and nine pages of pagination.**
+Neither says which groups we are actually deep in, which is the question behind
+"do you carry this?". They are one register now, ordered by catalogue depth, each
+row drawing its count as a bar proportional to the deepest category. The bar is
+decoration and the figure is printed beside it in text.
+
+**The blog was five pages of twenty identical rows.** "Showing 1 of 5" tells a
+reader nothing about pages 2–5, so nobody goes. It is three registers instead: one
+featured lead (always the newest — a rule, not an editorial pick), cards for the
+articles held in full, and a dated archive register grouped by year for the rest.
+
+### Two things the pages refuse to do
+
+**No photography per aircraft platform.** The library holds generic aviation
+scenes and not one is a photograph of a 737, a CRJ or a Black Hawk. A generic
+airliner under "Sikorsky UH-60" is not ambient treatment, it is a false claim
+about what the picture shows. `/browse/aircraft` is typographic; one wide
+flightline scene carries the page and claims nothing about any row.
+
+**The results page states the sample against the catalogue.** `lib/data.ts` is
+sixteen lines; a category claims 94,210. Printing the big number over four rows
+reads as a broken query, so the bar says "2 lines shown of 94,210 in the
+catalogue" and the sidebar says the listing is a sample.
+
+### The banned phrase
+
+It appears verbatim on the live `/salvaged-aircraft-parts/` page, the
+`/cage-codes/` page, and inside the closing promo paragraph of the aluminium
+forming article. It is nowhere here. The underlying story is expressed as
+documented provenance and stated eligibility — the part a buyer can audit. Every
+article's closing promo paragraph was dropped (the page carries a designed CTA
+instead), which removes it structurally rather than by hand-editing prose. See
+au-banned-phrase.
+
+### Motion: `CueReveal`, not `ScrollReveal`
+
+`ScrollReveal` arms every `[data-reveal]` on mount and blanket-reveals 2s later so
+no band can ship blank. On the homepage that is fine. These pages run six to nine
+bands deep, so the failsafe fires while band five is four screens away and every
+reader arrives to a section that finished animating without them — the bug
+`EdgeReveal` was written to fix on the about page. `CueReveal` generalises that
+fix: an element carries `data-cue` and plays when **it** crosses its own trigger
+line, with `data-cue-vh` and `data-cue-ms` to tune it. No blanket failsafe is
+needed, because nothing is armed until it is nearly on screen.
+
+The same contract holds throughout and is the reason any of this is safe: **the
+landed state is the stylesheet's default.** Every rule that displaces, clips or
+fades sits behind `[data-cue-state="armed"]`, written only by client JS from inside
+a real frame. Both scroll-linked properties (`--rail-p`, `--read-p`) fall back to
+their *finished* value, so an unset property is a drawn spine and never a missing
+one. Bars and brackets `scaleX`; they never animate `width`.
+
+**Verified running, and one bug that only measurement found.** The transitions were
+first declared on the base `[data-cue]` selector, which breaks the two-frame
+arm-then-play flip the whole mechanism rests on: arming an element whose transition
+is already live does not *snap* it to the start offset, it begins animating toward
+that offset — and one frame later the flip to `"in"` reverses it. Measured on the
+NSN diagram, the bracket read `matrix(1,0,0,1,0,0)` at the instant of arming and was
+fully drawn 540ms later, so the entrance was a wobble rather than an arrival. Every
+transition is now scoped to `[data-cue-state="in"]`; armed has none and snaps.
+
+With that fixed and measured against `next start`: the NSN band arms, snaps its
+brackets to `scaleX(0)`, plays 34 concurrent transitions and clears its own
+attribute; `LineRail` writes `--rail-p` and marks the current line; `ReadProgress`
+writes `--read-p`; `IndexFilter` filters, recounts and shows its empty state. After
+every run finishes, nothing anywhere is left below full opacity or clipped, in
+either motion mode.
+
+**A note on how not to diagnose this.** An earlier pass concluded this renderer
+delivers no IntersectionObserver callbacks and advances no CSS animation. That was
+wrong on both counts, and the cause is worth more than the claim: `next dev`
+compiles a route on first request, and a page measured during that compile has no
+client JS yet — every probe reads as a dead environment. Add a stale `.next` from a
+production build run against the same directory and it is indistinguishable from a
+hydration failure. Measure against `next start`, or warm the route and re-probe. See
+au-motion-safety and au-dev-compile-race.
+
+### Three defects found by measuring, not by looking
+
+**`.imast` was not registered as a dark ground.** The stylesheet's own comment says
+adding a dark surface means adding it to the `:is()` groups once rather than
+hunting for fifteen scattered overrides — and that had not been done, so the
+masthead's eyebrow took Steel Blue (2.2–3.4:1) and the breadcrumb took
+`--au-ink-muted` (1.6–3.5:1). `.breadcrumb` paints its own colour and was in no
+group at all, which is a fault `.page-header` shares latently; the fix went in the
+group.
+
+**The scrim's angle was wrong for the copy it protects.** At 38deg the darkest
+region sat bottom-left while the breadcrumb and eyebrow sit **top**-left. A pass
+that hides each text element and samples the brightest rendered pixel behind it
+found real failures on both. At 78deg the ramp is near-horizontal, so the whole
+left column sits on the plateau and the right side keeps the photograph — still one
+gradient, because crossing two multiplies opacity in the shared corner.
+Re-measure with the same pass before touching any stop.
+
+**The eyebrow was a 1,368px-wide box.** `.eyebrow`'s `align-self: flex-start` is
+inert in a block container, so the element reached across the bright side of the
+photograph. Sloppy geometry, and it is what a contrast pass measures:
+`width: fit-content`.
+
+Verified over all twelve new URLs at 1440/768/390: **zero WCAG AA text failures,
+zero JS errors, no horizontal overflow.** Masthead type over photography measures
+9.7–16.1:1.
+
+### Still dead links
+
+`/rfq`, `/quality`, `/part/<pn>` and `/search` are linked from these pages and from
+the homepage, about and contact, and do not exist yet. `prototype/rfq.html`,
+`quality.html`, `part.html` and `search.html` hold their UX.

@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact Us Blueprint — Aerospace Unlimited</title>
+<!--
+  CONTACT US BLUEPRINT — the same annotated-wireframe format as the client's
+  "About Us Blueprint": a left rail of section labels, a centre column of
+  wireframe bands, and a right rail of short editorial notes ("why it matters").
+
+  Two deliberate departures from the About blueprint, carried over from
+  app/about/page.tsx: (1) the company is named Aerospace Unlimited, not the
+  blueprint's "ASAP" shorthand; (2) every figure and every contact value is one
+  the site already states — no invented counts.
+
+  Content source: prototype/contact.html (routing fork, direct details,
+  departments, enquiry form, closing CTA). Nothing here is a new section.
+-->
+<style>
+  :root {
+    --ink:        #0d1b3e;
+    --ink-2:      #1f2d55;
+    --blue:       #2563eb;
+    --blue-mid:   #4f7ff5;
+    --blue-line:  #2f68f0;
+    --blue-soft:  #dfe8fd;
+    --blue-wash:  #eff4ff;
+    --grey:       #5b6684;
+    --grey-2:     #7b859d;
+    --amber:      #fbd77a;
+    --amber-ink:  #6b4400;
+    --rule:       #e3e8f2;
+    --page:       #ffffff;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 28px 22px 34px;
+    background: var(--page);
+    color: var(--ink);
+    font: 400 11px/1.5 "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sheet { max-width: 880px; margin: 0 auto; }
+
+  /* ---------- masthead ---------- */
+  .mast { text-align: center; margin: 0 0 18px; }
+  .mast h1 {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    color: var(--ink);
+  }
+  .mast h1 em { font-style: normal; color: var(--blue); font-weight: 700; }
+  .mast .tag {
+    display: inline-block;
+    vertical-align: 4px;
+    margin-left: 7px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--blue);
+    color: #fff;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+  }
+  .mast p {
+    margin: 6px 0 0;
+    font-size: 9.5px;
+    color: var(--grey);
+  }
+
+  /* ---------- nav mock ---------- */
+  .navmock {
+    margin: 0 auto 20px;
+    max-width: 560px;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(13,27,62,.05);
+    overflow: hidden;
+  }
+  .navmock a {
+    padding: 11px 12px;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--ink-2);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .navmock a.is-current {
+    border-top: 2px solid var(--ink);
+    color: var(--ink);
+  }
+  .navmock .cta {
+    margin: 6px 6px 6px 10px;
+    padding: 7px 12px;
+    border-radius: 5px;
+    background: var(--blue);
+    color: #fff;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    align-self: center;
+  }
+
+  /* ---------- three-rail grid ---------- */
+  .band {
+    display: grid;
+    grid-template-columns: 118px 1fr 168px;
+    gap: 16px;
+    align-items: start;
+    margin: 0 0 16px;
+  }
+
+  /* left rail */
+  .label {
+    padding-top: 4px;
+    text-align: left;
+  }
+  .chip {
+    display: inline-block;
+    padding: 3px 7px;
+    border-radius: 4px;
+    background: var(--amber);
+    color: var(--amber-ink);
+    font-size: 7.5px;
+    font-weight: 800;
+    letter-spacing: 0.55px;
+    text-transform: uppercase;
+  }
+  .label p {
+    margin: 8px 0 0;
+    font-size: 8.5px;
+    line-height: 1.55;
+    color: var(--grey);
+  }
+
+  /* right rail */
+  .note { padding-top: 4px; }
+  .note h4 {
+    margin: 0 0 7px;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .note p {
+    margin: 0 0 6px;
+    font-size: 8.5px;
+    line-height: 1.6;
+    color: var(--grey);
+  }
+  .note ul { margin: 0; padding: 0; list-style: none; }
+  .note li {
+    position: relative;
+    margin: 0 0 5px;
+    padding-left: 11px;
+    font-size: 8.5px;
+    line-height: 1.55;
+    color: var(--grey);
+  }
+  .note li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--blue);
+    font-weight: 700;
+  }
+  .note li.check::before { content: "✓"; font-size: 7.5px; }
+  .note .pull {
+    margin: 8px 0 0;
+    padding-left: 8px;
+    border-left: 2px solid var(--blue);
+    font-size: 8.5px;
+    line-height: 1.55;
+    color: var(--ink-2);
+  }
+
+  /* ---------- wireframe card ---------- */
+  .wire {
+    border: 1.4px solid var(--blue-line);
+    border-radius: 9px;
+    background: #fff;
+    padding: 16px 18px;
+  }
+  .wire.tight { padding: 14px 16px; }
+  .wire h2 {
+    margin: 0 0 9px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.55px;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .wire h3.display {
+    margin: 0 0 9px;
+    font-size: 15px;
+    line-height: 1.28;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .wire p {
+    margin: 0 0 8px;
+    font-size: 9px;
+    line-height: 1.65;
+    color: var(--grey);
+  }
+  .wire p:last-child { margin-bottom: 0; }
+  .cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: center;
+  }
+  .cols.flip { grid-template-columns: 0.85fr 1fr; }
+
+  /* image / map placeholder */
+  .ph {
+    border: 1.2px dashed var(--blue-mid);
+    border-radius: 7px;
+    background: var(--blue-wash);
+    min-height: 130px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 14px;
+    text-align: center;
+  }
+  .ph span {
+    font-size: 7.5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    line-height: 1.6;
+    text-transform: uppercase;
+    color: var(--blue);
+  }
+  .ph svg { opacity: .8; }
+
+  /* buttons */
+  .btnrow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .btn {
+    padding: 8px 13px;
+    border-radius: 5px;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+  }
+  .btn-solid { background: var(--blue); color: #fff; }
+  .btn-out { border: 1.2px solid var(--blue-soft); color: var(--blue); background: #fff; }
+
+  /* badges */
+  .badge {
+    display: inline-block;
+    padding: 3px 7px;
+    border-radius: 4px;
+    background: var(--blue-wash);
+    color: var(--blue);
+    font-size: 7px;
+    font-weight: 800;
+    letter-spacing: 0.55px;
+    text-transform: uppercase;
+  }
+  .badge.hot { background: var(--blue); color: #fff; }
+
+  /* route cards (the fork) */
+  .routes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .route {
+    border: 1px solid var(--blue-soft);
+    border-radius: 7px;
+    padding: 11px 11px 12px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+  }
+  .route h4 {
+    margin: 8px 0 6px;
+    font-size: 9px;
+    line-height: 1.35;
+    font-weight: 800;
+    color: var(--ink);
+  }
+  .route p { margin: 0 0 7px; font-size: 8px; line-height: 1.6; color: var(--grey); }
+  .route .mini {
+    margin-top: auto;
+    padding: 7px 8px;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 7.5px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .route .mini.solid { background: var(--blue); color: #fff; }
+  .route .mini.out { border: 1.1px solid var(--blue-soft); color: var(--blue); }
+  .route .under {
+    margin: 6px 0 0;
+    text-align: center;
+    font-size: 7.5px;
+    color: var(--blue);
+  }
+
+  /* icon grid (departments / what to have ready / compliance) */
+  .icons { display: grid; gap: 10px; }
+  .icons.c3 { grid-template-columns: repeat(3, 1fr); }
+  .icons.c5 { grid-template-columns: repeat(5, 1fr); }
+  .icons.c6 { grid-template-columns: repeat(6, 1fr); }
+  .icell { text-align: center; }
+  .icell .ring {
+    width: 26px; height: 26px;
+    margin: 0 auto 7px;
+    border-radius: 50%;
+    background: var(--blue-wash);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .icell b {
+    display: block;
+    font-size: 7.5px;
+    font-weight: 800;
+    letter-spacing: 0.45px;
+    text-transform: uppercase;
+    color: var(--ink);
+    line-height: 1.45;
+  }
+  .icell span {
+    display: block;
+    margin-top: 4px;
+    font-size: 7.5px;
+    line-height: 1.55;
+    color: var(--grey-2);
+  }
+
+  /* details table */
+  .rows { border: 1px solid var(--blue-soft); border-radius: 7px; overflow: hidden; }
+  .row {
+    display: grid;
+    grid-template-columns: 92px 1fr 44px;
+    gap: 10px;
+    align-items: center;
+    padding: 9px 11px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .row:last-child { border-bottom: 0; }
+  .row .k {
+    font-size: 7.5px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--grey-2);
+  }
+  .row .v { font-size: 9px; color: var(--ink-2); font-weight: 600; }
+  .row .v em { display: block; font-style: normal; margin-top: 3px; font-size: 7.5px; font-weight: 400; color: var(--grey-2); }
+  .row .c {
+    justify-self: end;
+    padding: 4px 6px;
+    border: 1px solid var(--blue-soft);
+    border-radius: 3px;
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--blue);
+  }
+
+  /* stat strip */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .stat {
+    border: 1px solid var(--blue-soft);
+    border-radius: 7px;
+    padding: 11px 8px;
+    text-align: center;
+  }
+  .stat b { display: block; font-size: 15px; font-weight: 800; letter-spacing: -0.3px; color: var(--blue); }
+  .stat span {
+    display: block;
+    margin-top: 5px;
+    font-size: 7px;
+    font-weight: 800;
+    letter-spacing: 0.55px;
+    text-transform: uppercase;
+    color: var(--grey);
+  }
+
+  /* form wireframe */
+  .fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .fld { margin-bottom: 10px; }
+  .fld > b {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 7.5px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .fld > b i { font-style: normal; color: var(--blue); }
+  .fld > b u { text-decoration: none; font-weight: 400; letter-spacing: 0.3px; color: var(--grey-2); }
+  .box {
+    border: 1px solid var(--blue-soft);
+    border-radius: 5px;
+    background: #fbfcff;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    padding: 0 9px;
+    font-size: 8px;
+    color: var(--grey-2);
+  }
+  .box.tall { height: 58px; align-items: flex-start; padding-top: 7px; }
+  .box.sel::after { content: "▾"; margin-left: auto; color: var(--blue); font-size: 8px; }
+  .hint { margin: 4px 0 0; font-size: 7.5px; color: var(--grey-2); }
+  .nudge {
+    margin: 4px 0 12px;
+    border-left: 2.5px solid var(--blue);
+    border-radius: 0 5px 5px 0;
+    background: var(--blue-wash);
+    padding: 9px 10px;
+  }
+  .nudge b { display: block; font-size: 8.5px; color: var(--ink); }
+  .nudge p { margin: 5px 0 0; font-size: 8px; line-height: 1.6; color: var(--grey); }
+
+  /* footer */
+  .foot {
+    margin-top: 6px;
+    text-align: center;
+    font-size: 8px;
+    color: var(--grey-2);
+  }
+
+  @media (max-width: 720px) {
+    .band { grid-template-columns: 1fr; gap: 10px; }
+    .routes, .stats, .icons.c5, .icons.c6, .cols, .cols.flip, .fgrid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <!-- ==================== MASTHEAD + NAV ==================== -->
+  <header class="mast">
+    <h1>Aerospace &amp; Industrial Parts <em>Contact Us Blueprint</em><span class="tag">AU</span></h1>
+    <p>Three ways in. One desk, staffed 24/7. Every route answered in a time we publish.</p>
+  </header>
+
+  <nav class="navmock">
+    <a>Home</a>
+    <a>Part Categories ▾</a>
+    <a>Capabilities</a>
+    <a>Industries</a>
+    <a>Resources ▾</a>
+    <a class="is-current">Contact</a>
+    <span class="btn btn-solid cta">Request Quote</span>
+  </nav>
+
+  <!-- ==================== 1 · CONTACT HERO ==================== -->
+  <section class="band">
+    <div class="label">
+      <span class="chip">Contact Hero</span>
+      <p>Open with the three routes and the time each one takes.</p>
+    </div>
+
+    <div class="wire">
+      <div class="cols">
+        <div>
+          <h3 class="display">Three ways in.<br>Pick the one that<br>matches your question.</h3>
+          <p>Somebody is on the desk at every hour of every day. Which route you take changes how fast you hear back — by hours, not minutes.</p>
+          <p>Part numbers go to the quoting desk. Aircraft on the ground go to the phone. Everything else goes to the form below.</p>
+          <div class="btnrow">
+            <span class="btn btn-solid">Request a quote</span>
+            <span class="btn btn-out">Call 24/7 AOG</span>
+          </div>
+        </div>
+        <div class="ph">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="4" width="18" height="15" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M3 17l5-4 4 3 3-2 6 4"/></svg>
+          <span>Hero image<br>(operations desk / facility)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <h4>Why it matters</h4>
+      <p>Most people who click “Contact” do not want a conversation — they want a price, and Contact is just the link they recognised.</p>
+      <p class="pull">The hero names the fast path before anyone types a part number into the wrong box.</p>
+    </div>
+  </section>
+
+  <!-- ==================== 2 · HOW TO REACH US (routing fork) ==================== -->
+  <section class="band">
+    <div class="label">
+      <span class="chip">How to reach us</span>
+      <p>Send each visitor down the right path before they start typing.</p>
+    </div>
+
+    <div class="wire">
+      <h2>How to reach us</h2>
+      <div class="routes">
+        <div class="route">
+          <span class="badge hot">Fastest · 15 min</span>
+          <h4>You need a price, availability or a lead time</h4>
+          <p>Anything with a part number, an NSN or a parts list. The quote form asks for quantity, condition and need-by date up front.</p>
+          <span class="mini solid">Request a quote</span>
+          <p class="under">Or paste a whole parts list →</p>
+        </div>
+        <div class="route">
+          <span class="badge">Immediate · 24/7/365</span>
+          <h4>An aircraft is on the ground</h4>
+          <p>Call — don’t send a form and wait by an inbox. The AOG line is answered by a person through nights, weekends and holidays.</p>
+          <span class="mini out">Call +1-714-705-4780</span>
+          <p class="under">Or flag “aircraft on ground” on the RFQ →</p>
+        </div>
+        <div class="route">
+          <span class="badge">One business day</span>
+          <h4>Everything else</h4>
+          <p>Vendor set-up, certificate copies, an existing order, accounts and invoicing, offering us stock, or careers.</p>
+          <span class="mini out">Go to the enquiry form</span>
+          <p class="under">Jump to the form below ↓</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <h4>Routing, not a menu</h4>
+      <p>Quote-intent traffic landing in a general inbox is the expensive failure: triaged by hand, answered in a day, sometimes lost.</p>
+      <ul>
+        <li class="check">Response time on every route</li>
+        <li class="check">Fastest option stated first</li>
+        <li class="check">No route hidden</li>
+      </ul>
+      <p class="pull">The buyer picks the fast path because it is better for them.</p>
+    </div>
+  </section>
+
+  <!-- ==================== 3 · DIRECT DETAILS ==================== -->
+  <section class="band">
+    <div class="label">
+      <span class="chip">Direct details</span>
+      <p>Phone, email and address — ready to paste into a PO.</p>
+    </div>
+
+    <div class="wire">
+      <h2>Direct details</h2>
+      <p>Copy any of these straight into your purchase order or vendor record.</p>
+      <div class="rows">
+        <div class="row">
+          <span class="k">Phone</span>
+          <span class="v">+1-714-705-4780<em>Answered 24 hours a day, every day of the year.</em></span>
+          <span class="c">Copy</span>
+        </div>
+        <div class="row">
+          <span class="k">Sales &amp; quotes</span>
+          <span class="v">sales@aerospaceunlimited.com<em>Quotes, orders, order status, certificate copies, vendor set-up.</em></span>
+          <span class="c">Copy</span>
+        </div>
+        <div class="row">
+          <span class="k">Purchasing</span>
+          <span class="v">purchase@aerospaceunlimited.com<em>Offering us inventory, supplier applications, quality-system and audit enquiries.</em></span>
+          <span class="c">Copy</span>
+        </div>
+        <div class="row">
+          <span class="k">Address</span>
+          <span class="v">1341 South Sunkist Street, Anaheim, CA 92806, USA<em>Shipping, receiving and inspection all happen here. Reference the PO number on the outer packaging.</em></span>
+          <span class="c">Copy</span>
+        </div>
+        <div class="row">
+          <span class="k">Hours</span>
+          <span class="v">24 / 7 / 365 for quoting and AOG<em>Same-day shipping on in-stock items ordered before 3pm Pacific.</em></span>
+          <span class="c">Copy</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <h4>Paste-ready</h4>
+      <p>Some buyers will never use a web form — procurement works from a purchase order and wants an address and an inbox.</p>
+      <p class="pull">These values get retyped into an ERP vendor record. A mistyped email on a PO is a week lost.</p>
+    </div>
+  </section>
+
+  <!-- ==================== 4 · WHICH DESK ==================== -->
+  <section class="band">
+    <div class="label">
+      <span class="chip">Which desk</span>
+      <p>Who owns which question, so nothing is triaged twice.</p>
+    </div>
+
+    <div class="wire">
+      <h2>Which desk handles what</h2>
+      <div class="icons c3">
+        <div class="icell">
+          <span class="ring"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.7" stroke-linecap="round"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg></span>
+          <b>Sales &amp; quotes</b>
+          <span>Pricing, availability, lead times, orders and order status.</span>
+        </div>
+        <div class="icell">
+          <span class="ring"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.7" stroke-linecap="round"><path d="M3 7h13l2 4h3v6h-4"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M9 17h6"/></svg></span>
+          <b>Purchasing</b>
+          <span>Offering us inventory, supplier applications, audits.</span>
+        </div>
+        <div class="icell">
+          <span class="ring"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.7" stroke-linecap="round"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/></svg></span>
+          <b>Certificates &amp; vendor set-up</b>
+          <span>Certificate copies and supplier surveys — dedicated form skips the queue.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <h4>One hop, not three</h4>
+      <p>Naming the desk on the page saves an internal forward and the day it costs.</p>
+      <ul>
+        <li>Quotes → quoting desk</li>
+        <li>Stock offers → purchasing</li>
+        <li>Certificates → quality</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ==================== 5 · RESPONSE TIMES ==================== -->
+  <section class="band">
+    <div class="label">
+      <span class="chip">Response times</span>
+      <p>The promises we publish against each route.</p>
+    </div>
+
+    <div class="wire">
+      <h2>What you can expect</h2>
+      <div class="stats">
+        <div class="stat"><b>15 MIN</b><span>Written quote, any hour</span></div>
+        <div class="stat"><b>24 / 7 / 365</b><span>Quoting &amp; AOG desk</span></div>
+        <div class="stat"><b>1 DAY</b><span>General enquiries</span></div>
+        <div class="stat"><b>3PM PT</b><span>Same-day ship cutoff</span></div>
+      </div>
+    </div>
+
+    <div class="note">
+      <h4>Only what we can stand behind</h4>
+      <p>Every figure here is already published elsewhere on the site — nothing new is claimed on Contact.</p>
+      <p class="pull">A response time you can be held to is worth more than a big number.</p>
+    </div>
+  </section>
+
+  <!-- ==================== 6 · WHERE WE ARE ==================== -->
+  <section class="band">
+    <div class="label">
+      <span class="chip">Where we are</span>
+      <p>The building, the dock and the hours behind the address.</p>
+    </div>
+
+    <div class="wire">
+      <div class="cols flip">
+        <div class="ph">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.6" stroke-linecap="round"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>
+          <span>Map / facility image<br>(Anaheim, California)</span>
+        </div>
+        <div>
+          <h2>Where we are</h2>
+          <p><b>1341 South Sunkist Street, Anaheim, CA 92806</b> — a single site where shipping, receiving and inspection all happen.</p>
+          <p>Deliveries to us should reference the purchase order number on the outer packaging. In-stock items ordered before 3pm Pacific ship the same day.</p>
+          <div class="btnrow">
+            <span class="btn btn-out">Get directions</span>
+            <span class="btn btn-out">Copy address</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <h4>A real dock, not a PO box</h4>
+      <p>Buyers vetting a new supplier check that the shipping address and the inspection address are the same building.</p>
+      <p class="pull">One address does more for trust than a paragraph about it.</p>
+    </div>
+  </section>
+
+  <!-- ==================== 7 · BEFORE YOU WRITE ==================== -->
+  <section class="band">
+    <div class="label">
+      <span class="chip">Before you write</span>
+      <p>What to have ready so nobody has to ask twice.</p>
+    </div>
+
+    <div class="wire">
+      <h2>Have these ready</h2>
+      <div class="icons c5">
+        <div class="icell">
+          <span class="ring"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.7" stroke-linecap="round"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M8 9h8M8 13h5"/></svg></span>
+          <b>Part number<br>or NSN</b>
+        </div>
+        <div class="icell">
+          <span class="ring"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.7" stroke-linecap="round"><path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M12 4v16"/></svg></span>
+          <b>Quantity</b>
+        </div>
+        <div class="icell">
+          <span class="ring"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.7" stroke-linecap="round"><path d="M12 3l7 3v6c0 5-7 9-7 9s-7-4-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+          <b>Condition</b>
+        </div>
+        <div class="icell">
+          <span class="ring"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span>
+          <b>Need-by date</b>
+        </div>
+        <div class="icell">
+          <span class="ring"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.7" stroke-linecap="round"><path d="M3 13l9-8 9 8"/><path d="M11 12h9l-3 3"/></svg></span>
+          <b>Aircraft, tail<br>or MSN (AOG)</b>
+        </div>
+      </div>
+      <p style="margin-top:11px">If you don’t have all of it, send what you have — an AOG call starts without any of it.</p>
+    </div>
+
+    <div class="note">
+      <h4>Fewer round trips</h4>
+      <p>Every missing field is one email each way, and on an AOG that is the whole delay.</p>
+    </div>
+  </section>
+
+  <!-- ==================== 8 · GENERAL ENQUIRY FORM ==================== -->
+  <section class="band">
+    <div class="label">
+      <span class="chip">Enquiry form</span>
+      <p>One form for everything that isn’t a part request.</p>
+    </div>
+
+    <div class="wire">
+      <h2>Send us a question</h2>
+      <p>For anything that is not a part request. Answered within one business day.</p>
+
+      <div class="fgrid">
+        <div class="fld"><b>Full name <i>*</i></b><div class="box"></div></div>
+        <div class="fld"><b>Work email <i>*</i></b><div class="box"></div><p class="hint">We reply here.</p></div>
+      </div>
+      <div class="fgrid">
+        <div class="fld"><b>Company <i>*</i></b><div class="box"></div></div>
+        <div class="fld"><b>Phone <u>optional</u></b><div class="box"></div></div>
+      </div>
+      <div class="fld"><b>What is this about? <i>*</i></b><div class="box sel">Select a topic — pricing · order · vendor set-up · accounts · selling stock · careers</div></div>
+
+      <div class="nudge">
+        <b>Conditional: shown only when “pricing” is selected.</b>
+        <p>“This form is the slow way to get a price.” — offers the quote form (15 minutes, day or night) before the visitor spends two minutes typing a part number here.</p>
+      </div>
+
+      <div class="fld"><b>Your question <i>*</i></b><div class="box tall">Include order or quote numbers, part numbers, or your PO reference.</div><p class="hint">No passwords, card details or export-controlled technical data.</p></div>
+
+      <div class="btnrow">
+        <span class="btn btn-solid">Send enquiry</span>
+        <span class="btn btn-out">Or email sales@ · call the desk</span>
+      </div>
+    </div>
+
+    <div class="note">
+      <h4>Last, on purpose</h4>
+      <p>The form sits below the fork and below the direct details — offered, never the first thing pushed.</p>
+      <ul>
+        <li class="check">Topic selector corrects intent early</li>
+        <li class="check">Submits either way — nobody trapped</li>
+        <li class="check">Confirms in place, keeping the AOG number visible</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ==================== 9 · QUALITY & COMPLIANCE ==================== -->
+  <section class="band">
+    <div class="label">
+      <span class="chip">Quality &amp; compliance</span>
+      <p>The standards a vendor-approval question is really asking about.</p>
+    </div>
+
+    <div class="wire tight">
+      <h2>Quality &amp; compliance</h2>
+      <p>Certificate copies, supplier surveys and traceability packs on request.</p>
+      <div class="icons c5">
+        <div class="icell"><span class="ring"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.7"><path d="M12 3l7 3v6c0 5-7 9-7 9s-7-4-7-9V6z"/></svg></span><b>AS9120<br>compliant</b></div>
+        <div class="icell"><span class="ring"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.7"><circle cx="12" cy="10" r="6"/><path d="M9 16l-1 5 4-2 4 2-1-5"/></svg></span><b>ISO 9001<br>certified</b></div>
+        <div class="icell"><span class="ring"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.7"><path d="M4 6h16v12H4z"/><path d="M8 10h8M8 14h4"/></svg></span><b>ITAR<br>registered</b></div>
+        <div class="icell"><span class="ring"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.7"><path d="M12 4v16"/><path d="M8 8l4-4 4 4"/></svg></span><b>Traceability<br>assured</b></div>
+        <div class="icell"><span class="ring"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.7"><path d="M5 5h14v14H5z"/><path d="M9 12l2 2 4-5"/></svg></span><b>Export<br>compliance</b></div>
+      </div>
+    </div>
+
+    <div class="note">
+      <h4>Auditable answers</h4>
+      <p>Half the “general enquiries” a distributor gets are vendor-approval paperwork. Answering it on the page removes the enquiry.</p>
+    </div>
+  </section>
+
+  <!-- ==================== 10 · CLOSING CTA ==================== -->
+  <section class="band">
+    <div class="label">
+      <span class="chip">Let’s talk</span>
+      <p>The cheapest possible next step for an undecided visitor.</p>
+    </div>
+
+    <div class="wire">
+      <div class="cols">
+        <div>
+          <h2>If it was a part you were after all along</h2>
+          <p>Skip the inbox. Send the part numbers and get pricing, availability, condition and lead time in writing within 15 minutes — no account, no sign-up, no sales call first.</p>
+          <div class="btnrow">
+            <span class="btn btn-solid">Request a quote</span>
+            <span class="btn btn-out">Browse the catalog</span>
+          </div>
+        </div>
+        <div class="ph" style="min-height:96px">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.6" stroke-linecap="round"><path d="M3 12l4-4 5 4 4-3 5 5"/><path d="M3 17h18"/></svg>
+          <span>Closing accent<br>(quote / handshake motif)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <h4>Undecided, not uninterested</h4>
+      <p>Anyone who reaches the bottom without using a route still hasn’t been given a price.</p>
+      <p class="pull">Exit on the one action this whole site exists to collect.</p>
+    </div>
+  </section>
+
+  <p class="foot">Trust. Precision. Partnership. That’s Aerospace Unlimited.</p>
+</div>
+</body>
+</html>

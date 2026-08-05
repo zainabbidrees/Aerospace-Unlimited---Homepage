@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { MANUFACTURERS } from "@/lib/data";
 import { num } from "@/lib/format";
 import { CueReveal } from "@/components/inner/CueReveal";
-import { PageMast } from "@/components/inner/PageMast";
+import { CatMast } from "@/components/inner/CatMast";
 import { IndexFilter } from "@/components/browse/IndexFilter";
 
 /*
@@ -59,7 +59,6 @@ const GROUPS = (() => {
 })();
 
 const PRESENT = new Set(GROUPS.map(([l]) => l));
-const TOTAL_PARTS = MANUFACTURERS.reduce((s, m) => s + m.count, 0);
 
 export default function ManufacturersPage() {
   return (
@@ -68,7 +67,11 @@ export default function ManufacturersPage() {
       {/* Filtering and letter-tracking over the server-rendered index. */}
       <IndexFilter noun="manufacturer" nounPlural="manufacturers" />
 
-      <PageMast
+      {/* The light CatMast, shared with the Catalog hub — see CatMast.tsx. The
+          dark PageMast that opened this page read as a second homepage hero. The
+          former `record` strip is dropped: the counts are the index directly
+          below, and a big figure strip up top is landing-page furniture. */}
+      <CatMast
         crumbs={[
           { href: "/", label: "Home" },
           { href: "/browse", label: "Catalog" },
@@ -84,18 +87,14 @@ export default function ManufacturersPage() {
           </>
         }
         actions={
-          <Link className="btn btn-primary btn-lg" href="/rfq">
-            Request a quote
+          <Link className="btn btn-primary btn-lg" href="/rfq?mode=list">
+            Send us a parts list
           </Link>
         }
-        img="/img/catalog/gear-axle.jpg"
-        alt="A main landing gear axle photographed between its two wheels, brake carriers and hydraulic lines visible against a dark hangar floor"
-        bias="50%"
-        record={[
-          { v: String(MANUFACTURERS.length), k: "Manufacturers listed" },
-          { v: num(TOTAL_PARTS), k: "Parts across them" },
-          { v: `${PRESENT.size}`, k: "Letters in use" },
-        ]}
+        img="/img/catalog/assembly-hall.jpg"
+        imgSm="/img/catalog/assembly-hall-sm.jpg"
+        alt="An aircraft engine mounted on a rail in an industrial assembly hall, its casing and pipework exposed alongside blue shop machinery"
+        imgPosition="50% 45%"
       />
 
       {/* ====================================================================

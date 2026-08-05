@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import { AIRCRAFT, CATEGORIES, MANUFACTURERS, PARTS } from "@/lib/data";
 import { num } from "@/lib/format";
 import { CueReveal } from "@/components/inner/CueReveal";
-import { PageMast } from "@/components/inner/PageMast";
+import { CatMast } from "@/components/inner/CatMast";
+import { MfrCarousel } from "@/components/browse/MfrCarousel";
 
 /*
   BROWSE — THE CATALOG HUB
@@ -52,9 +53,17 @@ const CAT_TOTAL = CATEGORIES.reduce((s, c) => s + c.count, 0);
 const CAT_MAX = Math.max(...CATEGORIES.map((c) => c.count));
 const CATEGORIES_BY_DEPTH = [...CATEGORIES].sort((a, b) => b.count - a.count);
 
-/* Sorted before slicing. Taking the first nine in source order is not the top
-   nine — GE Aviation sits at index 11 with the third-largest catalogue. */
-const MFR_TOP = [...MANUFACTURERS].sort((a, b) => b.count - a.count).slice(0, 9);
+/* Sorted by catalogue depth, then handed to the carousel whole — the rail
+   scrolls, so there is no reason to slice to a top-N the way a fixed grid had
+   to. The full A–Z index is still one click away in the section head. */
+const MFR_SORTED = [...MANUFACTURERS].sort((a, b) => b.count - a.count);
+const MFR_MAX = Math.max(...MANUFACTURERS.map((m) => m.count));
+const MFR_CARDS = MFR_SORTED.map((m) => ({
+  cage: m.cage,
+  name: m.name,
+  count: m.count,
+  share: Math.round((m.count / MFR_MAX) * 100),
+}));
 const AIRCRAFT_BY_DEPTH = [...AIRCRAFT].sort((a, b) => b.count - a.count);
 const AC_MAX = Math.max(...AIRCRAFT.map((a) => a.count));
 
@@ -88,8 +97,26 @@ const NIIN = NSN_BLOCKS.slice(1).join("");
 
 /* The four identifier routes, with the definitions the prototype carried. Each
    one states the format, gives a real example from the catalog, and goes
-   somewhere that exists. */
-const IDENTIFIERS = [
+   somewhere that exists.
+
+   `span` is a slice of the 13-digit NSN, [start, length], 1-indexed — the same
+   fact the data plate's brackets carry, reused here to draw each tile's scale
+   track. NSN is the whole 13; FSC is the first 4; NIIN is the last 9. CAGE has
+   no span because it is NOT part of the NSN — that absence is the point, and it
+   is why CAGE alone shows no track. Nothing is invented: these are statements
+   about the numbering system, derived against NSN_LEN below so a bar can never
+   claim a width the number does not have. */
+const NSN_LEN = 13;
+const IDENTIFIERS: {
+  code: string;
+  name: string;
+  fmt: string;
+  body: string;
+  eg: string;
+  href: string;
+  cta: string;
+  span: [number, number] | null;
+}[] = [
   {
     code: "NSN",
     name: "National Stock Number",
@@ -98,6 +125,7 @@ const IDENTIFIERS = [
     eg: "5310-00-877-5797",
     href: "/browse/fsc/5310",
     cta: "Browse an NSN group",
+    span: [1, 13],
   },
   {
     code: "NIIN",
@@ -107,6 +135,7 @@ const IDENTIFIERS = [
     eg: "008775797",
     href: "/browse/niin/008775797",
     cta: "Look up this NIIN",
+    span: [5, 9],
   },
   {
     code: "CAGE",
@@ -116,6 +145,7 @@ const IDENTIFIERS = [
     eg: "99193",
     href: "/browse/manufacturers",
     cta: "Manufacturers by CAGE",
+    span: null,
   },
   {
     code: "FSC",
@@ -125,8 +155,13 @@ const IDENTIFIERS = [
     eg: "4820",
     href: "#categories",
     cta: "FSC by category",
+    span: [1, 4],
   },
 ];
+
+/* The FSC | NIIN seam as a fraction of the whole, so every tile's boundary tick
+   lands on the same line and the three tracks read as one ruler. */
+const NSN_SEAM = `${(4 / NSN_LEN) * 100}%`;
 
 export default function BrowsePage() {
   return (
@@ -136,7 +171,13 @@ export default function BrowsePage() {
           reveal gets wrong. See CueReveal.tsx. */}
       <CueReveal />
 
-      <PageMast
+      {/* THE CATALOG HEADER — the light CatMast, shared with the two index
+          sub-pages, and NOT the dark PageMast the rest of the site opens on. The
+          dark version measured the same height and 52px headline as the homepage
+          hero and so read as a second landing page; see CatMast.tsx / ux.css §1b.
+          One action only — "Send us a parts list" is the catalog's contextual CTA
+          and does not duplicate the header's standing "Request a Quote". */}
+      <CatMast
         crumbs={[{ href: "/", label: "Home" }, { label: "Catalog" }]}
         eyebrow="The catalog"
         title={["Four ways in.", "One field that takes all of them."]}
@@ -144,29 +185,17 @@ export default function BrowsePage() {
           <>
             Over two billion part numbers, reachable by what the part does, who
             made it, what it flies on, or the government number stamped on the
-            paperwork. If you are holding any identifier at all, the search field
-            in the header is faster — it recognises the format as you type.
+            paperwork.
           </>
         }
         actions={
-          <>
-            <Link className="btn btn-primary btn-lg" href="/rfq?mode=list">
-              Send us a parts list
-            </Link>
-            <Link className="btn btn-quiet btn-lg" href="/capabilities">
-              Not a part number?
-            </Link>
-          </>
+          <Link className="btn btn-primary btn-lg" href="/rfq?mode=list">
+            Send us a parts list
+          </Link>
         }
-        img="/img/catalog/apron-cowls.jpg"
-        alt="A narrow-body airliner on the apron with both engine nacelle cowls hinged open, the fan and thrust reverser mechanism exposed, under a pale overcast sky"
-        bias="62%"
-        record={[
-          { v: "2bn+", k: "Part numbers" },
-          { v: String(CATEGORIES.length), k: "Part categories" },
-          { v: String(MANUFACTURERS.length), k: "Manufacturers listed" },
-          { v: String(AIRCRAFT.length), k: "Aircraft platforms" },
-        ]}
+        img="/img/catalog/mro-engine-bay.jpg"
+        imgSm="/img/catalog/mro-engine-bay-sm.jpg"
+        alt="A large turbofan engine mounted on a wheeled cradle in a maintenance hangar, its fan blades and accessory plumbing exposed under the shop's overhead structure"
       />
 
       {/* ====================================================================
@@ -271,7 +300,7 @@ export default function BrowsePage() {
            unreliable half of the pair. Nine of fourteen here — an explicit
            top-N by catalogue depth, with the full register one click away.
            ==================================================================== */}
-      <section className="section section-subtle" id="manufacturers">
+      <section className="section section-dark" id="manufacturers">
         <div className="u-page">
           <div className="section-head section-head-row" data-cue>
             <div>
@@ -287,19 +316,12 @@ export default function BrowsePage() {
             </Link>
           </div>
 
-          <ol className="cagegrid" data-cue="stack" data-cue-ms="1200">
-            {MFR_TOP.map((m) => (
-              <li key={m.cage}>
-                <Link className="cageplate" href={`/browse/manufacturer/${m.cage}`}>
-                  <span className="cage-label">CAGE</span>
-                  <span className="cage-code u-mono">{m.cage}</span>
-                  <span className="cage-rule" aria-hidden="true" />
-                  <span className="cage-name">{m.name}</span>
-                  <span className="cage-n">{num(m.count)} parts</span>
-                </Link>
-              </li>
-            ))}
-          </ol>
+          {/* A horizontal carousel of CAGE nameplates, ranked by catalogue
+              depth. Cards rather than a register because the CAGE code wants to
+              be a held object — a nameplate — and the rail keeps fourteen of
+              them from turning into a wall. The rail scrolls natively; the
+              arrows are enhancement. See MfrCarousel.tsx. */}
+          <MfrCarousel items={MFR_CARDS} />
         </div>
       </section>
 
@@ -334,20 +356,24 @@ export default function BrowsePage() {
             </Link>
           </div>
 
-          <ol className="acgrid" data-cue="stack" data-cue-ms="1200">
-            {AIRCRAFT_BY_DEPTH.map((a) => (
+          {/* A two-column ranked board rather than a card grid — the platforms
+              are ordered by catalogue depth and each reads as a line on a fleet
+              manifest, with the bar the dominant mark. The rank leads because
+              the ordering is the section's whole claim: this is what we are
+              deepest in. */}
+          <ol className="acboard" data-cue="stack" data-cue-ms="1200">
+            {AIRCRAFT_BY_DEPTH.map((a, i) => (
               <li key={a.slug}>
                 <Link className="acplate" href={`/browse/platform/${a.slug}`}>
+                  <span className="ac-rank u-mono" aria-hidden="true">{`0${i + 1}`}</span>
                   <span className="ac-name">{a.name}</span>
-                  <span className="ac-meta">
-                    <span className="ac-n">{num(a.count)} parts</span>
-                    <span
-                      className="ac-bar"
-                      aria-hidden="true"
-                      style={{ ["--depth" as string]: `${Math.round((a.count / AC_MAX) * 100)}%` }}
-                    >
-                      <i />
-                    </span>
+                  <span className="ac-n">{num(a.count)} parts</span>
+                  <span
+                    className="ac-bar"
+                    aria-hidden="true"
+                    style={{ ["--depth" as string]: `${Math.round((a.count / AC_MAX) * 100)}%` }}
+                  >
+                    <i />
                   </span>
                 </Link>
               </li>
@@ -390,51 +416,141 @@ export default function BrowsePage() {
             </p>
           </div>
 
-          {/* The specimen. `aria-hidden` on the diagram and a plain-language
-              summary in `.nsna-sr` for assistive tech: a screen reader read the
-              brackets and labels as a scatter of disconnected digits and words,
-              which is worse than a sentence. The sentence says the same thing. */}
-          <figure className="nsna" data-cue="nsna" data-cue-ms="1600" data-cue-vh="0.9">
-            <div className="nsna-stage" aria-hidden="true">
-              <div className="nsna-digits">
+          {/* ==============================================================
+               THE DATA PLATE
+
+               WHY A PLATE, AND NOT THE WHITE CARD THIS WAS. Every component in
+               this catalog carries a stamped data plate, and a buyer who "has a
+               government identifier" is almost always reading one — off a
+               nameplate, a removal tag or a line of paperwork. So the section is
+               built as the object it is about: a machined plate on the light
+               section ground, the number ENGRAVED rather than printed, and the
+               CAGE code physically detached from it because it is not part of
+               that number. The old version explained the separation in a caption
+               sentence; this one shows it in the layout, which is the whole
+               reason to spend a bespoke band here rather than four more cards.
+
+               It is also the only dark object on this page, which is what makes
+               it the centrepiece. Note it is an OBJECT on a light band, not a
+               dark band: the page's band count and its one-accent-band rule are
+               unchanged, and the plate reads as a thing on a bench rather than as
+               another full-bleed section.
+
+               ACCESSIBILITY. The diagram is aria-hidden and `.dp-sr` carries the
+               same content as one plain sentence — read aloud, brackets and
+               spans came out as a scatter of disconnected digits and words, which
+               is strictly worse than prose. The interactive highlight is a
+               hover/focus affordance over that diagram, so it adds nothing a
+               screen reader needs and takes nothing away.
+               ============================================================== */}
+          <figure className="dp" data-cue="plate" data-cue-ms="1950" data-cue-vh="0.9">
+            <div className="dp-plate" aria-hidden="true">
+              {/* The brushed grain and the bevel. Both are gradients rather than
+                  images — see ux.css. */}
+              <span className="dp-grain" />
+              {/* THE MEASURING PASS. One narrow band of light that crosses the
+                  plate once, during the entrance. It is also the specular that
+                  makes the surface read as metal rather than as a dark rectangle,
+                  which is why it is a real element and not a keyframe on the
+                  plate itself. */}
+              <span className="dp-pass" />
+
+              {/* The plate's own stamped header, the way a real one is labelled:
+                  what the number is, and what it is stamped on. */}
+              <div className="dp-head">
+                <span className="dp-head-k">National Stock Number</span>
+                <span className="dp-head-v u-mono">MS21042L3</span>
+              </div>
+
+              {/* THE NUMBER. Four blocks on a 4·2·3·4 grid, proportional to the
+                  digits each holds, so the brackets below land under equal
+                  densities of type rather than under equal boxes.
+
+                  `data-of` maps a block to the span it belongs to, and it is what
+                  the hover interrogation reads: pointing at any digit lights the
+                  bracket and label that own it and recedes the other. That is the
+                  containment relationship made operable — the one thing a static
+                  diagram of this cannot do. */}
+              <div className="dp-digits">
                 {NSN_BLOCKS.map((b, i) => (
-                  <span className="nsna-block u-mono" data-block={i} key={i}>
+                  <span
+                    className="dp-block u-mono"
+                    data-block={i}
+                    data-of={i === 0 ? "fsc" : "niin"}
+                    tabIndex={0}
+                    key={i}
+                  >
                     {b}
                   </span>
                 ))}
               </div>
 
-              {/* Two brackets, and their spans are the whole point. The FSC
-                  bracket sits under block one; the NIIN bracket spans blocks two
-                  to four, because the NIIN is the last nine digits taken
-                  together. Both are laid out on the same four-column grid as the
-                  digits, so a bracket cannot drift off the digits it describes. */}
-              <div className="nsna-brackets">
-                <span className="nsna-bracket" data-span="fsc">
+              {/* The spans, and getting them wrong is the one way this diagram
+                  could teach something false: the FSC bracket sits under block
+                  one, and the NIIN bracket spans blocks two to four because the
+                  NIIN is the last NINE digits taken together. Both ride the same
+                  grid as the digits, so a bracket cannot drift off what it
+                  describes. */}
+              <div className="dp-brackets">
+                <span className="dp-bracket" data-span="fsc">
                   <i />
                 </span>
-                <span className="nsna-bracket" data-span="niin">
+                <span className="dp-bracket" data-span="niin">
                   <i />
                 </span>
               </div>
 
-              <div className="nsna-labels">
-                <span className="nsna-label" data-span="fsc">
-                  <b>FSC {NSN_BLOCKS[0]}</b>
-                  Federal Supply Class — the kind of item it is. Valves, bearings,
-                  connectors.
+              <div className="dp-labels">
+                <span className="dp-label" data-span="fsc">
+                  <b>
+                    FSC <span className="u-mono">{NSN_BLOCKS[0]}</span>
+                  </b>
+                  <em>Federal Supply Class</em>
+                  The kind of item it is — valves, bearings, connectors. Four digits,
+                  and every NSN starts with them.
                 </span>
-                <span className="nsna-label" data-span="niin">
+                <span className="dp-label" data-span="niin">
                   <b>
                     NIIN <span className="u-mono">{NIIN}</span>
                   </b>
-                  The item itself. Its first two digits ({NSN_BLOCKS[1]}) name the
-                  codification bureau that assigned it.
+                  <em>National Item Identification Number</em>
+                  The item itself, and the same nine digits whichever way you write
+                  them. Its first two ({NSN_BLOCKS[1]}) name the codification bureau
+                  that assigned it.
                 </span>
+              </div>
+
+              <p className="dp-hint">Point at any block to see which number owns it.</p>
+            </div>
+
+            <div className="dp-foot">
+              <figcaption className="dp-cap">
+                Stamped from a real line in the catalog —{" "}
+                <Link className="u-mono" href="/part/MS21042L3">
+                  MS21042L3
+                </Link>
+                , a self-locking hexagon nut.
+              </figcaption>
+
+              {/* THE COUNTERPOINT, and it is a separate object on purpose. CAGE is
+                  the identifier buyers most often assume is part of the stock
+                  number, and it is the only one here that is not. A detached plate
+                  with its own hairline says that before the sentence does. */}
+              <div className="dp-aside">
+                <div className="dp-aside-plate" aria-hidden="true">
+                  <span className="dp-aside-k">CAGE</span>
+                  <span className="dp-aside-v u-mono">99193</span>
+                </div>
+                <p className="dp-aside-t">
+                  <b>Not part of the number above.</b> A CAGE code names the
+                  manufacturer, not the item — five characters, issued to the company.
+                  The plate carries both because a buyer needs both, but they are two
+                  separate systems.
+                </p>
               </div>
             </div>
 
-            <p className="nsna-sr u-visually-hidden">
+            <p className="dp-sr u-visually-hidden">
               In the National Stock Number {SPECIMEN}, the first four digits{" "}
               {NSN_BLOCKS[0]} are the Federal Supply Class, which says what kind of
               item it is. The remaining nine digits, {NIIN}, are the National Item
@@ -444,35 +560,77 @@ export default function BrowsePage() {
               manufacturer and is not part of the NSN.
             </p>
 
-            <figcaption className="nsna-cap">
-              A real line from the catalog:{" "}
-              <Link className="u-mono" href="/part/MS21042L3">
-                MS21042L3
-              </Link>
-              , a self-locking hexagon nut. The CAGE code is the one identifier here
-              that is <b>not</b> part of the NSN — it names the manufacturer, not the
-              item.
-            </figcaption>
           </figure>
 
-          <ol className="idgrid" data-cue="stack" data-cue-ms="1200">
-            {IDENTIFIERS.map((d) => (
-              <li className="card idcard" key={d.code}>
-                <div className="idcard-top">
-                  <h3 className="idcard-code u-mono">{d.code}</h3>
-                  <span className="badge">{d.fmt}</span>
-                </div>
-                <p className="idcard-name">{d.name}</p>
-                <p className="idcard-body">{d.body}</p>
-                <p className="idcard-eg">
-                  e.g. <span className="u-mono">{d.eg}</span>
-                </p>
-                <Link className="btn btn-text idcard-go" href={d.href}>
-                  {d.cta} <span aria-hidden="true">→</span>
-                </Link>
-              </li>
+          {/* THE ROUTES, AND THE LAYOUT CARRIES THE ARGUMENT. Three of these are
+              parts of one number and the fourth is a different system, so they do
+              not get four identical cells — NSN, NIIN and FSC sit together as the
+              number's own three scales, and CAGE sits after a divider. Four
+              equal cards said the opposite of what the band spends its whole
+              height establishing. */}
+          <div className="dp-routes">
+            <ol className="dp-route-set" data-cue="stack" data-cue-ms="1200">
+              {IDENTIFIERS.filter((d) => d.code !== "CAGE").map((d) => (
+                <li className="dp-route" data-key={d.code} key={d.code}>
+                  <Link href={d.href}>
+                    <span className="dp-route-top">
+                      <span className="dp-route-code u-mono">{d.code}</span>
+                      <span className="dp-route-fmt">{d.fmt}</span>
+                    </span>
+                    {/* The scale track: this identifier drawn as its slice of the
+                        13-digit NSN, on a ruler every tile shares. Read down the
+                        three — FSC (left) + NIIN (right) = NSN (whole). The seam
+                        tick marks the FSC|NIIN boundary at the same fraction on
+                        each. Decorative: the digit count states the same fact in
+                        text, so this is aria-hidden. */}
+                    {d.span ? (
+                      <span
+                        className="dp-route-scale"
+                        aria-hidden="true"
+                        style={{
+                          ["--from" as string]: `${((d.span[0] - 1) / NSN_LEN) * 100}%`,
+                          ["--width" as string]: `${(d.span[1] / NSN_LEN) * 100}%`,
+                          ["--seam" as string]: NSN_SEAM,
+                        }}
+                      >
+                        <i />
+                      </span>
+                    ) : null}
+                    <span className="dp-route-name">{d.name}</span>
+                    <span className="dp-route-body">{d.body}</span>
+                    <span className="dp-route-eg u-mono">{d.eg}</span>
+                    <span className="dp-route-go">
+                      {d.cta} <span aria-hidden="true">→</span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+
+            {IDENTIFIERS.filter((d) => d.code === "CAGE").map((d) => (
+              <div className="dp-route-apart" data-cue key={d.code}>
+                <p className="dp-route-apart-k">A different system</p>
+                <ol className="dp-route-set dp-route-set-one">
+                  <li className="dp-route" data-key={d.code}>
+                    <Link href={d.href}>
+                      <span className="dp-route-top">
+                        <span className="dp-route-code u-mono">{d.code}</span>
+                        <span className="dp-route-fmt">{d.fmt}</span>
+                      </span>
+                      {/* No scale track: CAGE is not a slice of the NSN, and the
+                          missing ruler is exactly what says so. */}
+                      <span className="dp-route-name">{d.name}</span>
+                      <span className="dp-route-body">{d.body}</span>
+                      <span className="dp-route-eg u-mono">{d.eg}</span>
+                      <span className="dp-route-go">
+                        {d.cta} <span aria-hidden="true">→</span>
+                      </span>
+                    </Link>
+                  </li>
+                </ol>
+              </div>
             ))}
-          </ol>
+          </div>
         </div>
       </section>
 

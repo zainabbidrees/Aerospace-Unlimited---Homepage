@@ -119,7 +119,7 @@ export default function HomePage() {
         <div
           className="hero-media"
           role="img"
-          aria-label="An Airbus A320 taxiing at dusk, airport control tower and terminal lights behind"
+          aria-label="A wide-body freighter on the apron under a bright sky, a cargo pallet on a loader being raised to its forward hold"
         />
         <div className="hero-scrim" aria-hidden="true" />
 
@@ -165,7 +165,7 @@ export default function HomePage() {
       <section className="section">
         <div className="u-page">
           <div className="about">
-            <div className="about-intro" data-reveal="up">
+            <div className="about-intro" data-reveal="stagger">
               <p className="eyebrow">About ASAP</p>
               <h2 className="about-title">
                 An accredited{" "}

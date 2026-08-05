@@ -4,7 +4,8 @@ import { ContactIcon } from "@/components/contact/ContactIcon";
 import { FocusRail } from "@/components/contact/FocusRail";
 import { SheetReveal } from "@/components/contact/SheetReveal";
 import { EnquiryForm } from "@/components/contact/EnquiryForm";
-import { SiteLocator } from "@/components/contact/SiteLocator";
+import { MapCamera } from "@/components/contact/MapCamera";
+import { SiteMap } from "@/components/contact/SiteMap";
 import { CopyButton } from "@/components/CopyButton";
 import { ScrollReveal } from "@/components/home/ScrollReveal";
 
@@ -45,7 +46,7 @@ import { ScrollReveal } from "@/components/home/ScrollReveal";
     · enq         — the form panel with a stepped "what happens next" rail
     · dial        — a read-down spine: sticky photograph beside a focused rail
     · sla         — THE page's one accent band: a divided ledger of four figures
-    · where       — a photograph with a glass address plate laid into its corner
+    · where       — a real OpenStreetMap street map, full bleed, copy over it
     · close       — dark, split, the details repeated as the last thing on screen
 
   MOTION is entrance-and-interaction only, and nothing is gated on it: the shared
@@ -107,6 +108,10 @@ export default function ContactPage() {
           load, so the sequence finished off-screen before anyone scrolled to it.
           See components/contact/SheetReveal. */}
       <SheetReveal />
+      {/* The map's camera: the arrival zoom, the cursor zoom and the readout, all
+          writing one transform so they cannot fight. Additive — the map is a static
+          SVG and the readout states the site without it. */}
+      <MapCamera />
 
       {/* ====================================================================
            THE HERO — a collage, built to the client's reference (2026-08-04).
@@ -152,6 +157,13 @@ export default function ContactPage() {
         <span className="chero-grid" aria-hidden="true" />
 
         <div className="u-page">
+          {/* Breadcrumb on every page but Home — see About. */}
+          <ol className="breadcrumb">
+            <li>
+              <Link href="/">Home</Link>
+            </li>
+            <li>Contact Us</li>
+          </ol>
           <div className="chero-top hero-enter">
             <div className="chero-head">
               <h1 className="chero-title">
@@ -583,85 +595,83 @@ export default function ContactPage() {
       </section>
 
       {/* ====================================================================
-           WHERE WE ARE — a locator that descends to the site, with the address
-           plate laid into its corner rather than set beside it. Buyers vetting a
-           new supplier check that the shipping address and the inspection address
-           are the same site; the band's job is to make that one address concrete.
+           WHERE WE ARE — THE MAP IS THE BAND.
 
-           IT WAS A PHOTOGRAPH OF THE BUILDING until the client asked for a map
-           animation that zooms in. What replaced it is a schematic approach plate
-           — range rings, a graticule and a scale bar, no streets — because this
-           project carries no map dependency and no tile key, and a drawn street
-           grid for a real address would be fiction on the one panel a buyer uses
-           to route a shipment. Everything it states is declared or verified; see
-           SiteLocator.tsx for exactly what, and for the geocode's provenance.
+           THIRD VERSION OF THIS BAND, and the first one that is actually a map.
+           It was a photograph of the building with a glass address plate laid into
+           its corner; then, when the client asked for a map, a schematic approach
+           plate — range rings, a graticule, a scale bar and NO STREETS, because the
+           project carried no map dependency and drawing a street grid for a real
+           shipping address would have put fiction on the one panel a buyer uses to
+           route a part.
+
+           The client's reference (2026-08-05) is a street map filling the whole
+           band, so the constraint had to be answered rather than worked around:
+           every road, footprint, rail line and street name here is OpenStreetMap
+           geometry for the window around 1341 South Sunkist Street, fetched once and
+           baked into the repo as vector. Real data, no tile key, no runtime request,
+           nothing invented — and the ODbL credit in the corner is a licence
+           requirement, not a caption. See components/contact/SiteMap.tsx.
+
+           COMPOSITION follows the reference: map edge to edge, one opaque panel over
+           it on the page grid, and the map's own furniture (coordinate readout,
+           scale bar, credit) in the corners. The panel is opaque and not glass
+           because street geometry behind body text is unreadable. Nothing was cut —
+           the same three facts, the same copy control and the same Directions link.
            ==================================================================== */}
-      <section className="section where" id="location">
-        <div className="u-page">
-          <div className="where-grid">
-            <figure className="where-media" data-reveal="up">
-              <SiteLocator />
-              {/* THE PLATE NAMES THE CITY, NOT THE STREET. It used to do that to
-                  avoid printing "1341 South Sunkist Street" over a photograph
-                  whose facade plaque read "1341 S. Sinclaire St." — a visible
-                  contradiction on the page's one piece of evidence. The
-                  photograph is gone, so that particular collision is too, but the
-                  line stays as it is: both are real Anaheim 92806 addresses about
-                  a kilometre apart, and which one is the shipping address is
-                  still the client's to confirm. The locator is pinned to the one
-                  this site publishes, which is also the value the copy control
-                  and the Directions link below already carry. */}
-              <figcaption className="where-plate">
-                <span className="where-plate-k">
-                  <ContactIcon name="pin" />
-                  Headquarters, shipping and inspection
-                </span>
-                <span className="where-plate-v">
-                  Anaheim, California 92806, United States
-                </span>
-                <span className="where-plate-act">
-                  <CopyButton
-                    className="btn btn-quiet btn-sm"
-                    value="1341 South Sunkist Street, Anaheim, CA 92806, United States"
-                  >
-                    Copy full address
-                  </CopyButton>
-                  <a
-                    className="btn btn-text btn-sm"
-                    href="https://www.google.com/maps/search/?api=1&query=1341+South+Sunkist+Street+Anaheim+CA+92806"
-                    target="_blank"
-                    rel="noreferrer noopener"
-                  >
-                    Directions →
-                  </a>
-                </span>
-              </figcaption>
-            </figure>
-
-            <div className="where-side" data-reveal="up">
-              <p className="eyebrow">Where we are</p>
-              <h2 className="where-title">One site. The dock, the bench and the desk.</h2>
-              <p className="where-lede">
-                Shipping, receiving and inspection all happen at this address, so a
-                part is never in transit between our own buildings.
-              </p>
-              <dl className="where-facts">
-                <div>
-                  <dt>Deliveries to us</dt>
-                  <dd>Reference the purchase order number on the outer packaging.</dd>
-                </div>
-                <div>
-                  <dt>Same-day dispatch</dt>
-                  <dd>In-stock items ordered before 3pm Pacific ship the same day.</dd>
-                </div>
-                <div>
-                  <dt>Out of hours</dt>
-                  <dd>The quoting and AOG desks are staffed continuously, including holidays.</dd>
-                </div>
-              </dl>
-            </div>
+      <section className="section wmap" id="location">
+        {/* The map and its furniture are one object; the copy panel is a SIBLING,
+            not a child. Inside the frame it was clipped out of existence at the
+            width where the band stops being an overlay and becomes two stacked
+            rows — the frame is 300px there and the panel is 680. Both live in the
+            same grid cell on desktop, which is what puts one over the other. */}
+        <div className="wmap-frame" data-map-frame>
+          <div className="wmap-svg-wrap">
+            <SiteMap />
           </div>
+
+          {/* THE READOUT IS THE MAP'S ONE PIECE OF TEXT, and it does two jobs. At
+              rest it states the site's own coordinate, which is what the server
+              renders and what a no-JS or touch visitor gets. Under a fine pointer
+              MapCamera switches it to the cursor's position — computed from the
+              projection, not looked up — and, once the pointer stops, the nearest
+              named street with its distance. A distance is part of the claim: at
+              8 m the street is the one you are on, at 210 m it is not. */}
+          <div className="wmap-read" data-map-read>
+            <p className="wmap-read-k" data-read-k>Site</p>
+            <p className="wmap-read-v u-mono" data-read-v>33.8149&deg; N &middot; 117.8814&deg; W</p>
+            <p className="wmap-read-n" data-read-n />
+          </div>
+          <p className="wmap-credit">
+            Map data &copy;{" "}
+            <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer noopener">
+              OpenStreetMap
+            </a>{" "}
+            contributors
+          </p>
         </div>
+
+        {/* THE COPY PANEL IS GONE (client, 2026-08-05). It carried the eyebrow, the
+            heading, a standfirst, three facts and the two controls, floating over the
+            left of the map — and the client did not want a card on the map. Every
+            fact in it is already published in type elsewhere on this page, so the
+            band loses no information:
+
+              · shipping / receiving / inspection at this address, and the purchase
+                order number on the outer packaging — Direct details, Address
+              · in-stock before 3pm Pacific ships the same day — Direct details,
+                Hours, and the accent band's "Same-day cutoff"
+              · desks staffed continuously — Direct details, Hours, and the accent
+                band's "24/7 all year"
+              · the full address, copyable — Direct details, Address
+
+            TWO THINGS WERE ONLY HERE and are now gone from the page: the Directions
+            link out to the map provider, and this band's heading. The heading is
+            replaced by a visually-hidden one so the document still has an outline
+            and the band still announces itself; the map's own aria-label describes
+            what it shows. If Directions should come back it needs a home that is not
+            a card — a bare link in a map corner is the obvious one. */}
+        <h2 className="u-visually-hidden">Where we are</h2>
       </section>
 
       {/* ====================================================================

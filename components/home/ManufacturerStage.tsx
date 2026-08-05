@@ -72,7 +72,7 @@ export function ManufacturerStage({
             <Link
               key={m.cage}
               className={`mfr-card${isActive ? " is-active" : ""}`}
-              href={`/browse/manufacturers/${encodeURIComponent(m.name)}`}
+              href={`/browse/manufacturer/${encodeURIComponent(m.cage)}`}
               aria-current={isActive ? "true" : undefined}
               onMouseEnter={() => setActive(i)}
               onFocus={() => setActive(i)}

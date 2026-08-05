@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { AIRCRAFT, PARTS } from "@/lib/data";
 import { num } from "@/lib/format";
 import { CueReveal } from "@/components/inner/CueReveal";
-import { PageMast } from "@/components/inner/PageMast";
+import { CatMast } from "@/components/inner/CatMast";
 import { IndexFilter } from "@/components/browse/IndexFilter";
 
 /*
@@ -44,6 +44,28 @@ export const metadata: Metadata = {
    without an edit, and a new helicopter slug lands in the wrong one visibly. */
 const ROTORCRAFT = new Set(["uh60", "ch47", "bell206"]);
 
+/* MAKER AND DESIGNATION, SPLIT OUT OF THE NAME lib/data.ts already holds — not
+   new content. "Boeing 737 (all series)" contains both facts; this only separates
+   them so each can be set at its own weight, the way the FSC chip and the CAGE
+   plate do elsewhere in the catalog.
+
+   THE DESIGNATION IS THE PLATE'S ANCHOR, and that is the same reasoning design.md
+   records for the category tiles: the code is real, unique per row, and it is what
+   a buyer scans for. Nobody reads eight full aircraft names looking for theirs —
+   they look for "737". Keyed by slug so a reorder in lib/data.ts cannot move a
+   designation onto the wrong platform, and the full name is still printed in
+   full underneath, because that is the identification. */
+const PLATFORM: Record<string, { maker: string; desig: string }> = {
+  b737:    { maker: "Boeing",     desig: "737" },
+  a320:    { maker: "Airbus",     desig: "A320" },
+  b777:    { maker: "Boeing",     desig: "777" },
+  crj:     { maker: "Bombardier", desig: "CRJ" },
+  c130:    { maker: "Lockheed",   desig: "C-130" },
+  uh60:    { maker: "Sikorsky",   desig: "UH-60" },
+  ch47:    { maker: "Boeing",     desig: "CH-47" },
+  bell206: { maker: "Bell",       desig: "206" },
+};
+
 const GROUPS = [
   {
     id: "fixed-wing",
@@ -63,7 +85,6 @@ const GROUPS = [
    each group. Scoped per group, the single C-130 row and the deepest airliner
    would both read as full and the comparison would be a lie. */
 const AC_MAX = Math.max(...AIRCRAFT.map((a) => a.count));
-const TOTAL = AIRCRAFT.reduce((s, a) => s + a.count, 0);
 
 export default function AircraftPage() {
   return (
@@ -71,7 +92,12 @@ export default function AircraftPage() {
       <CueReveal />
       <IndexFilter noun="platform" nounPlural="platforms" />
 
-      <PageMast
+      {/* The light CatMast, shared with the Catalog hub — see CatMast.tsx. One
+          action, matching the section; the salvage path for out-of-production
+          platforms is carried by the page's own sections below. The flightline
+          scene is the documented image for this route (design.md) — treatment,
+          not a claim about any listed platform. */}
+      <CatMast
         crumbs={[
           { href: "/", label: "Home" },
           { href: "/browse", label: "Catalog" },
@@ -88,23 +114,13 @@ export default function AircraftPage() {
           </>
         }
         actions={
-          <>
-            <Link className="btn btn-primary btn-lg" href="/rfq">
-              Request a quote
-            </Link>
-            <Link className="btn btn-quiet btn-lg" href="/capabilities#salvage">
-              Out-of-production platform?
-            </Link>
-          </>
+          <Link className="btn btn-primary btn-lg" href="/rfq?mode=list">
+            Send us a parts list
+          </Link>
         }
         img="/img/catalog/flightline.jpg"
         alt="A row of parked military jets seen from behind along a flightline, their exhaust nozzles and tailplanes receding into haze"
-        bias="38%"
-        record={[
-          { v: String(AIRCRAFT.length), k: "Platforms listed" },
-          { v: num(TOTAL), k: "Parts across them" },
-          { v: "24/7", k: "AOG desk" },
-        ]}
+        imgPosition="38% 50%"
       />
 
       {/* ====================================================================
@@ -173,27 +189,55 @@ export default function AircraftPage() {
               </h2>
               <p className="idxgroup-note">{g.note}</p>
 
+              {/* EVERY PLATE IS THE SAME SIZE and the last row is allowed to be
+                  short. Widening the deepest plate to span two columns was tried
+                  twice and abandoned both times — see the note in ux.css. */}
               <ol className="acgrid acgrid-page">
-                {g.items.map((a) => (
-                  <li data-index-row data-terms={a.name.toLowerCase()} key={a.slug}>
-                    <Link className="acplate acplate-lg" href={`/browse/platform/${a.slug}`}>
-                      <span className="ac-name">{a.name}</span>
-                      <span className="ac-meta">
-                        <span className="ac-n">{num(a.count)} parts listed</span>
-                        <span
-                          className="ac-bar"
-                          aria-hidden="true"
-                          style={{ ["--depth" as string]: `${Math.round((a.count / AC_MAX) * 100)}%` }}
-                        >
-                          <i />
+                {g.items.map((a) => {
+                  const meta = PLATFORM[a.slug];
+                  return (
+                    <li data-index-row data-terms={a.name.toLowerCase()} key={a.slug}>
+                      <Link
+                        className="acplate"
+                        href={`/browse/platform/${a.slug}`}
+                      >
+                        <span className="ac-top">
+                          {/* The designation, stamped. Mono because it is an
+                              identifier a buyer matches character by character —
+                              the one use design.md sanctions for the mono face. */}
+                          <span className="ac-desig u-mono">{meta?.desig ?? a.name}</span>
+                          <span className="ac-maker">{meta?.maker}</span>
                         </span>
-                      </span>
-                      <span className="ac-go" aria-hidden="true">
-                        Browse parts →
-                      </span>
-                    </Link>
-                  </li>
-                ))}
+
+                        <span className="ac-name">{a.name}</span>
+
+                        <span className="ac-foot">
+                          <span className="ac-figure">
+                            <b className="u-mono">{num(a.count)}</b>
+                            <em>parts listed</em>
+                          </span>
+                          {/* THE SCALE, not a progress pill. A hairline the full
+                              width of the plate with a solid segment and a tick at
+                              this platform's share of the deepest one — the same
+                              ruler idiom as the data plate's identifier tracks, so
+                              the catalog measures things one way. Decorative: the
+                              figure above states it in text. */}
+                          <span
+                            className="ac-scale"
+                            aria-hidden="true"
+                            style={{ ["--depth" as string]: `${Math.round((a.count / AC_MAX) * 100)}%` }}
+                          >
+                            <i />
+                          </span>
+                        </span>
+
+                        <span className="ac-go">
+                          Browse parts <span aria-hidden="true">→</span>
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
               </ol>
             </section>
           ))}

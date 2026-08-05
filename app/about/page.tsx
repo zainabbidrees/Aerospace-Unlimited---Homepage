@@ -235,6 +235,14 @@ export default function AboutPage() {
            ==================================================================== */}
       <section className="ahero">
         <div className="u-page ahero-inner">
+          {/* Breadcrumb on every page but Home; left-aligned even though the
+              hero centres, so its position matches Catalog/Blog/Capabilities. */}
+          <ol className="breadcrumb ahero-crumbs">
+            <li>
+              <Link href="/">Home</Link>
+            </li>
+            <li>About Us</li>
+          </ol>
           <p className="eyebrow eyebrow-center">Aerospace · Defense · Industrial parts distributor</p>
           <h1 className="ahero-title">
             <span className="ahero-line">Built to support the mission.</span>

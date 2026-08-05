@@ -13,6 +13,7 @@ import {
   readingMinutes,
 } from "@/lib/blog";
 import { CueReveal } from "@/components/inner/CueReveal";
+import { ArchiveYears } from "@/components/blog/ArchiveYears";
 
 /*
   BLOG INDEX
@@ -308,29 +309,8 @@ export default async function BlogIndexPage({
               </div>
             </div>
 
-            {years.map((g) => (
-              <section className="barch" data-cue="group" data-cue-ms="1200" key={g.year}>
-                <h3 className="barch-year">
-                  <span>{g.year}</span>
-                  <i className="barch-rule" aria-hidden="true" />
-                  <em>{g.posts.length}</em>
-                </h3>
-                <ol className="barch-list">
-                  {g.posts.map((p) => (
-                    <li key={p.slug}>
-                      <Link className="barch-row" href={`/blog/${p.slug}`}>
-                        <span className="barch-date u-mono">{formatDateShort(p.date)}</span>
-                        <span className="barch-title">{p.title}</span>
-                        <span className="barch-cat">{p.category}</span>
-                        <span className="barch-go" aria-hidden="true">
-                          →
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ol>
-              </section>
-            ))}
+            {/* Each year is a click-to-expand dropdown; see ArchiveYears. */}
+            <ArchiveYears years={years} />
           </div>
         </section>
       ) : null}

@@ -1147,7 +1147,7 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
 }
 .hero-media {
   position: absolute; inset: 0; z-index: -2;
-  background-image: url("/img/hero.jpg");
+  background-image: url("/img/hero-freight.jpg");
   background-size: cover;
   /* 58% across, not centre. The frame is narrower than the 3:2 source, so
      `cover` crops horizontally; biasing right pushes the nose, control tower and
@@ -1176,7 +1176,7 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
 @media (max-width: 760px) {
   /* A quarter of the bytes, and at this width the detail is invisible anyway.
      Biased further right so the nose survives the much narrower crop. */
-  .hero-media { background-image: url("/img/hero-sm.jpg"); background-position: 66% 50%; }
+  .hero-media { background-image: url("/img/hero-freight-sm.jpg"); background-position: 66% 50%; }
 }
 
 /* A scrim, not decoration. The copy sits bottom-left and the photograph's
@@ -1368,27 +1368,27 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
   flex-direction: column;
 }
 
-/* The section's loudest element. Regular weight on purpose — the design sets it
-   in Inter Regular, not bold — with the one accented word carrying the colour. */
+/* Matches the rest of the homepage: every other section heading is a plain
+   `.section-head h2`, so this takes the same h2 token, weight and navy ink
+   rather than the Figma design's oversized Inter-Regular display. The one
+   accented word keeps the steel emphasis. */
 .about-title {
   margin-top: var(--au-s-4);
-  max-width: 16ch;
-  font-size: clamp(2.25rem, 5vw, 4rem);
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  font-weight: var(--au-weight-regular);
-  /* Near-black (midnight), not the navy heading ink — the design sets the
-     non-accent words in black so the one steel word reads as the accent. */
-  color: var(--au-ink);
+  max-width: 22ch;
+  font-size: var(--au-text-h2);
+  line-height: var(--au-leading-h2);
+  letter-spacing: var(--au-tracking-h2);
+  font-weight: var(--au-weight-medium);
+  color: var(--au-ink-heading);
   text-wrap: balance;
 }
 .about-title-accent { color: var(--au-accent); }
 
 .about-lede {
-  margin-top: var(--au-s-5);
-  max-width: 46ch;
-  font-size: clamp(1.125rem, 1.5vw, 1.5rem);
-  line-height: 1.5;
+  margin-top: var(--au-s-4);
+  max-width: 60ch;
+  font-size: var(--au-text-body);
+  line-height: var(--au-leading-body);
   color: var(--au-ink-muted);
 }
 
@@ -1448,15 +1448,15 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
 }
 
 .about-stat-value {
-  font-size: clamp(1.75rem, 2.4vw, 2.5rem);
-  font-weight: var(--au-weight-regular);
-  line-height: 1.05;
-  letter-spacing: -0.02em;
+  font-size: var(--au-text-h3);
+  font-weight: var(--au-weight-medium);
+  line-height: 1.2;
+  letter-spacing: var(--au-tracking-h2);
   color: var(--au-ink-heading);
   font-variant-numeric: tabular-nums;
 }
 .about-stat-label {
-  font-size: clamp(1rem, 1.2vw, 1.25rem);
+  font-size: var(--au-text-small);
   color: var(--au-ink-muted);
 }
 
@@ -2239,7 +2239,12 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
   --res-pad: var(--au-s-4);
 
   display: flex;
-  gap: var(--au-s-2);
+  /* NO flex `gap`: a gap is a hover dead zone the pointer crosses between slats,
+     which briefly matches `.res-strip:hover` with nothing hovered and collapses
+     every slat to a stub. The inter-slat space is a transparent right-border on
+     each slat instead (see .res-slat) — part of that slat's own hover area, so
+     the pointer is never in a no-slat-hovered state and the row never snaps. */
+  gap: 0;
   /* Floored by the longest spine, not chosen for looks: "Parts by Aircraft /
      Helicopter Model" runs ~202px vertically at 12px, and the numeral plus
      padding costs another 66px. Below ~270px it clips, and a clipped name on a
@@ -2268,6 +2273,13 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
   padding: var(--res-pad);
   background: var(--au-glass-fill);
   border: var(--au-hairline-glass);
+  /* The visual gap between slats, as a transparent right-border rather than a
+     flex gap. `background-clip: padding-box` keeps the glass fill from painting
+     under it, so it reads as empty space; but it is part of this slat's hover
+     area, which is what removes the dead zone. The last slat has no trailing
+     gap. */
+  border-right: var(--au-s-2) solid transparent;
+  background-clip: padding-box;
   border-radius: var(--au-radius-lg);
   box-shadow: var(--au-raised);
   text-decoration: none;
@@ -2275,6 +2287,7 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
               flex-basis var(--au-dur-slow) var(--au-ease),
               box-shadow var(--au-dur-slow) var(--au-ease);
 }
+.res-slat:last-child { border-right: var(--au-hairline-glass); }
 
 /* The open state, in three rules that must stay in this order.
 
@@ -3209,6 +3222,79 @@ legend { padding: 0; font-size: var(--au-text-h3); letter-spacing: var(--au-trac
   .spec-table td { padding-top: var(--au-s-1); }
 }
 
+
+/* ==========================================================================
+   /rfq — the Instant Quote form (ported from prototype/rfq.html)
+
+   Most of the form rides primitives that already exist — .field, .check,
+   .pdp-layout, .rfq-panel, .steps, .certs, .spec-table. This block is only the
+   page's own spacing and the two shapes those primitives did not cover: the
+   three-column part LINE, and the in-place RECEIPT that replaces the form on a
+   successful send.
+   ========================================================================== */
+
+.rfq-crumbs { padding-block: var(--au-s-2) var(--au-s-6); }
+.rfq-lede {
+  margin-top: var(--au-s-3);
+  max-width: 60ch;
+  font-size: var(--au-text-h4);
+  color: var(--au-ink-muted);
+}
+.rfq-form { margin-top: clamp(var(--au-s-5), 3vw, var(--au-s-6)); }
+.rfq-fs { margin-bottom: clamp(var(--au-s-6), 4vw, var(--au-s-7)); }
+.rfq-modes { display: flex; gap: var(--au-s-2); margin-bottom: var(--au-s-4); }
+
+/* The part line: part number widest, quantity narrow, condition medium — a real
+   row rather than three equal auto-fit columns, collapsing to a stack when the
+   card gets tight. */
+.rfq-line { padding: var(--au-s-4); margin-bottom: var(--au-s-3); }
+.rfq-line .field-row {
+  grid-template-columns: minmax(0, 2.2fr) minmax(0, 0.9fr) minmax(0, 1.5fr);
+}
+@media (max-width: 620px) {
+  .rfq-line .field-row { grid-template-columns: minmax(0, 1fr); }
+}
+.rfq-line-rm { margin-top: var(--au-s-2); }
+.rfq-add { margin-top: var(--au-s-3); }
+.rfq-paste {
+  min-height: 132px;
+  font-family: var(--au-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.rfq-more { margin-top: var(--au-s-4); }
+.rfq-more > summary {
+  cursor: pointer;
+  padding: var(--au-s-2) 0;
+  font-size: var(--au-text-small);
+  font-weight: var(--au-weight-medium);
+  color: var(--au-ink);
+}
+.rfq-more > summary::marker { color: var(--au-ink-muted); }
+.rfq-more-row { margin-top: var(--au-s-4); }
+
+.rfq-urgent { display: flex; flex-direction: column; gap: var(--au-s-4); }
+.rfq-needby { max-width: 280px; }
+.rfq-notes { font-family: var(--au-font-sans); min-height: 90px; }
+
+.rfq-submit { background: var(--au-surface-alt); }
+.rfq-submit-note { margin-top: var(--au-s-3); text-align: center; }
+
+/* The receipt: the in-place confirmation. Bounded to a reading measure; the
+   summary reuses .spec-table but as a real three-column table, so the label
+   column's fixed 220px is released here. */
+.rfq-done { max-width: 760px; padding-block: clamp(var(--au-s-5), 4vw, var(--au-s-7)); }
+.rfq-done-badge { margin-bottom: var(--au-s-4); }
+.rfq-done-eta { margin-top: var(--au-s-4); font-size: var(--au-text-h4); color: var(--au-ink-body); }
+.rfq-done-card { margin-top: var(--au-s-6); }
+.rfq-done-sub { font-size: var(--au-text-h3); margin-bottom: var(--au-s-3); }
+.rfq-summary th { width: auto; }
+.rfq-summary th:nth-child(2) { width: 5rem; }
+.rfq-done-ref { margin-top: var(--au-s-4); font-size: var(--au-text-caption); color: var(--au-ink-muted); }
+.rfq-done-notice { margin-top: var(--au-s-5); }
+.rfq-done-again { display: flex; flex-wrap: wrap; gap: var(--au-s-3); margin-top: var(--au-s-7); }
+.rfq-done-aog { margin-top: var(--au-s-6); }
+
 .copy-btn {
   border: 0; background: transparent; cursor: pointer;
   border-radius: var(--au-radius-xs);
@@ -3641,6 +3727,28 @@ legend { padding: 0; font-size: var(--au-text-h3); letter-spacing: var(--au-trac
   [data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(5) { transition-delay: 0.36s; }
   [data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(6) { transition-delay: 0.44s; }
 
+  /* ---- About ASAP: a slow, sequenced arrival --------------------------
+     The band's request is that everything appears slowly as it scrolls in.
+     Both columns are stagger containers; here the transition is lengthened and
+     the steps widened so the eyebrow, headline, lede and image settle one after
+     another on the left while the four facts count in down the right — a calm
+     unfold rather than the default quick stagger. */
+  .about-intro[data-reveal="stagger"] > *,
+  .about-stats[data-reveal="stagger"] > * {
+    transition-duration: 1000ms;
+  }
+  .about-intro[data-reveal="stagger"][data-reveal-state="armed"] > * {
+    transform: translateY(26px);
+  }
+  .about-intro[data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(1) { transition-delay: 0.05s; }
+  .about-intro[data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(2) { transition-delay: 0.24s; }
+  .about-intro[data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(3) { transition-delay: 0.43s; }
+  .about-intro[data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(4) { transition-delay: 0.62s; }
+  .about-stats[data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(1) { transition-delay: 0.30s; }
+  .about-stats[data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(2) { transition-delay: 0.46s; }
+  .about-stats[data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(3) { transition-delay: 0.62s; }
+  .about-stats[data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(4) { transition-delay: 0.78s; }
+
 }
 
 /* ==========================================================================
@@ -3674,6 +3782,9 @@ legend { padding: 0; font-size: var(--au-text-h3); letter-spacing: var(--au-trac
   overflow: hidden;
 }
 .ahero-inner { display: flex; flex-direction: column; align-items: center; }
+/* The hero centres its content, but the breadcrumb is wayfinding chrome and
+   stays at the top-left like every other page's, so it overrides the centring. */
+.ahero-crumbs { align-self: flex-start; padding-top: 0; }
 /* The about hero's eyebrow is the standard `.eyebrow`; it only adds the hero's
    entrance rise, which the rest of the page's eyebrows do not carry. */
 .ahero-inner .eyebrow { animation: au-rise 760ms var(--au-ease) 80ms both; }
@@ -6999,321 +7110,248 @@ a.dial-val:hover { color: var(--au-link); text-decoration: underline; text-under
   }
   .sla-cell + .sla-cell::before { content: none; }
 }
+/* ---- 5 · Where we are — a real map, full bleed --------------------------
+   WHAT THIS REPLACED, TWICE. First a photograph of the building with a glass
+   address plate laid into its corner. Then a schematic approach plate — range
+   rings, a graticule, a scale bar and deliberately NO STREETS, because the project
+   carried no map dependency and a drawn street grid for a real shipping address
+   would have been fiction on the one panel a buyer uses to route a part.
 
-/* ---- 5 · Where we are ---------------------------------------------------
-   The plate is laid INTO the photograph rather than set beside it, so the address
-   and the building are one object. The photograph is the real headquarters, so it
-   is evidence and it is named — see au-stock-photography-scope for why the
-   generic scenes elsewhere on the site are never captioned this way.
+   IT IS NOW AN ACTUAL MAP, and the objection above is answered by data rather than
+   by restraint: every road, footprint and street name is OpenStreetMap geometry for
+   the window around the published address, baked into the repo as vector at build
+   time. Nothing is requested at runtime, there is no tile key, and nothing is
+   invented. See components/contact/SiteMap.tsx for the provenance and the licence —
+   the ODbL credit in the corner is a requirement, not decoration.
 
-   The plate's inset (27px) exceeds the frame's radius (16px), so the concentric
-   rule does not bind here — see .audits/README.md. */
-.where-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.22fr) minmax(0, 0.88fr);
-  gap: clamp(var(--au-s-5), 3.4vw, var(--au-s-7));
-  align-items: center;
-}
-.where-media {
+   THE MAP IS THE BAND. It runs the full width of the viewport with no container
+   and no radius, and the copy sits over it in one panel on the page grid — the
+   composition in the client's reference. The panel is opaque rather than glass:
+   over a map, translucency puts street geometry behind body text.
+
+   THE MAP PALETTE IS THE SITE'S, not a map provider's. Seven local properties, all
+   sampled from the Silver Mist / Wash family, so the band reads as this site with
+   real data in it rather than an embed dropped into the page. */
+.wmap {
+  --smap-ground: #eceff4;
+  --smap-block: #e4e8f0;
+  --smap-bld: #d2dae7;
+  --smap-road: #ffffff;
+  --smap-casing: #cfd6e2;
+  --smap-trunk: #f4eddd;
+  --smap-rail: var(--au-silver-mist);
+  --smap-label: var(--au-ink-muted);
+
   position: relative;
-  border-radius: var(--au-radius-lg);
-  overflow: hidden;
-  box-shadow: var(--au-raised-lg);
+  /* No section padding: the map is the band's ground, so it goes edge to edge and
+     top to bottom. */
+  padding-block: 0;
+  background: var(--smap-ground);
+  border-block: var(--au-hairline);
+  /* NO `overflow: hidden` HERE, and it is load-bearing. `overflow: hidden` makes an
+     element a scroll container, and a view timeline measures its subject against the
+     nearest scroll container above it — so clipping on this band pinned the descent
+     at a constant 50% progress, because the frame never moves inside a scroller that
+     is the band itself. The clip belongs on the frame, which is below the subject.
+     (Same family of trap as an overflow ancestor silently killing `position:
+     sticky`.) */
 }
-/* ---- The site locator ---------------------------------------------------
-   Replaces the headquarters photograph at the client's direction: a schematic
-   approach plate that descends 100× as the band scrolls. See SiteLocator.tsx for
-   what it does and does not claim — it draws no streets, and every distance on
-   it is declared rather than depicted.
-
-   IT IS A DARK PLATE, NOT AN ACCENT ONE. Steel Blue would have been the obvious
-   ground for a technical drawing, but /contact spends its one accent band on the
-   response-times band (`.sla`), and the rule is one per page. Midnight with a
-   navy lift also keeps the glass address plate reading as the lit thing on the
-   panel, which is the element a buyer actually came here for.
-
-   EVERY CUSTOM PROPERTY DEFAULTS TO ITS ARRIVED VALUE, so with no JS, under
-   reduced motion, or in the screenshot renderer this is a finished locator at
-   site scale: closest zoom, coarse tier gone, fine tier drawn, crosshair locked,
-   scale bar at 10% of the panel reading 50 m — which is exactly true, because
-   the arrival scale is 500 m across. */
-.loc {
+/* The map IS the band, so the band is simply the map's height. It was a grid of one
+   stacked cell until the copy panel that overlaid it was removed. */
+.wmap-frame {
   position: relative;
-  height: clamp(320px, 40vw, 540px);
+  height: clamp(420px, 42vw, 600px);
   overflow: hidden;
-  /* So the scale bar can be a true fraction of the PANEL's width — see
-     `.loc-scale-bar`. `.loc` is already `position: relative`, so the layout
-     containment this implies changes no containing block here. */
-  container-type: inline-size;
-  background:
-    radial-gradient(130% 110% at 50% 38%,
-      rgba(var(--au-tint-rgb), 0.55), transparent 68%),
-    var(--au-surface-dark);
-  isolation: isolate;
-}
-.loc-plate {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
 }
 
-/* The terrain scales; the instrument does not.
+/* ---- The camera --------------------------------------------------------
+   THE ZOOM IS NO LONGER SCROLL-LINKED. It was `animation-timeline: view()`,
+   scrubbing with the wheel; the client asked for it to play on landing on the
+   section and then to follow the pointer instead (2026-08-05). Both of those write
+   the same transform, and a CSS animation outranks an inline one, so the stylesheet
+   now declares NO animation at all — MapCamera owns the transform and this block
+   only sets up the coordinate system it writes into.
 
-   `transform-origin: 0 0`, NOT `center`, and this is the one thing here that is
-   easy to get wrong. With `transform-box: view-box` the reference box's top-left
-   is placed at the origin of the coordinate system the viewBox establishes — so
-   for a viewBox of `-250 -250 500 500`, `center` resolves to user-space (250,250),
-   a quarter-frame down and right of the site. Scaling about that dragged the whole
-   field toward the corner: the crosshair drifted off centre and the range rings
-   sailed out of frame, leaving one stray arc across the bottom right. The
-   geometry is authored around (0,0), so (0,0) is the origin the zoom needs. */
-.loc-field {
-  transform: scale(var(--loc-k, 1));
-  transform-box: view-box;
-  transform-origin: 0 0;
-  /* Fades the linework toward the frame so the field reads as a plate under a
-     pool of light rather than a grid cut off by the panel edge. It also hides
-     each tier's own finite extent at the moment it fades in. */
-  -webkit-mask-image: radial-gradient(78% 78% at 50% 46%, #000 34%, transparent 100%);
-  mask-image: radial-gradient(78% 78% at 50% 46%, #000 34%, transparent 100%);
+   THE ORIGIN IS THE SITE, and the component's maths depends on it: `transform-origin:
+   0 0` on an SVG group puts the scale origin at user (0,0), which is where the site
+   sits. The translate that holds a point under the cursor is derived from exactly
+   that, so changing this value silently moves every zoom off its anchor. No
+   `transform-box` — declaring `view-box` implies an origin at the viewBox corner
+   that Chrome does not actually use here, and that mismatch cost an iteration.
+
+   RESTING STATE IS TRUE SCALE. No transform is declared, so no-JS, reduced motion
+   and the screenshot renderer get the finished map — the camera only ever moves
+   away from what is already correct. See au-motion-safety. */
+.smap-zoom { transform-origin: 0 0; }
+
+/* ---- The drawn layers ---------------------------------------------------
+   Casings under fills is how a road network gets its edge without every road
+   carrying a stroke of its own: the wider dark line is drawn first for ALL roads,
+   then the narrower light line over it, so junctions merge instead of stacking. */
+.smap-ground { fill: var(--smap-ground); }
+.smap-landuse path { fill: var(--smap-block); }
+.smap-water path { fill: #d6e2f2; stroke: #d6e2f2; stroke-width: 6; }
+.smap-casing path { fill: none; stroke: var(--smap-casing); stroke-linecap: round; stroke-linejoin: round; }
+.smap-fill path { fill: none; stroke: var(--smap-road); stroke-linecap: round; stroke-linejoin: round; }
+/* The freeway warm, the way every legible map separates the through route from the
+   street grid by hue rather than by width alone. */
+.smap-fill .smap-trunk { stroke: var(--smap-trunk); }
+.smap-rail path { fill: none; stroke: var(--smap-rail); stroke-width: 2.4; stroke-dasharray: 9 7; }
+.smap-blds path { fill: var(--smap-bld); }
+.smap-site-bld path { fill: rgba(var(--au-accent-rgb), 0.18); }
+
+/* Labels get a halo of the ground colour rather than a box: `paint-order: stroke`
+   lets the stroke sit behind the glyphs, which is the one way to keep a street name
+   legible where it crosses its own road without printing a plate over the map. */
+.smap-labels text {
+  fill: var(--smap-label);
+  font-family: var(--au-font-sans);
+  font-weight: var(--au-weight-medium);
+  letter-spacing: 0.02em;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  paint-order: stroke;
+  stroke: var(--smap-ground);
+  stroke-width: 3.4;
+  stroke-linejoin: round;
 }
-.loc-tier { fill: none; }
-.loc-tier[data-tier="a"] { opacity: var(--loc-a, 0); }
-.loc-tier[data-tier="b"] { opacity: var(--loc-b, 1); }
-.loc-tier[data-tier="c"] { opacity: var(--loc-c, 1); }
-.loc-grid { stroke: rgba(255, 255, 255, 0.13); stroke-width: 1; }
-/* Horizon, not white: the rings are the measured element and they should read as
-   the instrument's own colour. 10.41:1 on Midnight. */
-.loc-ring { stroke: rgba(169, 200, 240, 0.34); stroke-width: 1; }
+.smap-labels .smap-l-trunk { fill: #8a6a2f; }
 
-/* The mark resolves from a dot to a locked crosshair as the plate arrives. It is
-   never absent — at `--loc-mark: 0` the centre dot is still there, which is what
-   a site looks like from 50 km up. */
-.loc-mark { fill: none; }
-.loc-mark-ring,
-.loc-mark-cross {
-  stroke: var(--au-link-inverse);
-  stroke-width: 1.25;
-  opacity: var(--loc-mark, 1);
-  /* Same origin rule as the field, same reason. */
-  transform: scale(calc(0.55 + 0.45 * var(--loc-mark, 1)));
-  transform-box: view-box;
-  transform-origin: 0 0;
+/* ---- The site ----------------------------------------------------------- */
+.smap-site-dot { fill: var(--au-accent); stroke: #ffffff; stroke-width: 3; }
+
+/* ---- The cursor probe ---------------------------------------------------
+   Same dot as the site's, with a crosshair around it: the crosshair is what says
+   this one is an instrument rather than a place. Invisible until MapCamera puts
+   `data-probe` on the readout, so nothing about the resting map changes.
+
+   `transition` on the group's own opacity only — position is set as an attribute
+   every frame, and transitioning that would put the crosshair permanently behind
+   the pointer. */
+.smap-probe { opacity: 0; transition: opacity var(--au-dur-fast) var(--au-ease); }
+[data-probe] .smap-probe { opacity: 1; }
+.smap-probe-cross { fill: none; stroke: rgba(var(--au-accent-rgb), 0.55); stroke-width: 1.6; }
+.smap-probe-ring { fill: none; stroke: rgba(var(--au-accent-rgb), 0.4); stroke-width: 1.4; }
+.smap-probe-halo { fill: rgba(var(--au-accent-rgb), 0.14); }
+.smap-probe-dot { fill: var(--au-accent); stroke: #ffffff; stroke-width: 2.4; }
+.smap-site-label {
+  fill: var(--au-ink-heading);
+  font-family: var(--au-font-sans);
+  font-size: 15px;
+  font-weight: var(--au-weight-semibold);
+  dominant-baseline: middle;
+  letter-spacing: 0.01em;
+  paint-order: stroke;
+  stroke: var(--smap-ground);
+  stroke-width: 4.5;
+  stroke-linejoin: round;
 }
-.loc-mark-cross { stroke-width: 1; }
-.loc-mark-dot { fill: #ffffff; stroke: none; }
-
-/* ---- The tracking reticle ----------------------------------------------
-   WHY THIS IS A SECOND MARK RATHER THAN THE SITE MARK MOVING. `.loc-mark` IS the
-   address: the range rings are measured from it, the scale bar is true relative
-   to it, and `.loc-readout` states its coordinates. Slide it under the cursor and
-   the panel asserts that the site is wherever the pointer happens to be — on the
-   one panel whose job is to tell a buyer where to send a part. So the datum stays
-   put and this tracks instead, which is what a scope does: a fixed mark and a
-   moving cursor.
-
-   AND IT MEASURES SOMETHING, which is what keeps it from being a glow that
-   follows the mouse. `.loc-readout-r` reads the reticle's distance from the site,
-   and that distance is true by construction rather than decorative: the geometry
-   is authored in metres and `--loc-k` is the live zoom, so `hypot(cx, cy) / k` is
-   a real number of metres at every point in the descent.
-
-   ONLY PRESENCE TRANSITIONS. `--loc-cx` / `--loc-cy` are rewritten every frame by
-   an exponential smoother in LocatorCursor, so a transition on the transform
-   would fight it and stack a second, uncontrolled lag on top of the smoothing.
-   Opacity fades; the position is followed.
-
-   NOTHING HERE IS CONTENT. At rest `--loc-cursor` is 0 and the reticle is simply
-   absent, which is correct for an affordance that only exists while a fine
-   pointer is over the panel — reduced motion and coarse pointers never arm it,
-   and no-JS never writes a property. See au-motion-safety. */
-.loc-cursor {
-  opacity: var(--loc-cursor, 0);
-  transform: translate(calc(var(--loc-cx, 0) * 1px), calc(var(--loc-cy, 0) * 1px));
-  transform-box: view-box;
-  transform-origin: 0 0;
-  transition: opacity 240ms var(--au-ease);
-  pointer-events: none;
-}
-/* Promoted only while it is actually tracking, the same way the field is. */
-.loc[data-loc-cursor="live"] .loc-cursor { will-change: transform; }
-
-/* The glow is a radial FILL, not a blur filter. A filter on a node that moves
-   every frame re-rasterises every frame, and this panel is already compositing a
-   masked field over a gradient ground. */
-.loc-cursor-glow { fill: url(#loc-cursor-glow); }
-.loc-cursor-ring {
+.smap-site-halo { fill: rgba(var(--au-accent-rgb), 0.16); }
+.smap-site-ping {
   fill: none;
-  stroke: var(--au-link-inverse);
-  stroke-width: 1;
-  opacity: 0.5;
+  stroke: rgba(var(--au-accent-rgb), 0.5);
+  stroke-width: 2;
+  transform-origin: center;
+  transform-box: fill-box;
 }
-.loc-cursor-cross {
-  fill: none;
-  stroke: var(--au-link-inverse);
-  stroke-width: 1;
-  opacity: 0.78;
+@media (prefers-reduced-motion: no-preference) {
+  /* Scale only. A failed or unplayed animation leaves a static ring around a solid
+     pin, which is the finished mark — see au-motion-safety. */
+  .smap-site-ping { animation: smap-ping 3.4s var(--au-ease) infinite; }
 }
-.loc-cursor-dot { fill: var(--au-link-inverse); stroke: none; }
-
-/* The range line. Always in the DOM and always holding its line, so the corner
-   readout cannot change height the moment tracking starts. */
-.loc-readout-r {
-  font-variant-numeric: tabular-nums;
-  color: var(--au-link-inverse);
-  opacity: var(--loc-cursor, 0);
-  transition: opacity 240ms var(--au-ease);
+@keyframes smap-ping {
+  0%   { transform: scale(0.55); opacity: 0.9; }
+  70%  { transform: scale(1.35); opacity: 0; }
+  100% { transform: scale(1.35); opacity: 0; }
 }
 
-/* ---- The instrument overlay: crisp at every zoom, none of it scaled ---- */
-.loc-readout,
-.loc-north,
-.loc-scale {
+/* ---- Map furniture ------------------------------------------------------ */
+.smap-scale path { fill: none; stroke: var(--au-ink-muted); stroke-width: 1.6; }
+.smap-north path { fill: var(--au-accent); stroke: none; }
+.smap-north text {
+  fill: var(--au-ink-muted);
+  font-family: var(--au-font-mono);
+  font-size: 13px;
+  text-anchor: middle;
+  letter-spacing: 0.04em;
+}
+.smap-scale text {
+  fill: var(--au-ink-muted);
+  font-family: var(--au-font-mono);
+  font-size: 13px;
+  text-anchor: middle;
+  letter-spacing: 0.04em;
+}
+
+/* ---- The two corner readouts -------------------------------------------
+   Both sit directly on the map, so both are the muted ink rather than a plate:
+   6.6:1 on the ground colour, which clears AA at their size without adding a
+   third floating object to a band that already has one. */
+.wmap-read,
+.wmap-credit {
   position: absolute;
   z-index: 1;
-  font-family: var(--au-font-mono);
-  font-size: var(--au-text-caption);
-  letter-spacing: 0.04em;
-  color: rgba(255, 255, 255, 0.72);
+  right: clamp(var(--au-s-4), 2.5vw, var(--au-s-6));
+  margin: 0;
+  font-size: var(--au-text-eyebrow);
+  color: var(--au-ink-muted);
+}
+.wmap-read {
+  top: var(--au-s-5);
+  text-align: right;
+  /* The pointer belongs to the map underneath, not to its own readout. */
   pointer-events: none;
 }
-.loc-readout {
-  top: var(--au-s-5);
-  left: var(--au-s-5);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.loc-readout-k {
-  font-size: var(--au-text-eyebrow);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--au-link-inverse);
-}
-.loc-readout-v { color: #ffffff; }
-.loc-readout-c { font-variant-numeric: tabular-nums; }
-
-.loc-north {
-  top: var(--au-s-5);
-  right: var(--au-s-5);
-  display: flex;
-  align-items: center;
-  gap: var(--au-s-2);
-}
-.loc-north-glyph { width: 13px; height: 19px; overflow: visible; }
-.loc-north-fill { fill: var(--au-link-inverse); }
-.loc-north-hollow { fill: rgba(255, 255, 255, 0.22); }
-.loc-north-stem { stroke: rgba(255, 255, 255, 0.42); stroke-width: 1; fill: none; }
-.loc-north-k {
-  font-size: var(--au-text-eyebrow);
-  letter-spacing: 0.12em;
-  color: #ffffff;
-}
-
-/* The bar is sized to a whole distance and labelled with it — the driver moves
-   BOTH together, so the pairing is true at every point of the descent. 10% is
-   the arrival: 50 m of the 500 m the panel spans at closest zoom. */
-.loc-scale {
-  right: var(--au-s-5);
-  bottom: var(--au-s-5);
-  display: flex;
-  align-items: center;
-  gap: var(--au-s-3);
-}
-/* `--loc-bar` is a unitless FRACTION of the panel width, not a percentage, and
-   that is load-bearing. As a percentage it resolved against `.loc-scale` — an
-   absolutely positioned, shrink-to-fit flex box with no definite width — so it
-   collapsed to the min-width and the bar never moved while its label counted
-   down. Against `100cqw` the fraction is exactly what it claims: 0.1 of the
-   panel is 50 m of the 500 m the panel spans on arrival. */
-.loc-scale-bar {
-  position: relative;
-  width: calc(var(--loc-bar, 0.1) * 100cqw);
-  height: 1px;
-  background: rgba(255, 255, 255, 0.6);
-}
-.loc-scale-tick {
-  position: absolute;
-  bottom: 0;
-  width: 1px;
-  height: 7px;
-  background: rgba(255, 255, 255, 0.6);
-}
-.loc-scale-tick:first-child { left: 0; }
-.loc-scale-tick:last-child { right: 0; }
-.loc-scale-v { color: #ffffff; font-variant-numeric: tabular-nums; }
-
-/* will-change for the descent only — the attribute is set when the driver arms
-   and removed when it lands. */
-.loc[data-loc-state="descending"] .loc-field { will-change: transform, opacity; }
-
-@media (max-width: 700px) {
-  .loc { height: clamp(240px, 52vw, 340px); }
-  /* At this width the address plate has become the frame's footer, so the
-     overlay has the panel to itself — but the two top labels would still crowd
-     each other on a 320px frame. The coordinate line is the one that can go: the
-     address is stated twice more on this page. */
-  .loc-readout-c { display: none; }
-}
-.where-plate {
-  position: absolute;
-  left: var(--au-s-5); bottom: var(--au-s-5);
-  display: flex; flex-direction: column; gap: var(--au-s-3);
-  max-width: min(380px, calc(100% - var(--au-s-8)));
-  padding: var(--au-s-5);
-  background: var(--au-glass-fill-strong);
-  -webkit-backdrop-filter: var(--au-glass-blur);
-  backdrop-filter: var(--au-glass-blur);
-  border: var(--au-hairline-glass);
-  border-radius: var(--au-radius-md);
-  box-shadow: var(--au-raised-md);
-}
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .where-plate { background: var(--au-surface); }
-}
-.where-plate-k {
-  display: flex; align-items: center; gap: var(--au-s-2);
-  font-size: var(--au-text-eyebrow);
+.wmap-read-k {
+  margin: 0;
   font-weight: var(--au-weight-semibold);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--au-accent);
 }
-.where-plate-k .c-glyph { width: 15px; height: 15px; }
-.where-plate-v { font-size: var(--au-text-body); line-height: 1.5; color: var(--au-ink); }
-.where-plate-act { display: flex; flex-wrap: wrap; align-items: center; gap: var(--au-s-3); }
-.where-title { margin-top: var(--au-s-4); font-size: var(--au-text-h2); line-height: var(--au-leading-h2); letter-spacing: var(--au-tracking-h2); }
-.where-lede { margin-top: var(--au-s-4); color: var(--au-ink-muted); max-width: 46ch; }
-.where-facts { margin-top: var(--au-s-6); border-top: var(--au-hairline); }
-.where-facts > div { padding-block: var(--au-s-4); border-bottom: var(--au-hairline); }
-.where-facts dt {
+.wmap-read-v {
+  margin: var(--au-s-1) 0 0;
   font-size: var(--au-text-eyebrow);
-  font-weight: var(--au-weight-semibold);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--au-accent);
+  letter-spacing: 0.04em;
+  /* Tabular, or the coordinate jitters sideways as the digits change under a
+     moving cursor — the one thing that makes a live readout feel broken. */
+  font-variant-numeric: tabular-nums;
+  color: var(--au-ink-muted);
 }
-.where-facts dd { margin: var(--au-s-2) 0 0; font-size: var(--au-text-small); color: var(--au-ink-body); }
+/* The street line is the only part that appears and disappears, so it gets the
+   height reserved for it: without this the whole block jumps a line every time the
+   pointer settles. */
+.wmap-read-n {
+  min-height: 1.5em;
+  margin: var(--au-s-1) 0 0;
+  color: var(--au-ink-heading);
+  font-weight: var(--au-weight-medium);
+  opacity: 0;
+  transform: translateY(-3px);
+  transition: opacity var(--au-dur) var(--au-ease), transform var(--au-dur) var(--au-ease);
+}
+[data-probe="settled"] .wmap-read-n { opacity: 1; transform: none; }
+.wmap-credit { bottom: var(--au-s-4); }
+.wmap-credit a { color: inherit; text-decoration: underline; text-underline-offset: 0.2em; }
 
-@media (max-width: 1024px) {
-  .where-grid { grid-template-columns: minmax(0, 1fr); }
-}
-@media (max-width: 700px) {
-  /* The plate stops floating and becomes the frame's own footer: at this width an
-     overlay covers most of the photograph it is supposed to be annotating. */
-  .where-plate {
-    position: static;
-    max-width: none;
-    border: 0;
-    border-top: var(--au-hairline);
-    border-radius: 0;
-    box-shadow: none;
+@media (max-width: 900px) {
+  .wmap-frame { height: 340px; }
+  /* Both readouts move to the bottom LEFT and stack. Two things worth measuring
+     here: at the top of a 390px map the coordinate ran into the right edge and sat
+     on a street label, and set opposite the credit it collided with it — the two
+     strings together are 400px on a 390px screen. Stacked, neither can clash and
+     the credit stays on the map, which the licence requires. */
+  .wmap-read,
+  .wmap-credit {
+    right: auto;
+    left: clamp(var(--au-s-4), 2.5vw, var(--au-s-6));
+    text-align: left;
   }
-  .where-media img { height: clamp(240px, 52vw, 340px); }
+  .wmap-read { top: auto; bottom: calc(var(--au-s-4) + 22px); }
+  /* No fine pointer here, so the street line never fills — reclaim its space. */
+  .wmap-read-n { display: none; }
+  .wmap-credit { bottom: var(--au-s-4); }
 }
-
 
 /* ---- 6 · The enquiry form ----------------------------------------------
    The panel carries the form; the rail answers the question a contact form always
@@ -7840,6 +7878,106 @@ a.close-v:hover { color: var(--au-link-inverse); text-decoration: underline; tex
 
 
 /* ==========================================================================
+   1b · .catmast — the CATALOG header: light ground + framed banner
+   Worn by /browse only. PageMast (the dark stage) is untouched and still opens
+   every other inner page.
+
+   WHY THIS IS NOT A PAGEMAST. The dark PageMast used here measured, at 1440, the
+   same band height and the same 52px headline as the homepage hero — and because
+   `--au-text-display` and `--au-text-h1` both cap at 3.25rem, that collision is
+   structural, not a tuning slip. Every attempt to keep a dark full-bleed photo
+   band and still not read as a landing page fought that. So the catalog header
+   stops being a dark photographic band at all:
+
+     · IT SITS ON THE PAGE'S OWN LIGHT GROUND. The homepage opens on a dark
+       photographic hero and nothing else on the site does; a light header is
+       therefore the single clearest "inner page" signal available, cheaper and
+       louder than any amount of rescaling.
+     · THE PHOTOGRAPH IS A FRAMED BANNER BELOW THE COPY, not a ground under it.
+       Bounded and rounded — the opposite of the hero's full-bleed square edge —
+       so it reads as a figure the page presents, not a stage the page stands on.
+     · ONE ACTION, set to the right of the copy. The offer is stated once and
+       answered once; the four routes below are where the reader actually acts.
+
+   FULL-BLEED IS THE HERO'S; BOUNDED-AND-ROUNDED IS THE INTERIOR'S. That rule
+   (design.md) is doing the heavy lifting here — the banner takes the card radius
+   precisely because it must not read as an edge-to-edge hero plate.
+   ========================================================================== */
+
+.catmast {
+  padding-top: var(--au-s-6);
+  padding-bottom: clamp(var(--au-s-7), 5vw, var(--au-s-8));
+}
+
+/* Plain breadcrumb on the light ground — it is NOT inside a dark `:is()` group,
+   so it keeps the default light-ground ink rather than the inverse set. */
+.catmast-crumbs { margin-bottom: clamp(var(--au-s-5), 4vw, var(--au-s-7)); }
+
+/* Copy left, action right, baseline-of-block aligned: the button sits level with
+   the foot of the lede, which is where the reference parks it. Wraps to a stack
+   below the container's narrow end. */
+.catmast-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--au-s-5) var(--au-s-7);
+  flex-wrap: wrap;
+}
+.catmast-lead { min-width: 0; max-width: 720px; }
+
+/* The one place the display scale is right on an inner page: this is the page
+   title on its own ground, not a band headline competing with a photograph. Ink,
+   not inverse. */
+.catmast-title {
+  margin-top: var(--au-s-4);
+  font-size: var(--au-text-display);
+  line-height: var(--au-leading-display);
+  letter-spacing: var(--au-tracking-display);
+  font-weight: var(--au-weight-medium);
+  color: var(--au-ink);
+  max-width: 20ch;
+}
+.catmast-title span { display: block; }
+
+.catmast-lede {
+  margin-top: var(--au-s-5);
+  font-size: var(--au-text-h4);
+  line-height: 1.55;
+  color: var(--au-ink-muted);
+  max-width: 54ch;
+}
+
+/* `flex: none` so the button never stretches or shrinks; the small bottom nudge
+   optically seats its baseline against the lede's last line rather than its box. */
+.catmast-actions { flex: 0 0 auto; padding-bottom: var(--au-s-1); }
+
+/* The banner. Bounded and rounded — see the header note. A fixed responsive
+   height with `object-fit: cover` gives the wide letterbox crop regardless of
+   the source ratio; the bias favours the engine over the shop ceiling. */
+.catmast-media {
+  margin-top: clamp(var(--au-s-6), 4vw, var(--au-s-7));
+  border-radius: var(--au-radius-lg);
+  overflow: hidden;
+  background: var(--au-surface-subtle, rgba(0, 0, 0, 0.04));
+}
+.catmast-media img {
+  display: block;
+  width: 100%;
+  height: clamp(240px, 33vw, 460px);
+  object-fit: cover;
+  object-position: var(--catmast-pos, 50% 42%);
+}
+
+/* Stack the action under the copy on narrow viewports, full-width, and let it
+   lead the block rather than trail a long measure of text. */
+@media (max-width: 640px) {
+  .catmast-head { align-items: stretch; }
+  .catmast-actions { padding-bottom: 0; }
+  .catmast-actions .btn { width: 100%; }
+}
+
+
+/* ==========================================================================
    2 · /browse — the route selector
 
    Four numbered plates. The rule along the top edge is the plate's only
@@ -7850,15 +7988,17 @@ a.close-v:hover { color: var(--au-link-inverse); text-decoration: underline; tex
 .brt-row {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: clamp(var(--au-s-4), 2.2vw, var(--au-s-6));
+  gap: clamp(var(--au-s-3), 1.8vw, var(--au-s-5));
   list-style: none;
 }
+.brt-plate { position: relative; }
+
 /* THE RULE IS A PSEUDO-ELEMENT, not a border, and that is the whole reason this
    plate is built the way it is: the entrance draws the rule by scaling it from
    its leading edge, and a `border-top` cannot be scaled without scaling the
    content it sits above. Hover recolours the same element, so the two effects
-   compose instead of one having to clear the other. */
-.brt-plate { position: relative; }
+   compose instead of one having to clear the other. It sits above the hover
+   surface (z-index) so the accent edge caps the glass when the plate lifts. */
 .brt-plate::after {
   content: "";
   position: absolute;
@@ -7869,25 +8009,72 @@ a.close-v:hover { color: var(--au-link-inverse); text-decoration: underline; tex
   background: var(--au-border);
   transform-origin: left center;
   transition: background var(--au-dur-fast) var(--au-ease);
+  z-index: 2;
 }
 .brt-plate:hover::after { background: var(--au-accent); }
+
+/* The plate is an OPEN numbered slab at rest — not a box — so the selector
+   reads as editorial rather than as one more card grid. On hover a glass
+   surface fades in beneath it and the slab lifts, which is what turns "four
+   headings" into "four doors you can push on". */
 .brt-plate > a {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--au-s-2);
   height: 100%;
-  padding-top: var(--au-s-4);
+  min-height: 176px;
+  padding: var(--au-s-5) var(--au-s-4) var(--au-s-4);
+  border-radius: var(--au-radius-lg);
   text-decoration: none;
+  overflow: hidden;
+  transition: background var(--au-dur-fast) var(--au-ease),
+              box-shadow var(--au-dur-fast) var(--au-ease),
+              transform var(--au-dur-fast) var(--au-ease);
 }
-.brt-num {
-  font-family: var(--au-font-sans);
-  font-size: var(--au-text-caption);
-  font-weight: var(--au-weight-medium);
-  letter-spacing: 0.1em;
+.brt-plate > a:hover {
+  background: var(--au-glass-fill);
+  box-shadow: var(--au-raised);
+  transform: translateY(-2px);
+}
+/* The arrow lives on the anchor, not in a span, so it stays clear of the
+   entrance's span stagger; it slides in from the left on hover. */
+.brt-plate > a::before {
+  content: "→";
+  position: absolute;
+  right: var(--au-s-4);
+  bottom: var(--au-s-4);
+  font-size: var(--au-text-small);
   color: var(--au-accent);
-  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transform: translateX(-5px);
+  transition: opacity var(--au-dur-fast) var(--au-ease),
+              transform var(--au-dur-fast) var(--au-ease);
 }
+.brt-plate > a:hover::before { opacity: 1; transform: none; }
+
+/* The index numeral, repurposed as a ghosted watermark in the corner. Order is
+   real here — the routes are ranked by how often a buyer can answer them — so
+   the numeral is entitled to its size rather than being decoration. */
+.brt-num {
+  position: absolute;
+  top: var(--au-s-2);
+  right: var(--au-s-4);
+  font-family: var(--au-font-sans);
+  font-size: clamp(2.75rem, 4.4vw, 3.75rem);
+  font-weight: var(--au-weight-medium);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: rgba(var(--au-accent-rgb), 0.11);
+  font-variant-numeric: tabular-nums;
+  transition: color var(--au-dur) var(--au-ease);
+  pointer-events: none;
+}
+.brt-plate > a:hover .brt-num { color: rgba(var(--au-accent-rgb), 0.22); }
+
 .brt-holds {
+  margin-top: var(--au-s-6);
+  max-width: 20ch;
   font-size: var(--au-text-caption);
   line-height: 1.45;
   color: var(--au-ink-muted);
@@ -7896,7 +8083,7 @@ a.close-v:hover { color: var(--au-link-inverse); text-decoration: underline; tex
   margin-top: var(--au-s-1);
   font-size: var(--au-text-h4);
   font-weight: var(--au-weight-medium);
-  line-height: 1.3;
+  line-height: 1.28;
   letter-spacing: var(--au-tracking-h4);
   color: var(--au-ink-heading);
   transition: color var(--au-dur-fast) var(--au-ease);
@@ -7911,7 +8098,10 @@ a.close-v:hover { color: var(--au-link-inverse); text-decoration: underline; tex
 }
 
 @media (max-width: 900px) { .brt-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 520px) { .brt-row { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 520px) {
+  .brt-row { grid-template-columns: minmax(0, 1fr); }
+  .brt-plate > a { min-height: 0; }
+}
 
 
 /* ==========================================================================
@@ -7933,7 +8123,9 @@ a.close-v:hover { color: var(--au-link-inverse); text-decoration: underline; tex
   grid-template-columns: 5.5ch minmax(11ch, 22ch) minmax(0, 1fr) 9ch 2ch;
   align-items: center;
   gap: clamp(var(--au-s-3), 1.6vw, var(--au-s-5));
-  padding-block: var(--au-s-4);
+  padding: var(--au-s-4) var(--au-s-4);
+  margin-inline: calc(var(--au-s-4) * -1);
+  border-radius: var(--au-radius-md);
   text-decoration: none;
   transition: background var(--au-dur-fast) var(--au-ease);
 }
@@ -7961,9 +8153,10 @@ a.close-v:hover { color: var(--au-link-inverse); text-decoration: underline; tex
 .depth-bar {
   position: relative;
   display: block;
-  height: 3px;
+  height: 6px;
   border-radius: var(--au-radius-pill);
-  background: var(--au-border-quiet, rgba(var(--au-tint-rgb), 0.09));
+  background: rgba(var(--au-tint-rgb), 0.08);
+  box-shadow: var(--au-recessed);
   overflow: hidden;
 }
 .depth-bar > i {
@@ -7973,8 +8166,9 @@ a.close-v:hover { color: var(--au-link-inverse); text-decoration: underline; tex
   width: var(--depth, 100%);
   border-radius: inherit;
   background: linear-gradient(90deg,
-    rgba(var(--au-accent-rgb), 0.45),
-    rgba(var(--au-accent-rgb), 0.92));
+    rgba(var(--au-accent-rgb), 0.55),
+    var(--au-accent));
+  box-shadow: 0 0 0 1px rgba(var(--au-accent-rgb), 0.10) inset;
   transform-origin: left center;
 }
 .depth-n {
@@ -8002,89 +8196,199 @@ a.close-v:hover { color: var(--au-link-inverse); text-decoration: underline; tex
   .depth-go { display: none; }
 }
 
-
 /* ==========================================================================
-   4 · CAGE plates — /browse manufacturers preview
+   4 · The manufacturer carousel — /browse manufacturers preview
 
-   The code leads and the name follows, which is the reverse of the live site
-   and is the point: a buyer holding a nameplate is reading five characters, and
-   the brand on the box is the unreliable half of the pair.
+   A horizontal scroll-snap rail of CAGE nameplates, ranked by catalogue depth.
+   The CAGE code is a held object here — a stamped plate — so this stays cards
+   rather than a register, and the rail keeps fourteen of them from becoming a
+   wall. Native scroll does the work (trackpad, touch, keyboard); the arrow
+   buttons and the end-of-rail fades in MfrCarousel.tsx are enhancement. Edge
+   masks fade the cards off both ends so there is always a visible "more this
+   way". See au-visual-system for the glass + skeuomorphism rules the card obeys.
    ========================================================================== */
 
-.cagegrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(var(--au-s-4), 2vw, var(--au-s-5));
+.mfrcar { position: relative; }
+
+.mfrcar-rail {
+  display: flex;
+  gap: var(--au-s-5);
   list-style: none;
+  overflow-x: auto;
+  overflow-y: hidden;
+  /* Room for the raised shadow and the -4px hover lift, so neither is clipped
+     by the single-axis scroll box. */
+  padding-block: var(--au-s-4);
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
 }
-.cageplate {
+.mfrcar-rail::-webkit-scrollbar { height: 6px; }
+.mfrcar-rail::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: var(--au-radius-pill);
+}
+.mfrcar-rail > li {
+  flex: 0 0 clamp(248px, 74vw, 288px);
+  scroll-snap-align: start;
+}
+
+/* The band is Deep Navy — the brand's dark, not Midnight black — set on the
+   section id so it overrides .section-dark's default ground while keeping all of
+   that class's inverted header/eyebrow/button handling. */
+#manufacturers.section-dark { background: var(--au-surface-dark-alt); }
+
+.mfrcard {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
   padding: var(--au-s-5);
-  border: var(--au-hairline-glass);
+  border: 1px solid var(--au-glass-border-dark);
   border-radius: var(--au-radius-lg);
-  background: var(--au-glass-fill);
-  -webkit-backdrop-filter: var(--au-glass-blur-sm);
-  backdrop-filter: var(--au-glass-blur-sm);
-  box-shadow: var(--au-raised);
+  /* A lifted navy plate: a faint white wash over the Deep Navy band raises the
+     card one step, so it reads as sitting ON the band rather than blending into
+     it — no black, all one navy family. */
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
+    var(--au-surface-dark-alt);
+  box-shadow: var(--au-inner-top-dark), var(--au-shadow-lg);
   text-decoration: none;
-  transition: box-shadow var(--au-dur-fast) var(--au-ease),
-              transform var(--au-dur-fast) var(--au-ease),
-              border-color var(--au-dur-fast) var(--au-ease);
+  transition: border-color var(--au-dur-fast) var(--au-ease);
 }
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .cageplate { background: var(--au-surface); }
+.mfrcard:hover { border-color: var(--au-link-inverse); }
+
+/* THE LABELLED FIELD — a small caption sitting directly over the code, so the
+   card reads as one thing ("the CAGE code is 99193") instead of a tag floating
+   above a bare number. Tight gap: label and value are one unit. */
+.mfrcard-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--au-s-2);
 }
-.cageplate:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.95);
-  box-shadow: var(--au-raised-lg);
-}
-.cage-label {
+.mfrcard-k {
   font-family: var(--au-font-sans);
   font-size: var(--au-text-eyebrow);
-  font-weight: var(--au-weight-semibold);
-  letter-spacing: 0.12em;
+  font-weight: var(--au-weight-medium);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--au-ink-muted);
+  color: var(--au-ink-inverse-muted);
 }
-.cage-code {
-  margin-top: var(--au-s-1);
-  font-size: clamp(1.5rem, 2.4vw, 2rem);
-  line-height: 1.1;
-  color: var(--au-ink-heading);
+.mfrcard-code {
+  font-size: clamp(1.875rem, 2.8vw, 2.35rem);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: var(--au-ink-inverse);
   font-variant-numeric: tabular-nums;
+  transition: color var(--au-dur-fast) var(--au-ease);
 }
-/* The rule under the code is what the hover draws — a growing underline, the
-   same device the homepage's category tiles use. */
-.cage-rule {
+.mfrcard:hover .mfrcard-code { color: var(--au-link-inverse); }
+/* The growing underline — Horizon, not Steel Blue, because Steel Blue collapses
+   to 2.38:1 on this ground; Horizon is the palette's accent role on dark. */
+.mfrcard-rule {
   display: block;
-  width: 28px;
+  width: 30px;
   height: 2px;
   margin-top: var(--au-s-3);
   border-radius: var(--au-radius-pill);
-  background: var(--au-accent);
+  background: var(--au-link-inverse);
   transition: width var(--au-dur-slow) var(--au-ease);
 }
-.cageplate:hover .cage-rule { width: 64px; }
-.cage-name {
+.mfrcard:hover .mfrcard-rule { width: 72px; }
+.mfrcard-name {
   margin-top: var(--au-s-4);
   font-size: var(--au-text-body);
   font-weight: var(--au-weight-medium);
   line-height: 1.35;
-  color: var(--au-ink);
+  color: var(--au-ink-inverse);
 }
-.cage-n {
+.mfrcard-foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--au-s-2);
   margin-top: auto;
-  padding-top: var(--au-s-3);
-  font-size: var(--au-text-caption);
-  color: var(--au-ink-muted);
+  padding-top: var(--au-s-5);
+}
+.mfrcard-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--au-s-3);
+}
+.mfrcard-n-label {
+  font-size: var(--au-text-eyebrow);
+  font-weight: var(--au-weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--au-ink-inverse-muted);
+}
+.mfrcard-n {
+  font-size: var(--au-text-h4);
+  font-weight: var(--au-weight-medium);
+  color: var(--au-ink-inverse);
   font-variant-numeric: tabular-nums;
 }
+/* The share bar — this manufacturer's depth against the deepest one. Data, not
+   decoration: the width is the row's own datum. */
+.mfrcard-bar {
+  position: relative;
+  display: block;
+  height: 5px;
+  border-radius: var(--au-radius-pill);
+  background: rgba(255, 255, 255, 0.10);
+  overflow: hidden;
+}
+.mfrcard-bar > i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  display: block;
+  width: var(--depth, 100%);
+  border-radius: inherit;
+  background: linear-gradient(90deg,
+    rgba(169, 200, 240, 0.55), var(--au-link-inverse));
+}
 
-@media (max-width: 900px) { .cagegrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 560px) { .cagegrid { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---- The overlay arrows ------------------------------------------------- */
+.mfrcar-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: var(--au-hairline-strong);
+  border-radius: var(--au-radius-circle);
+  background: var(--au-surface);
+  box-shadow: var(--au-shadow-sm);
+  color: var(--au-accent);
+  font-size: var(--au-text-body);
+  cursor: pointer;
+  transition: background var(--au-dur-fast) var(--au-ease),
+              border-color var(--au-dur-fast) var(--au-ease),
+              box-shadow var(--au-dur-fast) var(--au-ease),
+              opacity var(--au-dur-fast) var(--au-ease);
+}
+.mfrcar-btn[data-dir="prev"] { left: -8px; }
+.mfrcar-btn[data-dir="next"] { right: -8px; }
+.mfrcar-btn:hover {
+  background: var(--au-accent-soft);
+  border-color: var(--au-accent);
+  box-shadow: var(--au-shadow-md);
+}
+.mfrcar-btn:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Touch scroll carries small screens; the arrows only crowd them. */
+@media (max-width: 720px) {
+  .mfrcar-nav { display: none; }
+  .mfrcar-rail > li { flex-basis: clamp(240px, 82vw, 280px); }
+}
 
 
 /* ==========================================================================
@@ -8101,15 +8405,46 @@ a.close-v:hover { color: var(--au-link-inverse); text-decoration: underline; tex
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: clamp(var(--au-s-3), 1.8vw, var(--au-s-5));
   list-style: none;
+  /* Breathing room between the group header (label + note) and the cards. The
+     note carried no bottom margin, so the grid started flush against it and the
+     note read as glued to the first card's top edge. */
+  margin-top: clamp(var(--au-s-4), 2vw, var(--au-s-5));
 }
 .acgrid-page { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
+/* ---- The platform plate -------------------------------------------------
+   THE PROBLEM THIS REPLACES. Eight identical white boxes, each holding a name, a
+   count and a thin rounded pill, with a stranded empty cell beside the last row.
+   Every one of those is a thing craft demands you not do: same-size cards as the
+   page structure, a progress pill standing in for content, and no hierarchy
+   anywhere. It was not under-decorated, it was under-designed — so this is a
+   restructure, not a coat of paint. NO GRADIENTS: the whole plate is flat fills,
+   hairlines, type and proportion.
+
+   THREE MOVES CARRY IT:
+
+     1. THE DESIGNATION IS THE ANCHOR, stamped into a filled chip at the top-left.
+        Nobody reads eight aircraft names looking for theirs; they look for "737".
+        Same reasoning design.md records for the category tiles' FSC code — real,
+        unique per row, and genuinely how a buyer scans.
+     2. THE COUNT GETS A SCALE, not a pill: a hairline the full width of the plate
+        with a solid segment and a tick at this platform's share of the deepest.
+        It reads as a measurement because it is drawn like one, and it matches the
+        ruler on the data plate's identifier tiles.
+     3. ONE PLATE PER GROUP IS WIDE — the deepest, and only when spanning makes the
+        group fill its rows exactly. That kills the stranded cell AND gives the grid
+        a hierarchy instead of eight peers.
+
+   The count deliberately does NOT get display scale. Eight big numbers with small
+   labels is the hero-metric template, and it would also put our biggest figure
+   above the thing the buyer is actually hunting for, which is their platform. */
 .acplate {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: var(--au-s-3);
+  gap: var(--au-s-4);
   height: 100%;
-  padding: var(--au-s-5);
+  padding: clamp(var(--au-s-5), 2.4vw, var(--au-s-6));
   border: var(--au-hairline);
   border-radius: var(--au-radius-lg);
   background: var(--au-surface);
@@ -8123,7 +8458,37 @@ a.close-v:hover { color: var(--au-link-inverse); text-decoration: underline; tex
   border-color: var(--au-border-strong);
   box-shadow: var(--au-raised-md);
 }
-.acplate-lg { padding: clamp(var(--au-s-5), 2.4vw, var(--au-s-6)); }
+.acplate:focus-visible { outline: none; box-shadow: var(--au-focus-ring); }
+
+.ac-top { display: flex; align-items: center; gap: var(--au-s-3); }
+
+/* The stamped designation. A flat navy fill — no gradient — inverting to the
+   accent on hover, so the plate acknowledges the cursor at its anchor rather than
+   by moving text around. */
+.ac-desig {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px var(--au-s-3) 4px;
+  border-radius: var(--au-radius-sm);
+  background: var(--au-surface-dark-alt);
+  font-size: var(--au-text-h4);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: var(--au-ink-inverse);
+  font-variant-numeric: tabular-nums;
+  transition: background var(--au-dur-fast) var(--au-ease);
+}
+.acplate:hover .ac-desig { background: var(--au-accent); }
+
+.ac-maker {
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-eyebrow);
+  font-weight: var(--au-weight-semibold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--au-ink-muted);
+}
+
 .ac-name {
   font-size: var(--au-text-h4);
   font-weight: var(--au-weight-medium);
@@ -8132,291 +8497,115 @@ a.close-v:hover { color: var(--au-link-inverse); text-decoration: underline; tex
   color: var(--au-ink-heading);
   transition: color var(--au-dur-fast) var(--au-ease);
 }
-.acplate-lg .ac-name { font-size: var(--au-text-h3); }
 .acplate:hover .ac-name { color: var(--au-link); }
-.ac-meta { display: flex; flex-direction: column; gap: var(--au-s-2); margin-top: auto; }
-.ac-n {
-  font-size: var(--au-text-caption);
-  color: var(--au-ink-muted);
+
+/* The figure and its scale sit together at the foot, pushed down so plates of
+   unequal name length still align along the measurement — which is the row a
+   reader compares across. */
+.ac-foot { margin-top: auto; display: flex; flex-direction: column; gap: var(--au-s-3); }
+.ac-figure { display: flex; align-items: baseline; gap: var(--au-s-2); }
+.ac-figure b {
+  font-size: var(--au-text-h4);
+  font-weight: var(--au-weight-regular);
+  line-height: 1;
+  color: var(--au-ink-heading);
   font-variant-numeric: tabular-nums;
 }
-.ac-bar {
-  position: relative;
-  display: block;
-  height: 3px;
-  border-radius: var(--au-radius-pill);
-  background: rgba(var(--au-tint-rgb), 0.09);
-  overflow: hidden;
-}
-.ac-bar > i {
-  position: absolute;
-  inset: 0 auto 0 0;
-  display: block;
-  width: var(--depth, 100%);
-  border-radius: inherit;
-  background: linear-gradient(90deg,
-    rgba(var(--au-accent-rgb), 0.4),
-    rgba(var(--au-accent-rgb), 0.9));
-  transform-origin: left center;
-}
-.ac-go {
+.ac-figure em {
+  font-style: normal;
   font-size: var(--au-text-caption);
   color: var(--au-ink-muted);
-  transition: color var(--au-dur-fast) var(--au-ease), transform var(--au-dur-fast) var(--au-ease);
-}
-.acplate:hover .ac-go { color: var(--au-accent); transform: translateX(3px); }
-
-@media (max-width: 1100px) { .acgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 900px) { .acgrid-page { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 560px) {
-  .acgrid, .acgrid-page { grid-template-columns: minmax(0, 1fr); }
 }
 
+/* THE SCALE — the platform's share of the deepest catalogue, drawn as the same
+   rounded depth bar the hub board and the identifier tracks use, so the catalog
+   measures things one way. A recessed full-width track carries an accent fill to
+   --depth; it reads as a filled measure rather than the thin hairline-and-tick it
+   was, which looked unfinished with its long empty tail.
 
-/* ==========================================================================
-   6 · The NSN anatomy — /browse's one authored moment
+   THE TRACK FILLS THE PLATE, and may only do that because every plate in a row is
+   the same width — a scale is comparable across plates only if every track is the
+   same LENGTH. REINTRODUCE A WIDTH CAP if a plate of a different width is ever
+   added. Decorative: the figure above states the value in text. */
+.ac-scale {
+  position: relative;
+  display: block;
+  height: 6px;
+  border-radius: var(--au-radius-pill);
+  background: rgba(var(--au-tint-rgb), 0.10);
+  overflow: hidden;
+}
+.ac-scale > i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--depth, 100%);
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--au-accent-rgb), 0.55),
+    rgba(var(--au-accent-rgb), 0.95)
+  );
+  /* The group entrance sweeps this out with scaleX(0)→scaleX(1); it must grow
+     from the left edge, and the finished (unset) state is the drawn bar. */
+  transform-origin: left center;
+  transition: filter var(--au-dur-fast) var(--au-ease);
+}
+.acplate:hover .ac-scale > i { filter: saturate(1.12) brightness(1.08); }
 
-   The digits, two brackets, two labels. The four blocks and both brackets sit on
-   ONE shared four-column grid, so a bracket physically cannot drift off the
-   digits it describes:
+.ac-go {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--au-s-2);
+  padding-top: var(--au-s-4);
+  border-top: var(--au-hairline-quiet);
+  font-size: var(--au-text-caption);
+  font-weight: var(--au-weight-medium);
+  color: var(--au-link);
+}
+.ac-go span { transition: transform var(--au-dur-fast) var(--au-ease); }
+.acplate:hover .ac-go span { transform: translateX(4px); }
 
-     column 1 = 5310 (FSC)   columns 2–4 = 00-877-5797 (NIIN)
+/* ---- No featured plate, and that is the third answer to one problem ------
+   Five platforms in a three-column grid leave a row of two beside an empty cell.
+   Two attempts to fix that by widening the deepest plate to span two columns both
+   failed the same way: a grid item stretches to the tallest plate in its row, and a
+   wide plate has the same four things to say in twice the width, so the slack
+   pooled — first down the middle, then above and below a centred line, then beside
+   an over-long divider. Each version traded a partial row for a visible hole.
 
-   The whole diagram is aria-hidden and a plain sentence in .nsna-sr carries it
-   for assistive tech — read aloud, the brackets and labels came out as a scatter
-   of disconnected digits and words, which is worse than prose.
-   ========================================================================== */
-
-.nsna {
-  margin: 0;
-  padding: clamp(var(--au-s-5), 3.4vw, var(--au-s-8)) clamp(var(--au-s-4), 3vw, var(--au-s-7));
-  border: var(--au-hairline-glass);
-  border-radius: var(--au-radius-lg);
+   A partial last row is ordinary and reads as a grid; a stretched plate reads as a
+   mistake. So every plate is identical and the row is allowed to be short. The
+   blandness this section started with was never the empty cell — it was a plate
+   with no anchor, no hierarchy inside it, and a decorative pill standing in for the
+   one datum that mattered. That is what got fixed. */
+/* THE STICKY FILTER BAR. Its base rules had gone missing — only fragments and
+   the mobile overrides survived — so above 1000px it had no container and no
+   grid, and the search field, the group jumps and the count simply stacked as
+   raw blocks. This is the bar those pieces belong to: a full-bleed glass surface
+   bedded under the sticky header (the 128px it measures), with the controls held
+   to the page measure and laid out as one row — filter, jumps, count. */
+.idxbar {
+  position: sticky;
+  top: 128px;
+  z-index: 100;
+  margin-block: clamp(var(--au-s-5), 3vw, var(--au-s-6)) clamp(var(--au-s-5), 2.5vw, var(--au-s-6));
+  padding-block: var(--au-s-4);
   background: var(--au-glass-fill-strong);
   -webkit-backdrop-filter: var(--au-glass-blur);
   backdrop-filter: var(--au-glass-blur);
-  box-shadow: var(--au-raised-lg);
+  border-block: var(--au-hairline);
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .nsna { background: var(--au-surface); }
-}
-
-.nsna-stage {
-  /* 4 · 2 · 3 · 4 digits — the columns are proportional to the block widths, so
-     the brackets land under equal-density runs of type rather than under equal
-     boxes. `fr` on a mono face at a fixed size is exact enough for this. */
-  --nsna-cols: 4fr 2fr 3fr 4fr;
-  max-width: 900px;
-  margin-inline: auto;
-}
-
-.nsna-digits {
-  display: grid;
-  grid-template-columns: var(--nsna-cols);
-  gap: clamp(var(--au-s-2), 1.2vw, var(--au-s-4));
-  align-items: end;
-}
-.nsna-block {
-  font-size: clamp(1.75rem, 6.2vw, 4.25rem);
-  line-height: 1;
-  letter-spacing: -0.01em;
-  color: var(--au-ink-heading);
-  font-variant-numeric: tabular-nums;
-  text-align: center;
-}
-/* Block one is the FSC, which is the half of the number this diagram is
-   separating out, so it takes the accent. */
-.nsna-block[data-block="0"] { color: var(--au-accent); }
-
-.nsna-brackets {
-  display: grid;
-  grid-template-columns: var(--nsna-cols);
-  gap: clamp(var(--au-s-2), 1.2vw, var(--au-s-4));
-  margin-top: var(--au-s-4);
-}
-/* The spans. Column 1 for the FSC; columns 2 through 4 for the NIIN. Set here
-   once, in one place, because getting them wrong is the only way this diagram
-   could teach something false. */
-.nsna-bracket[data-span="fsc"]  { grid-column: 1; }
-.nsna-bracket[data-span="niin"] { grid-column: 2 / 5; }
-
-/* A bracket is a rule with two short down-strokes at its ends: the rule is the
-   element's own border-top, the strokes are `i`'s two side borders. Two
-   elements, no pseudo-element gymnastics, and it scales with the column. */
-.nsna-bracket {
-  display: block;
-  height: 10px;
-  border-top: 2px solid var(--au-accent);
-  border-radius: 2px 2px 0 0;
-  transform-origin: center top;
-}
-.nsna-bracket > i {
-  display: block;
-  height: 8px;
-  border-left: 2px solid var(--au-accent);
-  border-right: 2px solid var(--au-accent);
-  border-radius: 0;
-}
-.nsna-bracket[data-span="niin"] { border-top-color: var(--au-ink-heading); }
-.nsna-bracket[data-span="niin"] > i {
-  border-left-color: var(--au-ink-heading);
-  border-right-color: var(--au-ink-heading);
-}
-
-.nsna-labels {
-  display: grid;
-  grid-template-columns: var(--nsna-cols);
-  gap: clamp(var(--au-s-2), 1.2vw, var(--au-s-4));
-  margin-top: var(--au-s-3);
-}
-.nsna-label[data-span="fsc"]  { grid-column: 1; }
-.nsna-label[data-span="niin"] { grid-column: 2 / 5; }
-.nsna-label {
-  display: block;
-  font-size: var(--au-text-caption);
-  line-height: 1.55;
-  color: var(--au-ink-muted);
-}
-.nsna-label b {
-  display: block;
-  margin-bottom: var(--au-s-1);
-  font-size: var(--au-text-small);
-  font-weight: var(--au-weight-medium);
-  color: var(--au-ink-heading);
-}
-.nsna-label[data-span="fsc"] b { color: var(--au-accent); }
-
-.nsna-cap {
-  max-width: 76ch;
-  margin: clamp(var(--au-s-6), 3vw, var(--au-s-7)) auto 0;
-  padding-top: var(--au-s-5);
-  border-top: var(--au-hairline);
-  font-size: var(--au-text-caption);
-  line-height: 1.6;
-  color: var(--au-ink-muted);
-  text-align: center;
-}
-
-@media (max-width: 700px) {
-  .nsna-block { font-size: clamp(1.375rem, 8vw, 2.25rem); }
-  .nsna-label { font-size: 0.75rem; }
-  /* THE LABELS LEAVE THE DIGITS' GRID at phone width, and only the labels. The
-     brackets stay on `--nsna-cols` because their spans are the diagram's actual
-     claim — a bracket that drifts off its digits teaches something false. The
-     labels only have to be readable, and on the digit grid the FSC label got 31%
-     of 340px and wrapped to seven lines while the NIIN label sat in white space.
-     Roughly 44/56 gives both a workable measure. */
-  .nsna-labels { grid-template-columns: 1fr 1.28fr; }
-  .nsna-label[data-span="niin"] { grid-column: 2; }
-}
-
-.idgrid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: clamp(var(--au-s-4), 2vw, var(--au-s-5));
-  margin-top: clamp(var(--au-s-6), 3.4vw, var(--au-s-8));
-  list-style: none;
-}
-.idcard { display: flex; flex-direction: column; height: 100%; }
-.idcard-top { display: flex; align-items: center; justify-content: space-between; gap: var(--au-s-3); }
-.idcard-code {
-  font-size: var(--au-text-h3);
-  font-weight: var(--au-weight-regular);
-  color: var(--au-ink-heading);
-}
-.idcard-name {
-  margin-top: var(--au-s-3);
-  font-size: var(--au-text-small);
-  font-weight: var(--au-weight-medium);
-  line-height: 1.4;
-  color: var(--au-ink);
-}
-.idcard-body {
-  margin-top: var(--au-s-2);
-  font-size: var(--au-text-caption);
-  line-height: 1.6;
-  color: var(--au-ink-muted);
-}
-.idcard-eg {
-  margin-top: var(--au-s-4);
-  padding-top: var(--au-s-3);
-  border-top: var(--au-hairline);
-  font-size: var(--au-text-caption);
-  color: var(--au-ink-muted);
-}
-.idcard-go { margin-top: var(--au-s-4); align-self: flex-start; }
-
-@media (max-width: 1000px) { .idgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 520px) { .idgrid { grid-template-columns: minmax(0, 1fr); } }
-
-
-/* ==========================================================================
-   7 · The shared closing accent band
-
-   Used by /browse, /blog and the article reader. `.section-accent` already
-   inverts the ground and the buttons; this only sets the composition.
-   ========================================================================== */
-
-.brc { position: relative; overflow: hidden; }
-/* The sheen darkens DOWN the face, never up. Accent is Steel Blue and takes
-   white ink: a white top sheen drops white-on-accent to 2.80:1. Shading the
-   lower half moves contrast the safe way and still reads as lit from above. */
-.brc::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--au-accent-sheen);
-  pointer-events: none;
-}
-.brc-inner { position: relative; z-index: 1; }
-.brc-lead { max-width: 68ch; }
-.brc-title {
-  margin-top: var(--au-s-4);
-  font-size: var(--au-text-h1);
-  font-weight: var(--au-weight-medium);
-  line-height: var(--au-leading-h1);
-  letter-spacing: var(--au-tracking-h1);
-  color: var(--au-accent-ink);
-}
-/* Horizon is 4.37:1 on Steel Blue and fails; white at 0.72 over the accent
-   reads as the quieter half of the sentence and still clears AA at 4.9:1. */
-.brc-accent { color: rgba(255, 255, 255, 0.72); }
-.brc-lede {
-  margin-top: var(--au-s-5);
-  max-width: 60ch;
-  font-size: var(--au-text-h4);
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.84);
-}
-.brc-cta { display: flex; flex-wrap: wrap; gap: var(--au-s-3); margin-top: var(--au-s-6); }
-
-
-/* ==========================================================================
-   8 · The index pages — sticky control bar, A–Z rail, letter groups
-   ========================================================================== */
-
-.idxbar {
-  position: sticky;
-  /* Clears the sticky site header. */
-  top: 72px;
-  z-index: var(--au-z-sticky, 200);
-  border-bottom: var(--au-hairline);
-  background: rgba(248, 245, 240, 0.86);
-  -webkit-backdrop-filter: var(--au-glass-blur);
-  backdrop-filter: var(--au-glass-blur);
-}
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .idxbar { background: var(--au-bg); }
+  .idxbar { background: var(--au-surface); }
 }
 .idxbar-inner {
   display: grid;
-  grid-template-columns: minmax(220px, 340px) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: clamp(var(--au-s-3), 2vw, var(--au-s-5));
-  padding-block: var(--au-s-4);
+  gap: var(--au-s-3) clamp(var(--au-s-4), 2.5vw, var(--au-s-6));
 }
 .idxbar-field { min-width: 0; }
-.idxbar-count { margin: 0; white-space: nowrap; }
+.idxbar-count { margin: 0; white-space: nowrap; justify-self: end; }
 
 .azrail { display: flex; flex-wrap: wrap; gap: 2px; justify-content: center; }
 .azrail-wide { justify-content: flex-start; gap: var(--au-s-2); }
@@ -8455,8 +8644,11 @@ a.azkey:hover { background: var(--au-tint-hover); color: var(--au-ink); }
 /* Tighter than a section rhythm on purpose. This page can carry twenty-six
    groups of one or two rows each; at the 90px section gap the index became a
    column of headings with occasional content between them. */
-.idxgroup { margin-top: clamp(var(--au-s-5), 2.4vw, var(--au-s-7)); scroll-margin-top: 148px; }
-.idxgroup:first-child { margin-top: var(--au-s-5); }
+.idxgroup { margin-top: clamp(var(--au-s-6), 3vw, var(--au-s-8)); scroll-margin-top: 148px; }
+/* The filter bar's own bottom margin already spaces the first group from it, so
+   this only zeroes the doubled gap; later groups keep the larger separation
+   above so each group reads as its own register. */
+.idxgroup:first-child { margin-top: 0; }
 
 .idxgroup-letter {
   display: flex;
@@ -8549,7 +8741,7 @@ a.azkey:hover { background: var(--au-tint-hover); color: var(--au-ink); }
   /* The site header goes static on a phone, so the bar sits at the top. */
   .idxbar { top: 0; }
   .idxbar-inner { grid-template-columns: minmax(0, 1fr); }
-  .idxbar-count { text-align: left; }
+  .idxbar-count { text-align: left; justify-self: start; }
   .idxgroup { scroll-margin-top: 92px; }
 }
 
@@ -9262,38 +9454,103 @@ a.resopt:hover { background: var(--au-tint-hover); color: var(--au-ink); }
 /* The archive register. */
 .barch { margin-top: clamp(var(--au-s-6), 3.4vw, var(--au-s-8)); }
 .barch:first-of-type { margin-top: 0; }
+.barch-yh { margin: 0; }
+/* The year bar is now the dropdown's trigger — a full-width button reset to the
+   editorial heading it was, plus a chevron and a pointer affordance. */
 .barch-year {
   display: flex;
   align-items: center;
   gap: var(--au-s-4);
-  font-size: var(--au-text-h2);
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  padding: var(--au-s-3) 0;
+  cursor: pointer;
+  text-align: left;
+  /* Larger than a section h2 on purpose: the year is the register's spine, so it
+     carries editorial weight and the depth of the archive is felt at a glance. */
+  font-family: inherit;
+  font-size: clamp(2.25rem, 4.2vw, 3.25rem);
   font-weight: var(--au-weight-medium);
   line-height: 1;
   letter-spacing: var(--au-tracking-h2);
   color: var(--au-ink-heading);
   font-variant-numeric: tabular-nums;
 }
+.barch-year:focus-visible { outline: 2px solid var(--au-accent); outline-offset: 4px; border-radius: var(--au-radius-xs); }
 .barch-rule { flex: 1; height: 1px; background: var(--au-border); transform-origin: left center; }
+/* The dropdown chevron: down when closed, flips up when the year is open. */
+.barch-chev {
+  flex: none;
+  color: var(--au-ink-muted);
+  transition: transform var(--au-dur) var(--au-ease), color var(--au-dur-fast) var(--au-ease);
+}
+.barch[data-open="true"] .barch-chev { transform: rotate(180deg); color: var(--au-accent); }
+.barch-year:hover .barch-chev { color: var(--au-accent); }
+.barch-year:hover .barch-year-n { color: var(--au-accent); }
+.barch-year-n { transition: color var(--au-dur-fast) var(--au-ease); }
+
+/* THE DROPDOWN — a grid-rows 1fr↔0fr collapse, the reliable way to animate an
+   auto height. Open (and no-JS) is 1fr; JS collapses closed years to 0fr and,
+   one frame later, arms the transition so the first collapse on load snaps
+   rather than sliding the whole list shut. */
+.barch-panel { display: grid; grid-template-rows: 1fr; }
+.barch-panel-inner { overflow: hidden; }
+.barch[data-open="false"] .barch-panel { grid-template-rows: 0fr; }
+.barch[data-open="false"] .barch-panel-inner { opacity: 0; }
+.barch[data-ready="true"] .barch-panel {
+  transition: grid-template-rows var(--au-dur-slow) var(--au-ease);
+}
+.barch[data-ready="true"] .barch-panel-inner {
+  transition: opacity var(--au-dur) var(--au-ease);
+}
+/* The count as a small accent pill, not a bare figure adrift at the end of the
+   rule — a neat badge that gives each year one hit of brand colour. */
 .barch-year em {
   flex: none;
   font-family: var(--au-font-sans);
-  font-size: var(--au-text-caption);
+  font-size: var(--au-text-eyebrow);
   font-style: normal;
-  font-weight: var(--au-weight-regular);
-  color: var(--au-ink-muted);
+  font-weight: var(--au-weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--au-accent);
+  background: rgba(var(--au-accent-rgb), 0.10);
+  padding: 4px 11px;
+  border-radius: var(--au-radius-pill);
 }
-.barch-list { list-style: none; margin-top: var(--au-s-4); }
+.barch-list { list-style: none; margin-top: var(--au-s-5); }
+.barch-list li + li { border-top: var(--au-hairline); }
 .barch-row {
+  position: relative;
   display: grid;
   grid-template-columns: 13ch minmax(0, 1fr) 12ch 2ch;
-  align-items: baseline;
+  align-items: center;
   gap: var(--au-s-4);
-  padding-block: var(--au-s-4);
-  border-bottom: var(--au-hairline);
+  padding: var(--au-s-4) var(--au-s-3);
+  border-radius: var(--au-radius-md);
   text-decoration: none;
   transition: background var(--au-dur-fast) var(--au-ease);
 }
 .barch-row:hover { background: var(--au-tint-hover); }
+/* A leading accent tick that grows in on hover — the one moving part, and what
+   turns a flat register into a list with a pulse. Sits in the row's left gutter,
+   aligned under the year numeral. */
+.barch-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 22px;
+  border-radius: var(--au-radius-pill);
+  background: var(--au-accent);
+  transform: translateY(-50%) scaleY(0);
+  transition: transform var(--au-dur-fast) var(--au-ease);
+}
+.barch-row:hover::before { transform: translateY(-50%) scaleY(1); }
 .barch-date { font-size: var(--au-text-caption); color: var(--au-ink-muted); font-variant-numeric: tabular-nums; }
 .barch-title {
   font-size: var(--au-text-body);
@@ -9303,8 +9560,22 @@ a.resopt:hover { background: var(--au-tint-hover); color: var(--au-ink); }
   transition: color var(--au-dur-fast) var(--au-ease);
 }
 .barch-row:hover .barch-title { color: var(--au-link); }
-.barch-cat { font-size: var(--au-text-caption); color: var(--au-ink-muted); }
+/* Topic as an outlined chip, so it reads as a tag rather than a second date. */
+.barch-cat {
+  justify-self: start;
+  font-size: var(--au-text-eyebrow);
+  font-weight: var(--au-weight-medium);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--au-ink-muted);
+  border: var(--au-hairline);
+  border-radius: var(--au-radius-pill);
+  padding: 3px 10px;
+  transition: color var(--au-dur-fast) var(--au-ease), border-color var(--au-dur-fast) var(--au-ease);
+}
+.barch-row:hover .barch-cat { color: var(--au-accent); border-color: var(--au-accent); }
 .barch-go {
+  justify-self: end;
   font-size: var(--au-text-small);
   color: var(--au-ink-muted);
   transition: transform var(--au-dur-fast) var(--au-ease), color var(--au-dur-fast) var(--au-ease);
@@ -9530,7 +9801,8 @@ a.resopt:hover { background: var(--au-tint-hover); color: var(--au-ink); }
      routes        the four plates' rules draw, numerals lift, staggered
      depth         the register's bars sweep out, staggered down the rows
      stack         a container whose direct children arrive in sequence
-     nsna          the NSN taken apart: digits settle, brackets draw, labels rise
+     plate         the data plate read by one measuring pass; the sweep is the
+                   clock every other delay in the sequence is measured against
      group         an index/archive group: label lifts, rule draws, rows print
      rows          the part-row results printing down the column
      head          a capability line's head
@@ -9555,20 +9827,20 @@ a.resopt:hover { background: var(--au-tint-hover); color: var(--au-ink); }
      per recipe means a new recipe that forgets to opt out gets the default
      rather than nothing. */
   [data-cue]:not([data-cue="routes"], [data-cue="depth"], [data-cue="stack"],
-                 [data-cue="nsna"], [data-cue="group"], [data-cue="rows"],
+                 [data-cue="plate"], [data-cue="group"], [data-cue="rows"],
                  [data-cue="media"], [data-cue="pair"], [data-cue="note"],
                  [data-cue="doc"], [data-cue="steps"], [data-cue="send"],
                  [data-cue="lead-media"], [data-cue="lead-body"],
-                 [data-cue="cover"])[data-cue-state="armed"] {
+                 [data-cue="cover"], [data-cue="deal"])[data-cue-state="armed"] {
     opacity: 0;
     transform: translateY(24px);
   }
   [data-cue]:not([data-cue="routes"], [data-cue="depth"], [data-cue="stack"],
-                 [data-cue="nsna"], [data-cue="group"], [data-cue="rows"],
+                 [data-cue="plate"], [data-cue="group"], [data-cue="rows"],
                  [data-cue="media"], [data-cue="pair"], [data-cue="note"],
                  [data-cue="doc"], [data-cue="steps"], [data-cue="send"],
                  [data-cue="lead-media"], [data-cue="lead-body"],
-                 [data-cue="cover"])[data-cue-state="in"] {
+                 [data-cue="cover"], [data-cue="deal"])[data-cue-state="in"] {
     opacity: 1;
     transform: none;
   }/* ---- stack: children arrive in sequence -------------------------------- */
@@ -9591,7 +9863,27 @@ a.resopt:hover { background: var(--au-tint-hover); color: var(--au-ink); }
   [data-cue="stack"][data-cue-state="in"] > *:nth-child(6) { transition-delay: 0.32s; }
   [data-cue="stack"][data-cue-state="in"] > *:nth-child(7) { transition-delay: 0.38s; }
   [data-cue="stack"][data-cue-state="in"] > *:nth-child(8) { transition-delay: 0.44s; }
-  [data-cue="stack"][data-cue-state="in"] > *:nth-child(9) { transition-delay: 0.50s; }/* ---- routes: the four plates ------------------------------------------- */
+  [data-cue="stack"][data-cue-state="in"] > *:nth-child(9) { transition-delay: 0.50s; }
+
+  /* ---- deal: the manufacturer cards rise and settle in sequence ---------- */
+  [data-cue="deal"][data-cue-state="in"] .mfrcard {
+    transition: opacity 700ms var(--au-ease), transform 700ms var(--au-ease);
+    will-change: transform;
+  }
+  [data-cue="deal"][data-cue-state="armed"] .mfrcard {
+    opacity: 0;
+    transform: translateY(30px) scale(0.94);
+  }
+  [data-cue="deal"][data-cue-state="in"] .mfrcard { opacity: 1; transform: none; }
+  [data-cue="deal"][data-cue-state="in"] > *:nth-child(1) .mfrcard { transition-delay: 0.04s; }
+  [data-cue="deal"][data-cue-state="in"] > *:nth-child(2) .mfrcard { transition-delay: 0.11s; }
+  [data-cue="deal"][data-cue-state="in"] > *:nth-child(3) .mfrcard { transition-delay: 0.18s; }
+  [data-cue="deal"][data-cue-state="in"] > *:nth-child(4) .mfrcard { transition-delay: 0.25s; }
+  [data-cue="deal"][data-cue-state="in"] > *:nth-child(5) .mfrcard { transition-delay: 0.32s; }
+  [data-cue="deal"][data-cue-state="in"] > *:nth-child(6) .mfrcard { transition-delay: 0.39s; }
+  [data-cue="deal"][data-cue-state="in"] > *:nth-child(7) .mfrcard { transition-delay: 0.46s; }
+  [data-cue="deal"][data-cue-state="in"] > *:nth-child(n+8) .mfrcard { transition-delay: 0.53s; }
+/* ---- routes: the four plates ------------------------------------------- */
   /* The rule along the top edge is the plate's only decoration,
   so drawing it IS
      the entrance. It scales from its leading edge; the text simply rises. */
@@ -9650,47 +9942,134 @@ a.resopt:hover { background: var(--au-tint-hover); color: var(--au-ink); }
   [data-cue="depth"][data-cue-state="in"] > li:nth-child(3) .depth-bar > i { transition-delay: 0.28s; }
   [data-cue="depth"][data-cue-state="in"] > li:nth-child(4) .depth-bar > i { transition-delay: 0.34s; }
   [data-cue="depth"][data-cue-state="in"] > li:nth-child(5) .depth-bar > i { transition-delay: 0.40s; }
-  [data-cue="depth"][data-cue-state="in"] > li:nth-child(n+6) .depth-bar > i { transition-delay: 0.46s; }/* ---- nsna: the number taken apart ------------------------------------- */
-  /* Three beats,
-  in the order the eye should meet them: the four digit blocks
-     settle in from small alternating offsets,
-  then each bracket draws OUTWARD
-     from its own centre — which is what makes it read as a span being measured
-     rather than a line being extended — and finally the labels rise underneath.
+  [data-cue="depth"][data-cue-state="in"] > li:nth-child(n+6) .depth-bar > i { transition-delay: 0.46s; }/* ---- plate: the number read by one measuring pass --------------------
+   THE THESIS. A single band of light crosses the plate, and everything else in
+   the sequence is timed off where that light has reached. Behind it the engraving
+   lights block by block; then the FSC bracket draws outward from its own centre,
+   then the NIIN bracket does the same across three blocks; then each label writes
+   in beneath its span. The number is being READ and taken apart, which is exactly
+   what the band is claiming in words.
 
-     The brackets scale from centre,
-  so their transform-origin is `center top`
-     (set in the structural block) and only the scale changes here. */
+   WHY THE PASS IS THE CLOCK. The previous version faded the four blocks in from
+   small offsets and then drew the brackets — four things arriving, then two more.
+   Nothing connected them, so it read as a list of reveals. Anchoring every delay
+   to the sweep's position turns six reveals into one gesture, and it is the only
+   version of this that explains itself: light moves, and what it has touched is
+   legible.
 
-  [data-cue="nsna"][data-cue-state="in"] .nsna-block {
-    transition: opacity 640ms var(--au-ease), transform 640ms var(--au-ease);
-  }[data-cue="nsna"][data-cue-state="in"] .nsna-bracket {
-    transition: transform 720ms var(--au-ease), opacity 400ms var(--au-ease);
-  }[data-cue="nsna"][data-cue-state="in"] .nsna-label {
-    transition: opacity 600ms var(--au-ease), transform 600ms var(--au-ease);
+   ONE PASS, ONCE. It is not a loop. A perpetual sweep across a band of factual
+   data reads as a loading state, and this plate is never loading.
+
+   MOTION-SAFE, and the plate is the strictest case on the site because it is the
+   one element whose rest state is genuinely elaborate:
+     · At rest the plate is complete — every digit lit, both brackets drawn, both
+       labels in place, the pass parked off the right-hand edge. That is what the
+       server renders and what a dead frame, a crawler or no-JS leaves on screen.
+     · Only [data-cue-state="armed"] dims or collapses anything, and only
+       CueReveal writes that attribute, from inside a real frame.
+     · Transitions are scoped to [data-cue-state="in"], so the armed state SNAPS
+       into place instead of animating toward itself — without that, arming would
+       play the whole sequence backwards first.
+     · Under reduced motion the pass is removed outright rather than parked: its
+       only behaviour is movement, so frozen mid-plate it would be a stray streak
+       of light with no explanation. */
+
+  [data-cue="plate"][data-cue-state="in"] .dp-pass {
+    /* 1600ms and linear. The sweep is the clock every other delay is measured
+       against, so it must travel at a constant rate — eased, it would cover the
+       first three blocks in a third of the time and the bracket delays below
+       would no longer line up with where the light actually is. */
+    transition: transform 1250ms linear;
+  }
+  [data-cue="plate"][data-cue-state="in"] .dp-block {
+    transition: color 460ms var(--au-ease), text-shadow 460ms var(--au-ease),
+                transform 620ms var(--au-ease);
+  }
+  [data-cue="plate"][data-cue-state="in"] .dp-bracket {
+    transition: transform 620ms var(--au-ease), opacity 300ms var(--au-ease);
+  }
+  [data-cue="plate"][data-cue-state="in"] .dp-label,
+  [data-cue="plate"][data-cue-state="in"] .dp-hint,
+  [data-cue="plate"][data-cue-state="in"] .dp-head > * {
+    transition: opacity 560ms var(--au-ease), transform 560ms var(--au-ease);
+  }
+  [data-cue="plate"][data-cue-state="in"] .dp-aside {
+    transition: opacity 620ms var(--au-ease), transform 620ms var(--au-ease);
   }
 
-  [data-cue="nsna"][data-cue-state="armed"] .nsna-block { opacity: 0; transform: translateY(18px); }
-  /* Alternating x-offsets, tiny, so the four blocks read as separating out of
-     one string rather than four things dropping in. */
-  [data-cue="nsna"][data-cue-state="armed"] .nsna-block[data-block="0"] { transform: translate(-10px, 18px); }
-  [data-cue="nsna"][data-cue-state="armed"] .nsna-block[data-block="3"] { transform: translate(10px, 18px); }
-  [data-cue="nsna"][data-cue-state="armed"] .nsna-bracket { transform: scaleX(0); opacity: 0; }
-  [data-cue="nsna"][data-cue-state="armed"] .nsna-label { opacity: 0; transform: translateY(10px); }
+  /* ---- ARMED: the only state in which anything is hidden --------------- */
 
-  [data-cue="nsna"][data-cue-state="in"] .nsna-block { opacity: 1; transform: none; }
-  [data-cue="nsna"][data-cue-state="in"] .nsna-bracket { transform: scaleX(1); opacity: 1; }
-  [data-cue="nsna"][data-cue-state="in"] .nsna-label { opacity: 1; transform: none; }
+  /* The sweep starts off the LEFT edge and the plate is dark and unread. */
+  [data-cue="plate"][data-cue-state="armed"] .dp-pass {
+    transform: translateX(-130%) skewX(-8deg);
+  }
+  /* The digits are present and positioned — they are engraved into the plate, so
+     they do not fly in. They are simply not yet lit, and they rise 6px, which is
+     the whole displacement in this sequence. A number that slides across its own
+     plate would be a number coming loose. */
+  [data-cue="plate"][data-cue-state="armed"] .dp-block {
+    color: rgba(185, 191, 205, 0.16);
+    text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.4);
+    transform: translateY(6px);
+  }
+  [data-cue="plate"][data-cue-state="armed"] .dp-bracket { transform: scaleX(0); opacity: 0; }
+  [data-cue="plate"][data-cue-state="armed"] .dp-label { opacity: 0; transform: translateY(10px); }
+  [data-cue="plate"][data-cue-state="armed"] .dp-hint { opacity: 0; }
+  [data-cue="plate"][data-cue-state="armed"] .dp-head > * { opacity: 0; transform: translateY(8px); }
+  [data-cue="plate"][data-cue-state="armed"] .dp-aside { opacity: 0; transform: translateY(16px); }
 
-  [data-cue="nsna"][data-cue-state="in"] .nsna-block[data-block="0"] { transition-delay: 0.04s; }
-  [data-cue="nsna"][data-cue-state="in"] .nsna-block[data-block="1"] { transition-delay: 0.12s; }
-  [data-cue="nsna"][data-cue-state="in"] .nsna-block[data-block="2"] { transition-delay: 0.18s; }
-  [data-cue="nsna"][data-cue-state="in"] .nsna-block[data-block="3"] { transition-delay: 0.24s; }
-  /* The FSC bracket first — it is the cut this diagram is making. */
-  [data-cue="nsna"][data-cue-state="in"] .nsna-bracket[data-span="fsc"] { transition-delay: 0.44s; }
-  [data-cue="nsna"][data-cue-state="in"] .nsna-bracket[data-span="niin"] { transition-delay: 0.60s; }
-  [data-cue="nsna"][data-cue-state="in"] .nsna-label[data-span="fsc"] { transition-delay: 0.86s; }
-  [data-cue="nsna"][data-cue-state="in"] .nsna-label[data-span="niin"] { transition-delay: 0.98s; }/* ---- group: an index or archive group --------------------------------- */
+  /* ---- IN: the landed state, which is also the CSS default ------------- */
+
+  [data-cue="plate"][data-cue-state="in"] .dp-pass { transform: translateX(232%) skewX(-8deg); }
+  [data-cue="plate"][data-cue-state="in"] .dp-block {
+    color: var(--au-ink-inverse-muted);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.17), 0 -1px 1px rgba(0, 0, 0, 0.55);
+    transform: none;
+  }
+  [data-cue="plate"][data-cue-state="in"] .dp-bracket { transform: scaleX(1); opacity: 1; }
+  [data-cue="plate"][data-cue-state="in"] .dp-label { opacity: 1; transform: none; }
+  [data-cue="plate"][data-cue-state="in"] .dp-hint { opacity: 1; }
+  [data-cue="plate"][data-cue-state="in"] .dp-head > * { opacity: 1; transform: none; }
+  [data-cue="plate"][data-cue-state="in"] .dp-aside { opacity: 1; transform: none; }
+
+  /* ---- THE DELAYS ARE THE SWEEP'S POSITION ---------------------------- */
+  /* THE DELAYS ARE THE SWEEP'S POSITION, and this is the arithmetic — every value
+     below is derived from it, so re-derive them all if the travel or the duration
+     changes.
+
+       the pass element is 46% of the plate wide and travels −130% → 232% of its
+       OWN width, i.e. its left edge crosses −59.8% → +106.7% of the plate;
+       its light centre sits 23% further right, so the centre sweeps
+       −36.8% → +129.7% — a run of 166.5 plate-percent over 1250ms.
+
+       centre reaches plate position p%  at  (36.8 + p) / 166.5 × 1250ms
+
+     The four columns are 4/13, 2/13, 3/13 and 4/13 of the number's width, putting
+     their centres near 15%, 38%, 58% and 85% across — which is where these come
+     from:  389ms · 561ms · 712ms · 914ms. Each bracket then follows once the light
+     has cleared the span it measures, and each label once its bracket is drawn. */
+  [data-cue="plate"][data-cue-state="in"] .dp-head > *:nth-child(1) { transition-delay: 0.06s; }
+  [data-cue="plate"][data-cue-state="in"] .dp-head > *:nth-child(2) { transition-delay: 0.14s; }
+
+  [data-cue="plate"][data-cue-state="in"] .dp-block[data-block="0"] { transition-delay: 0.39s; }
+  [data-cue="plate"][data-cue-state="in"] .dp-block[data-block="1"] { transition-delay: 0.56s; }
+  [data-cue="plate"][data-cue-state="in"] .dp-block[data-block="2"] { transition-delay: 0.71s; }
+  [data-cue="plate"][data-cue-state="in"] .dp-block[data-block="3"] { transition-delay: 0.91s; }
+
+  /* The brackets follow the light off the plate: FSC first, because that is the
+     cut this diagram is making, then the NIIN span across the other three. */
+  [data-cue="plate"][data-cue-state="in"] .dp-bracket[data-span="fsc"]  { transition-delay: 1.02s; }
+  [data-cue="plate"][data-cue-state="in"] .dp-bracket[data-span="niin"] { transition-delay: 1.14s; }
+  [data-cue="plate"][data-cue-state="in"] .dp-label[data-span="fsc"]    { transition-delay: 1.26s; }
+  [data-cue="plate"][data-cue-state="in"] .dp-label[data-span="niin"]   { transition-delay: 1.38s; }
+  /* The hint last, and only once there is something to interrogate. */
+  [data-cue="plate"][data-cue-state="in"] .dp-hint  { transition-delay: 1.56s; }
+  /* The counterpoint arrives after the plate has finished being read, which is
+     the order the argument runs in: this is the number, and THEN here is the one
+     that is not part of it. */
+  [data-cue="plate"][data-cue-state="in"] .dp-aside { transition-delay: 1.50s; }
+
+/* ---- group: an index or archive group --------------------------------- */
   /* The label lifts,
   its rule draws across to the count,
   and the rows print
@@ -9710,7 +10089,9 @@ a.resopt:hover { background: var(--au-tint-hover); color: var(--au-ink); }
   .barch-list,
   .acgrid) > li {
     transition: opacity 520ms var(--au-ease), transform 520ms var(--au-ease);
-  }[data-cue="group"][data-cue-state="in"] .ac-bar > i { transition: transform 880ms var(--au-ease); }
+  }[data-cue="group"][data-cue-state="in"] :is(.ac-bar, .ac-scale) > i { transition: transform 880ms var(--au-ease); }
+  /* The tick marks the value, so it arrives once the segment has reached it. */
+  [data-cue="group"][data-cue-state="in"] .ac-scale::after { transition: opacity 340ms var(--au-ease); }
 
   [data-cue="group"][data-cue-state="armed"] :is(.idxgroup-letter, .barch-year) > :is(span, em),
   [data-cue="group"][data-cue-state="armed"] .idxgroup-note {
@@ -9722,7 +10103,8 @@ a.resopt:hover { background: var(--au-tint-hover); color: var(--au-ink); }
     opacity: 0;
     transform: translateY(14px);
   }
-  [data-cue="group"][data-cue-state="armed"] .ac-bar > i { transform: scaleX(0); }
+  [data-cue="group"][data-cue-state="armed"] :is(.ac-bar, .ac-scale) > i { transform: scaleX(0); }
+  [data-cue="group"][data-cue-state="armed"] .ac-scale::after { opacity: 0; }
 
   [data-cue="group"][data-cue-state="in"] :is(.idxgroup-letter, .barch-year) > :is(span, em),
   [data-cue="group"][data-cue-state="in"] .idxgroup-note { opacity: 1; transform: none; }
@@ -9731,7 +10113,8 @@ a.resopt:hover { background: var(--au-tint-hover); color: var(--au-ink); }
     opacity: 1;
     transform: none;
   }
-  [data-cue="group"][data-cue-state="in"] .ac-bar > i { transform: scaleX(1); }
+  [data-cue="group"][data-cue-state="in"] :is(.ac-bar, .ac-scale) > i { transform: scaleX(1); }
+  [data-cue="group"][data-cue-state="in"] .ac-scale::after { opacity: 1; }
 
   [data-cue="group"][data-cue-state="in"] :is(.idxgroup-letter, .barch-year) > span { transition-delay: 0.02s; }
   [data-cue="group"][data-cue-state="in"] :is(.idxgroup-rule, .barch-rule) { transition-delay: 0.10s; }
@@ -9744,10 +10127,10 @@ a.resopt:hover { background: var(--au-tint-hover); color: var(--au-ink); }
   [data-cue="group"][data-cue-state="in"] :is(.idxlist, .barch-list, .acgrid) > li:nth-child(5) { transition-delay: 0.40s; }
   [data-cue="group"][data-cue-state="in"] :is(.idxlist, .barch-list, .acgrid) > li:nth-child(6) { transition-delay: 0.45s; }
   [data-cue="group"][data-cue-state="in"] :is(.idxlist, .barch-list, .acgrid) > li:nth-child(n+7) { transition-delay: 0.50s; }
-  [data-cue="group"][data-cue-state="in"] .acgrid > li:nth-child(1) .ac-bar > i { transition-delay: 0.34s; }
-  [data-cue="group"][data-cue-state="in"] .acgrid > li:nth-child(2) .ac-bar > i { transition-delay: 0.40s; }
-  [data-cue="group"][data-cue-state="in"] .acgrid > li:nth-child(3) .ac-bar > i { transition-delay: 0.46s; }
-  [data-cue="group"][data-cue-state="in"] .acgrid > li:nth-child(n+4) .ac-bar > i { transition-delay: 0.52s; }/* ---- rows: the part-row results printing ------------------------------ */
+  [data-cue="group"][data-cue-state="in"] .acgrid > li:nth-child(1) :is(.ac-bar, .ac-scale) > i { transition-delay: 0.34s; }
+  [data-cue="group"][data-cue-state="in"] .acgrid > li:nth-child(2) :is(.ac-bar, .ac-scale) > i { transition-delay: 0.40s; }
+  [data-cue="group"][data-cue-state="in"] .acgrid > li:nth-child(3) :is(.ac-bar, .ac-scale) > i { transition-delay: 0.46s; }
+  [data-cue="group"][data-cue-state="in"] .acgrid > li:nth-child(n+4) :is(.ac-bar, .ac-scale) > i { transition-delay: 0.52s; }/* ---- rows: the part-row results printing ------------------------------ */
   /* `.part-row` deliberately carries no backdrop-filter (see design.md),
   so this
      is transform and opacity only and composites cleanly at fifty rows. */
@@ -9953,6 +10336,36 @@ a.resopt:hover { background: var(--au-tint-hover); color: var(--au-ink); }
    as a finished article the reader has not started. */
 @media (prefers-reduced-motion: reduce) {
   .art-progress { display: none; }
+  /* The measuring pass's only behaviour is movement. Frozen mid-plate it is a
+     stray streak of light with nothing to explain it, so it goes entirely — the
+     plate reads correctly without it. */
+  .dp-pass { display: none; }
   .bmast-line { animation: none; transform: none; }
   .blead-gloss { display: none; }
+}
+
+/* ==========================================================================
+   The platform grid's breakpoints.
+
+   These live here, at the end, because they were lost once already: a regex
+   cleaning up the abandoned featured-plate experiment took them with it, and the
+   aircraft page silently held three columns down to 390px with the page
+   overflowing sideways. Restored and kept together so the set is obvious.
+
+   (The `.cagegrid` breakpoints removed in the same sweep are NOT restored — that
+   component no longer exists in the markup or the stylesheet.)
+   ========================================================================== */
+
+/* An identifier must never break across lines — "C-130" split over two rows stops
+   being a designation and starts being a typo. */
+.ac-desig { white-space: nowrap; }
+
+/* /browse's preview rail. */
+@media (max-width: 1100px) { .acgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* The aircraft page's plates: three, then two, then one. 620px rather than 560,
+   because at 600 the chip and the maker label were sharing a line with no room and
+   the designation chip started stretching to two rows. */
+@media (max-width: 900px) { .acgrid-page { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) {
+  .acgrid, .acgrid-page { grid-template-columns: minmax(0, 1fr); }
 }

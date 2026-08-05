@@ -66,6 +66,20 @@ const MFR_CARDS = MFR_SORTED.map((m) => ({
 }));
 const AIRCRAFT_BY_DEPTH = [...AIRCRAFT].sort((a, b) => b.count - a.count);
 const AC_MAX = Math.max(...AIRCRAFT.map((a) => a.count));
+/* Maker + short designation per platform — the same map the /browse/aircraft
+   page carries. The designation is the card's anchor ("737", not the full
+   name); it is the real designation, keyed to the slug so it can never land on
+   the wrong platform. Kept in sync with app/browse/aircraft/page.tsx. */
+const PLATFORM: Record<string, { maker: string; desig: string }> = {
+  b737: { maker: "Boeing", desig: "737" },
+  a320: { maker: "Airbus", desig: "A320" },
+  b777: { maker: "Boeing", desig: "777" },
+  crj: { maker: "Bombardier", desig: "CRJ" },
+  c130: { maker: "Lockheed", desig: "C-130" },
+  uh60: { maker: "Sikorsky", desig: "UH-60" },
+  ch47: { maker: "Boeing", desig: "CH-47" },
+  bell206: { maker: "Bell", desig: "206" },
+};
 
 /* The four routes, in the order a buyer can most often answer them. A
    description is the one thing everybody has even when the paperwork is gone, so
@@ -356,28 +370,41 @@ export default function BrowsePage() {
             </Link>
           </div>
 
-          {/* A two-column ranked board rather than a card grid — the platforms
-              are ordered by catalogue depth and each reads as a line on a fleet
-              manifest, with the bar the dominant mark. The rank leads because
-              the ordering is the section's whole claim: this is what we are
-              deepest in. */}
-          <ol className="acboard" data-cue="stack" data-cue-ms="1200">
-            {AIRCRAFT_BY_DEPTH.map((a, i) => (
-              <li key={a.slug}>
-                <Link className="acplate" href={`/browse/platform/${a.slug}`}>
-                  <span className="ac-rank u-mono" aria-hidden="true">{`0${i + 1}`}</span>
-                  <span className="ac-name">{a.name}</span>
-                  <span className="ac-n">{num(a.count)} parts</span>
-                  <span
-                    className="ac-bar"
-                    aria-hidden="true"
-                    style={{ ["--depth" as string]: `${Math.round((a.count / AC_MAX) * 100)}%` }}
-                  >
-                    <i />
-                  </span>
-                </Link>
-              </li>
-            ))}
+          {/* A card grid: each plate is anchored by its stamped designation,
+              then the full name, then the part count with a depth scale showing
+              its share of the deepest catalogue. Same plate the /browse/aircraft
+              page uses, so the two read as one system. */}
+          <ol className="acgrid" data-cue="stack" data-cue-ms="1200">
+            {AIRCRAFT_BY_DEPTH.map((a) => {
+              const meta = PLATFORM[a.slug];
+              return (
+                <li key={a.slug}>
+                  <Link className="acplate" href={`/browse/platform/${a.slug}`}>
+                    <span className="ac-top">
+                      <span className="ac-desig u-mono">{meta?.desig ?? a.name}</span>
+                      <span className="ac-maker">{meta?.maker}</span>
+                    </span>
+                    <span className="ac-name">{a.name}</span>
+                    <span className="ac-foot">
+                      <span className="ac-figure">
+                        <b className="u-mono">{num(a.count)}</b>
+                        <em>parts listed</em>
+                      </span>
+                      <span
+                        className="ac-scale"
+                        aria-hidden="true"
+                        style={{ ["--depth" as string]: `${Math.round((a.count / AC_MAX) * 100)}%` }}
+                      >
+                        <i />
+                      </span>
+                    </span>
+                    <span className="ac-go">
+                      Browse parts <span aria-hidden="true">→</span>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
           </ol>
         </div>
       </section>

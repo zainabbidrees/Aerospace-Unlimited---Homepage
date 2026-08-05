@@ -6305,11 +6305,14 @@ legend { padding: 0; font-size: var(--au-text-h3); letter-spacing: var(--au-trac
        three colours are calibrated for a light ground (see the clock block
        below), and on a dark pane its readout would vanish.
 
-     · THE DISPLAY LINE IS MONA SANS 500, UPPERCASE, TRACKED IN. The reference
-       sets a heavy condensed face. This site has one family and a hard 500
-       ceiling on headings, so the reference's weight is carried by CASE and
-       TRACKING rather than by importing a face or a weight the system does not
-       own. It stays inside the 52px cap (`--au-text-display`).
+     · THE DISPLAY LINE IS SENTENCE CASE, on the shared display tokens. It was set
+       in UPPERCASE with the tracking opened out, to carry the reference's heavy
+       condensed face using case and tracking — this site has one family and a hard
+       500 ceiling on headings, so weight was not available. The client rejected it
+       (2026-08-04): no display line anywhere else on the site is capitalised, so
+       this one read as a second typographic system rather than as the same one
+       turned up. The reference's weight is simply not reproducible here, and
+       faking it costs more than it buys. Matches `.hero h1` exactly.
 
      · THE FILLED CARD IS DEEP NAVY, NOT ACCENT. The reference's third card is
        near-black, and Navy is the site's answer to that. Accent would also have
@@ -6335,12 +6338,19 @@ legend { padding: 0; font-size: var(--au-text-h3); letter-spacing: var(--au-trac
 /* Uppercase at the display size, tracked in rather than set heavier. `-0.022em`
    is the floor that still holds at 32px on a phone; tighter and the caps start
    touching at the small end of the clamp. */
+/* SENTENCE CASE, and it takes the shared display tokens rather than its own values.
+   This was uppercase with the tracking opened to -0.022em to compensate — an attempt
+   to carry the reference's heavy condensed face using case and tracking, since the
+   system has one family and a hard 500 ceiling on headings. It was the wrong trade:
+   the site sets no display line in caps anywhere, so this one read as a different
+   typographic system rather than as the same one turned up, and the tracking was
+   tuned for capitals besides. Matching `.hero h1` exactly is the fix — same size,
+   same leading, same tracking, same measure. */
 .chero-title {
   font-size: var(--au-text-display);        /* 32 → 52px, the site's ceiling */
-  line-height: 1.03;
-  letter-spacing: -0.022em;
+  line-height: var(--au-leading-display);
+  letter-spacing: var(--au-tracking-display);
   font-weight: var(--au-weight-medium);     /* 500 — the heading ceiling */
-  text-transform: uppercase;
   color: var(--au-ink-heading);
   max-width: 22ch;
 }
@@ -6383,92 +6393,14 @@ legend { padding: 0; font-size: var(--au-text-h3); letter-spacing: var(--au-trac
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* 32%, not 15%. The supplied source is a 1696 x 667 banner rather than the square
-     this slot used to crop, so the frame only loses ~130px of height — and what it
-     must not lose is the faces, which sit just above the middle. Lower than this and
-     the plate overlaying the bottom edge starts eating them. */
-  object-position: 50% 32%;
+  /* 42%, and it moved DOWN from 32% when the "Quoting desk" plate was removed on
+     2026-08-05. The old value existed to hold the faces clear of a box laid over the
+     lower edge; with the edge free, the frame is balanced a little below centre —
+     which keeps the faces just above the middle and lets the desk, trays and cartons
+     read along the bottom instead of being half-covered. */
+  object-position: 50% 42%;
 }
 
-/* The plate, laid into the banner's lower edge.
-
-   THE INSET IS AT LEAST 18px ON PURPOSE. The banner's radius is 16px, and the
-   concentric rule says an inner box inside a rounded outer one must either match
-   `outer − inset` or clear the corner zone entirely. At an inset of 18px it
-   clears 16px of radius, so the plate is free to carry its own radius and the
-   `.audits/concentric.js` check has nothing to compare. Drop the inset below 16px
-   and the plate's radius has to become `16 − inset` or its corner will cut the
-   banner's curve. */
-.chero-plate {
-  position: absolute;
-  left: clamp(var(--au-s-4), 1.8vw, var(--au-s-5));
-  right: clamp(var(--au-s-4), 1.8vw, var(--au-s-5));
-  bottom: clamp(var(--au-s-4), 1.8vw, var(--au-s-5));
-  display: flex;
-  align-items: center;
-  gap: clamp(var(--au-s-4), 2vw, var(--au-s-5));
-  padding: clamp(var(--au-s-4), 1.8vw, var(--au-s-5));
-  border-radius: var(--au-radius-md);
-  background: var(--au-glass-fill-strong);
-  -webkit-backdrop-filter: var(--au-glass-blur);
-  backdrop-filter: var(--au-glass-blur);
-  /* A white-ish edge, not the navy hairline: over a photograph the plate's job is
-     to read as lit, and a dark edge reads as a hole cut in the image. */
-  border: 1px solid rgba(255, 255, 255, 0.58);
-  box-shadow: var(--au-raised);
-  color: var(--au-ink-body);
-}
-/* Capped once there is width to spare. Stretched edge to edge the plate covered the
-   right half of the supplied photograph — which is the room the two people are
-   standing in — and read as a bar laid across the picture rather than a plate
-   sitting on it. Below 900px it returns to full width: there is no spare room to
-   give the image at that size, and a 640px plate in a 500px frame is just a plate. */
-@media (min-width: 900px) {
-  .chero-plate { right: auto; max-width: min(640px, 52%); }
-}
-/* Without a backdrop-filter the fill is just a pale wash over the photograph and
-   the text loses its ground, so it goes opaque instead. */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .chero-plate { background: var(--au-surface); }
-}
-.chero-plate-txt { min-width: 0; flex: 1 1 auto; }
-.chero-plate-k {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--au-s-2);
-  font-size: var(--au-text-eyebrow);
-  font-weight: var(--au-weight-medium);
-  letter-spacing: var(--au-tracking-label);
-  text-transform: uppercase;
-  color: var(--au-accent);
-}
-.chero-plate-t {
-  margin-top: var(--au-s-3);
-  max-width: 52ch;
-  font-size: var(--au-text-h4);
-  line-height: var(--au-leading-tight);
-  color: var(--au-ink-heading);
-}
-.chero-plate-d { margin-top: var(--au-s-3); }
-
-/* The reference's circled mark, at the plate's far end. */
-.chero-plate-go {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  width: 52px;
-  height: 52px;
-  border-radius: var(--au-radius-circle);
-  background: var(--au-accent);
-  color: var(--au-accent-ink);
-  box-shadow: var(--au-shadow-sm);
-  transition: background var(--au-dur-fast) var(--au-ease),
-              transform var(--au-dur-fast) var(--au-ease);
-}
-.chero-plate-go .c-glyph { width: 20px; height: 20px; }
-.chero-plate-go:hover { background: var(--au-accent-hover); }
-.chero-plate-go:active { transform: translateY(1px); }
 
 /* ---- Responsive --------------------------------------------------------- */
 @media (max-width: 1000px) {
@@ -6481,326 +6413,25 @@ legend { padding: 0; font-size: var(--au-text-h3); letter-spacing: var(--au-trac
   .chero-banner { aspect-ratio: 16 / 9; }
 }
 @media (max-width: 620px) {
-  /* THE PLATE COMES OFF THE PHOTOGRAPH at this width, and that is the only honest
-     answer here. A 4/5 portrait crop out of a 1696 x 667 banner is a narrow vertical
-     slice — it kept one head and one shoulder — and the plate then covered most of
-     what survived. Laying the plate under the frame instead lets the image keep a
-     landscape crop with both people in it, and gives the four lines inside the plate
-     the full width they were wrapping in.
+  /* A TALLER CROP, because 13/4 out of a 1696 x 667 source is a very shallow slice
+     and at 390px it kept about one head. 3/2 gives the frame enough height to hold
+     both people.
 
-     `aspect-ratio` moves to the IMG rather than staying on the figure: the figure now
-     has to be as tall as the picture plus the plate, so a ratio on it would squash
-     one or the other. */
-  .chero-banner { aspect-ratio: auto; display: block; }
-  .chero-banner img {
-    position: static;
-    aspect-ratio: 3 / 2;
-    height: auto;
-    object-position: 46% 30%;
-  }
-  .chero-plate {
-    position: static;
-    max-width: none;
-    /* Square where it meets the picture, and the figure's own radius clips the
-       bottom two corners — so the two elements read as one object rather than a card
-       under a photograph. */
-    border-radius: 0;
-    border: 0;
-    border-top: var(--au-hairline);
-    box-shadow: none;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .chero-plate-go { align-self: flex-end; }
+     This block used to do considerably more: it took the "Quoting desk" plate off
+     the photograph and laid it underneath, which meant moving `aspect-ratio` from
+     the figure to the img so the figure could be as tall as picture plus plate. The
+     plate was removed on 2026-08-05, so the ratio stays on the figure and only the
+     crop changes. */
+  .chero-banner { aspect-ratio: 3 / 2; }
+  .chero-banner img { object-position: 46% 34%; }
   .chero-title { max-width: none; }
 }
 
-/* ---- The desk clock, on a light ground ---------------------------------
-   The clock ships calibrated for the inverted band this hero used to be, so every
-   one of its three colours has to be restated here. Left alone, Horizon on white
-   measures 1.4:1 — the mirror image of the "Steel Blue on Midnight" failure the
-   token file warns about, and just as invisible. */
-.clock {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--au-s-2) var(--au-s-3);
-  font-size: var(--au-text-caption);
-}
-.clock-live {
-  display: inline-flex; align-items: center; gap: var(--au-s-2);
-  flex: none;
-  font-size: var(--au-text-eyebrow);
-  font-weight: var(--au-weight-semibold);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--au-accent);
-}
-.chero .clock-live { color: var(--au-accent); }
-.clock-dot {
-  width: 7px; height: 7px; flex: none;
-  border-radius: var(--au-radius-circle);
-  background: var(--au-stock-in);
-  /* Decorative only: this project's renderer never advances an animation, so the
-     failure state is a static dot rather than a missing one. */
-  animation: au-ping 2.6s var(--au-ease) infinite;
-}
-@keyframes au-ping {
-  0%   { box-shadow: 0 0 0 0 rgba(31, 111, 74, 0.34); }
-  70%  { box-shadow: 0 0 0 9px rgba(31, 111, 74, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(31, 111, 74, 0); }
-}
-/* No divider rule between the label and the readout: inside the stat plate the
-   line wraps, and a dangling rule at the end of a wrapped line is worse than no
-   rule at all. The gap carries the separation. */
-.clock-body { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--au-s-2) var(--au-s-3); min-width: 0; }
-/* THE TWO LIVE CHUNKS stay intact and the row wraps between them — left to break
-   internally, "11:34 Pacific" split across two lines. It is deliberately NOT
-   `.clock-body > *`: that also caught the no-JS fallback, which is a whole sentence
-   ("Staffed 24/7/365 · same-day shipping before 3pm Pacific") and ran straight out
-   through the side of the stat card at 390px. A standalone `.clock-cut` is the
-   fallback and has to wrap; one following `.clock-time` is the live pair and must
-   not. */
-.clock-time,
-.clock-time + .clock-cut { white-space: nowrap; }
-.clock-time {
-  font-family: var(--au-font-mono);
-  font-variant-numeric: tabular-nums;
-  color: var(--au-ink);
-}
-.clock-cut { color: var(--au-ink-muted); }
-.clock-time + .clock-cut::before { content: "·"; margin-right: var(--au-s-2); opacity: 0.55; }
 
 
 /* The head row's entrance is entirely the shared .hero-enter set: two children, the
    headline and its standfirst, both covered by the existing nth-child delays. The
    two extra delays the five-child copy column needed went with it. */
-
-/* ---- 2 · The routing fork — a register read downward -------------------
-   WHY IT IS NOT THREE CARDS. It was: three equal columns, each with a display
-   figure on top, one line of copy, a full-width button at the bottom, and the fast
-   one inverted. That is a SUBSCRIPTION TIER GRID, down to the highlighted column,
-   and it invites the one reading these three are not for — compare the options,
-   pick the best value. They are not tiers. They are three doors, exactly one of
-   which is right for any given visitor, and a register says that: the times run
-   down one column so they compare at a glance, and each row is one sentence about
-   who should take it, ending in one action.
-
-   No per-row card chrome, no repeated block buttons, no highlighted middle. The
-   fast route is marked by its accent spine and by holding the band's only filled
-   button — emphasis without a tier.
-
-   THE FOCUS SEQUENCE lives at the bottom of this block, gated entirely on an
-   attribute client JS writes. Read that note before touching it. */
-/* THE HEAD IS THE WIDTH OF THE REGISTER. At 52ch and h2 scale it measured 491px
-   against the register's 1,180 and the band opened on 690px of empty ground — the
-   one head on the page with nothing to its right and the most important band to
-   introduce. Three moves, no new copy:
-
-   · Display scale on the claim. This is the only section head on the page that
-     takes it, and it is earned: routing is the page's whole argument, and this is
-     the band that makes it. A shorter measure (24ch) breaks it over two lines that
-     sit above the time and route columns instead of running to a third.
-   · The standfirst crosses to the right edge, bottom-aligned, over the action
-     column — a note in the register's margin rather than a third line of heading.
-   · Both ends are marked the same way: the eyebrow's 32px rule at top left, the
-     same tick in accent above the note at top right. The head reads as one ruled
-     object with the register hanging off its bottom edge.
-
-   The inline padding matches `.route`'s, so the claim starts on the index column's
-   edge and the note ends where the buttons do. */
-/* A GRID, NOT A WRAPPING FLEX ROW. The note's alignment has to agree with whether
-   it is beside the claim or under it, and flex wraps at whatever width the content
-   happens to need — at 1,100px it stacked while still set to the right, which reads
-   as a mistake. Two explicit columns and one breakpoint mean the two decisions can
-   never disagree. The stack point is 1,180px: the claim needs 777px at display
-   scale, the note 210, the gutter 54. */
-.fork-head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
-  gap: var(--au-s-5) var(--au-s-7);
-  max-width: 1180px;
-  padding-inline: clamp(var(--au-s-3), 1.6vw, var(--au-s-5));
-  margin-bottom: var(--au-s-6);
-}
-/* THE MEASURE GOES ON THE H2, NOT ITS WRAPPER. `ch` resolves against the element's
-   own font-size, and on the wrapper that is 15px body text — 24ch came out at 180px
-   and broke the claim over FIVE lines. On the h2 it is 24 display characters. */
-.fork-head > .fork-head-t { max-width: none; }
-.fork-head h2 {
-  max-width: 24ch;
-  font-size: var(--au-text-display);
-  line-height: var(--au-leading-display);
-  letter-spacing: var(--au-tracking-display);
-  text-wrap: balance;
-}
-.fork-head > p.fork-head-note {
-  max-width: 30ch;
-  margin: 0;
-  padding-top: var(--au-s-4);
-  font-size: var(--au-text-small);
-  color: var(--au-ink-muted);
-  /* Set to the RIGHT edge, like the action column it sits above. Left-aligned in a
-     right-hand box it left a ragged 100px hole at the one place the composition
-     needs a hard edge, and balanced over two lines it is two short sentences — no
-     reading cost. */
-  text-align: right;
-  text-wrap: balance;
-}
-/* The eyebrow's rule, repeated at the other end of the head — 2px and accent rather
-   than 1px at 0.55, because it is the closing mark of a composition rather than the
-   opening one, and it has a display headline to hold its own against. */
-.fork-head > p.fork-head-note::before {
-  content: "";
-  display: block;
-  width: 32px; height: 2px;
-  margin-left: auto;
-  margin-bottom: var(--au-s-4);
-  border-radius: var(--au-radius-pill);
-  background: var(--au-accent);
-}
-/* Stacked, the note is under the claim rather than beside it, so it goes back to
-   reading left — a right-aligned paragraph below a left-aligned headline reads as a
-   mistake, not a margin. */
-@media (max-width: 1180px) {
-  .fork-head { grid-template-columns: minmax(0, 1fr); }
-  .fork-head > p.fork-head-note { text-align: left; max-width: 46ch; }
-  .fork-head > p.fork-head-note::before { margin-left: 0; }
-}
-
-.routes {
-  border-top: var(--au-hairline);
-  /* The rail is the object; the rows are its entries. Nothing here is a card, and
-     nothing gets a shadow — a lifted row would be a card by another name.
-
-     Capped, and left-aligned with the head above it. At the page container's full
-     1600px the action sat the better part of a metre from the sentence it belonged
-     to on a wide display, which is a register nobody can read across. */
-  margin-top: var(--au-s-6);
-  max-width: 1180px;
-}
-.route {
-  position: relative;
-  display: grid;
-  grid-template-columns: 34px minmax(130px, 0.5fr) minmax(0, 1.35fr) auto;
-  align-items: center;
-  gap: clamp(var(--au-s-4), 2.2vw, var(--au-s-6));
-  padding: clamp(var(--au-s-5), 2.6vw, var(--au-s-6)) clamp(var(--au-s-3), 1.6vw, var(--au-s-5));
-  border-bottom: var(--au-hairline);
-  transition: background var(--au-dur) var(--au-ease);
-}
-/* The spine. It is the row's "you are here" mark: dormant until the row is the one
-   being read, hovered or focused. Steel Blue on the light band; the fast route
-   carries it permanently at half strength so the band still says which door is the
-   quick one when nothing is focused at all. */
-.route::before {
-  content: "";
-  position: absolute;
-  left: 0; top: 12%; bottom: 12%;
-  width: 3px;
-  border-radius: var(--au-radius-pill);
-  background: var(--au-accent);
-  transform: scaleY(0);
-  transform-origin: 50% 50%;
-  transition: transform var(--au-dur) var(--au-ease), opacity var(--au-dur) var(--au-ease);
-}
-.route-fast::before { transform: scaleY(1); opacity: 0.4; }
-.route-idx {
-  font-size: var(--au-text-caption);
-  font-weight: var(--au-weight-semibold);
-  letter-spacing: 0.08em;
-  font-variant-numeric: tabular-nums;
-  color: var(--au-ink-muted);
-}
-.route-time { display: flex; flex-direction: column; gap: var(--au-s-2); }
-/* The figures are the column that gets compared, so they are the largest thing in
-   the row and they are tabular — three different widths of numeral in one column is
-   what makes a published time look approximate. */
-.route-time-v {
-  font-size: clamp(1.75rem, 3vw, 2.5rem);
-  font-weight: var(--au-weight-medium);
-  line-height: 1;
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
-  color: var(--au-ink-heading);
-}
-.route-fast .route-time-v { color: var(--au-accent); }
-.route-time-k {
-  font-size: var(--au-text-eyebrow);
-  font-weight: var(--au-weight-semibold);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--au-ink-muted);
-}
-.route-t { min-width: 0; }
-.route-title {
-  display: flex; align-items: center; gap: var(--au-s-3);
-  font-size: var(--au-text-h3);
-  line-height: var(--au-leading-tight);
-  letter-spacing: var(--au-tracking-h3);
-}
-/* A glyph at reading size beside the title, not a 46px tile above it. The tile was
-   part of what made each row read as a card's header. */
-.route-ico { display: inline-flex; flex: none; color: var(--au-accent); }
-.route-ico .c-glyph { width: 22px; height: 22px; }
-.route-body {
-  margin-top: var(--au-s-2);
-  font-size: var(--au-text-small);
-  color: var(--au-ink-muted);
-  max-width: 52ch;
-}
-.route-act { justify-self: end; }
-.route-arrow { display: inline-block; transition: transform var(--au-dur-fast) var(--au-ease); }
-@media (hover: hover) {
-  .route:hover { background: rgba(var(--au-tint-rgb), 0.04); }
-  .route:hover::before { transform: scaleY(1); opacity: 1; }
-  .route:hover .route-arrow { transform: translateX(3px); }
-}
-.route:focus-within::before { transform: scaleY(1); opacity: 1; }
-
-/* ---- The focus sequence ------------------------------------------------
-   THE BLUR IS GONE, at the client's direction (2026-08-04). It was `blur(4px)` and
-   `opacity: 0.4` on the two rows not being read — depth of field, the row in hand
-   sharp and the others behind it. Removed, and nothing replaced it in kind: the
-   sequence now works by ADDING a mark to the row being read rather than taking
-   legibility off the other two. All three rows are readable at every scroll
-   position, which is also the outcome the contrast floor wanted — muted text at 0.4
-   was never going to clear AA.
-
-   What is left is the row's own spine lit to full strength and the faintest tint
-   behind it, the same pair `:hover` uses. Every rule is still nested under
-   `[data-route-live="on"]` — written only by FocusRail, only after mount, only while
-   the band is on screen, never under prefers-reduced-motion — so at rest the band is
-   exactly what the server rendered. See au-motion-safety. */
-@media (prefers-reduced-motion: no-preference) {
-  .routes[data-route-live="on"] .route {
-    transition: background var(--au-dur) var(--au-ease);
-  }
-  /* The row being read takes the marks. The other two are left alone. */
-  .routes[data-route-live="on"] [data-route-state="on"] {
-    background: rgba(var(--au-tint-rgb), 0.04);
-  }
-  .routes[data-route-live="on"] [data-route-state="on"]::before {
-    transform: scaleY(1);
-    opacity: 1;
-  }
-}
-
-@media (max-width: 900px) {
-  /* Stacked: the index and the time share the first line, then the sentence, then
-     the action. The four-column grid put the time at 28px next to a 22px title in
-     140px of space, which wrapped both. */
-  .route {
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: start;
-    row-gap: var(--au-s-4);
-  }
-  .route-idx { order: 1; }
-  .route-time { order: 2; flex-direction: row; align-items: baseline; gap: var(--au-s-3); }
-  .route-t { order: 3; grid-column: 1 / -1; }
-  .route-act { order: 4; grid-column: 1 / -1; justify-self: start; }
-}
 
 /* ---- 3 · Direct details — a spine you read down ------------------------
    WHAT THIS REPLACED, TWICE. First a left-aligned head with an empty right half

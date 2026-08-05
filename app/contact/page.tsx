@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ContactIcon } from "@/components/contact/ContactIcon";
-import { DeskClock } from "@/components/contact/DeskClock";
 import { FocusRail } from "@/components/contact/FocusRail";
 import { SheetReveal } from "@/components/contact/SheetReveal";
 import { EnquiryForm } from "@/components/contact/EnquiryForm";
@@ -14,31 +13,37 @@ import { ScrollReveal } from "@/components/home/ScrollReveal";
   which is the client's About Us Blueprint format applied to this page. It was ten
   bands in the blueprint's order; on the client's instruction (2026-08-04) three
   were cut — "Which desk", "Before you write" and the quality & compliance
-  register — leaving seven: header, the enquiry form, direct details, the routing
-  fork, response times, where we are, and the closing CTA.
+  register — and the routing fork went the same way on 2026-08-04, leaving six:
+  header, the enquiry form, direct details, response times, where we are, and the
+  closing CTA.
 
   THE PAGE'S ONE ARGUMENT is routing. Most people who click "Contact" on a
   distributor site do not want a conversation, they want a price — and every one
   of them who types a part number into a general enquiry box waits a day for an
   answer they could have had in fifteen minutes. So every band is built to move a
-  visitor toward the route that matches their question. The enquiry form was the
-  last band for that reason; on the client's instruction (2026-08-04) it is now the
-  first band after the header, and the correction it used to get from its position
-  is carried by its own standfirst and topic selector instead — see the band's own
-  comment.
+  visitor toward the route that matches their question. THAT ARGUMENT NO LONGER HAS
+  A BAND OF ITS OWN: the routing fork — three routes, each led by its response time,
+  the quote form marked as the fast one — was deleted on the client's instruction
+  (2026-08-04), and the enquiry form moved from last to first the same day. What
+  survives of the routing is distributed: the header's chips publish the response
+  times and its button goes to the quote form, the enquiry standfirst names the
+  quote form as fifty times faster, its topic selector re-routes anyone who picks
+  "pricing or availability", and the urgent card beside it carries the AOG number.
+  Nothing about the page pushes a visitor to the right door any more; it answers
+  them once they have chosen. If routing needs to come back, it needs a band, not a
+  longer standfirst.
 
   COPY AND CONTACT VALUES are prototype/contact.html's, unchanged: the phone
   number, both inboxes, the Anaheim address, the 24/7/365 coverage, the 15-minute
   quote, the one-business-day enquiry reply and the 3pm Pacific same-day cutoff.
   Nothing is invented and no new figure is introduced — see au-no-invented-content.
 
-  DESIGN — each band takes a different device, because seven variations of "head
+  DESIGN — each band takes a different device, because six variations of "head
   over a card grid" is what makes a long page read as one long section:
   In page order:
     · header      — a contact card, response-time chips and an on-page nav strip
     · enq         — the form panel with a stepped "what happens next" rail
     · dial        — a read-down spine: sticky photograph beside a focused rail
-    · fork        — a register of three routes, the one at the reading line in focus
     · sla         — THE page's one accent band: a divided ledger of four figures
     · where       — a photograph with a glass address plate laid into its corner
     · close       — dark, split, the details repeated as the last thing on screen
@@ -46,10 +51,11 @@ import { ScrollReveal } from "@/components/home/ScrollReveal";
   MOTION is entrance-and-interaction only, and nothing is gated on it: the shared
   [data-reveal] observer arms itself after mount, so the server render, the
   screenshot renderer, reduced motion and no-JS all get the page fully composed.
-  The page's two focus rails (the routing fork and the Direct details spine) mark
-  the entry at the reading line and leave every other entry fully legible — the
-  blur both once carried was removed at the client's direction on 2026-08-04. The one live element
-  (DeskClock) adds a line to a plate that already reads correctly without it.
+  The Direct details spine marks the entry at the reading line and leaves every
+  other entry fully legible — the blur it and the deleted routing fork once carried
+  was removed at the client's direction on 2026-08-04. The enquiry sheet has the
+  page's one authored entrance. The page has no live-updating element: the desk
+  clock went with the hero plate on 2026-08-05, so every figure here is static text.
   See au-motion-safety.
 */
 
@@ -60,54 +66,6 @@ export const metadata: Metadata = {
     "desks staffed 24/7 from 1341 South Sunkist Street, Anaheim, CA 92806. Part " +
     "requests are answered fastest through the quote form — in writing, within 15 minutes.",
 };
-
-/* The routing fork — FOUR ELEMENTS PER CARD and one line of copy each.
-
-   These carried a header band, a tag, a mechanism line, an index numeral, a
-   paragraph, a caution well and a secondary link. Every part was defensible on its
-   own and together they buried the only thing the card is for: how long this route
-   takes, and what it is for.
-
-   That trim was originally made on the grounds that everything cut from the cards
-   was still on the page — what to have ready in "Before you write", who owns what
-   in "Which desk", the certificate route in the compliance band. Those three bands
-   were cut on the client's instruction (2026-08-04), so that is no longer true:
-   this page no longer names which desk owns which question, no longer lists what
-   to have ready before writing, and no longer states the accreditations. The
-   routing fork is now the only place any of it is implied. If any of it needs to
-   come back, it needs a home — not a longer card.
-
-   `tone` picks the slab treatment: the fast path is the inverted one, because the
-   page's whole job is to make it the obvious choice. */
-const ROUTES = [
-  {
-    tone: "fast" as const,
-    icon: "quote",
-    time: "15 min",
-    timeNote: "in writing, any hour",
-    title: "A price or a lead time",
-    body: "Part number, NSN or a whole list — straight to the quoting desk.",
-    cta: { href: "/rfq", label: "Request a quote", kind: "primary" as const },
-  },
-  {
-    tone: "aog" as const,
-    icon: "aog",
-    time: "24/7",
-    timeNote: "answered by a person",
-    title: "An aircraft on the ground",
-    body: "Call, don’t write. Worked immediately, at any hour.",
-    cta: { href: "tel:+17147054780", label: "Call +1-714-705-4780", kind: "quiet" as const },
-  },
-  {
-    tone: "slow" as const,
-    icon: "mail",
-    time: "1 day",
-    timeNote: "read by the office",
-    title: "Everything else",
-    body: "Orders, invoices, vendor set-up, certificates, careers.",
-    cta: { href: "#enquiry", label: "Go to the enquiry form", kind: "quiet" as const },
-  },
-];
 
 /* The four figures on the accent band. Every one is already stated elsewhere on
    the site — this band restates them together, it does not add a claim.
@@ -143,11 +101,6 @@ export default function ContactPage() {
       <ScrollReveal />
       {/* The reading focus on Direct details. Scroll-driven, armed after mount,
           and it rests the whole rail when the band leaves the viewport. */}
-      {/* The two reading-focus rails, both on one driver. The routing fork gets a
-          lower reading line because its entries are twice the height of the
-          register's — the line is what sets the pace, and one tuned for five short
-          rows makes three tall ones flick past. */}
-      <FocusRail rail="[data-route-rail]" step="[data-route-step]" liveKey="routeLive" stateKey="routeState" line={0.52} />
       <FocusRail rail="[data-dial-rail]" step="[data-dial-step]" liveKey="dialLive" stateKey="dialState" />
       {/* The enquiry sheet's arrival. Not [data-reveal]: the shared observer's 2s
           failsafe plays every band still armed, and this one sits below the fold at
@@ -221,12 +174,8 @@ export default function ContactPage() {
               IT IS THE RIGHT PICTURE FOR THIS BAND for the reason the stand-in never
               was: the page is about reaching a person, and this frame is two people
               at the desk that answers — one reading a printed document, one working
-              a tablet beside them. The previous note here recorded a long argument
-              about which 800 x 800 square survived a shallow horizontal slice; that
-              argument is over, because this source is 1696 x 667 and already a
-              banner. The crop now takes ~130px off the frame's height rather than
-              two thirds of a square, so `object-position` only has to protect the
-              faces from the plate that overlays the lower edge.
+              a tablet beside them. The source is 1696 x 667 and already a banner, so
+              the crop takes only ~130px off the frame's height.
 
               The alt describes the scene and names nobody: no caption on this band
               attributes a role, a desk or a company to a face. The polos in frame
@@ -234,8 +183,28 @@ export default function ContactPage() {
               it belongs to is stated as text in the Direct details band, not claimed
               off the back of a photograph.
 
-              The plate stays light glass: the photograph is bright and the desk clock
-              inside it is calibrated for a light ground. */}
+              THE "QUOTING DESK" PLATE THAT SAT ON THE LOWER EDGE WAS REMOVED at the
+              client's instruction (2026-08-05). It carried an eyebrow, the line
+              "Somebody is on the desk at every hour of every day.", a live desk clock
+              and an icon-only tel link. Nothing it said is lost from the page, which
+              is why it could go cleanly:
+
+                · the round-the-clock claim is the accent response-times band, which
+                  states it with the hours attached rather than as an assertion over
+                  a photograph (the routing fork carried it too, until that band was
+                  deleted on 2026-08-04)
+                · the phone number is in the header, the enquiry rail's AOG escape
+                  hatch, Direct details and the closing card — four places, all of
+                  them in type
+                · the clock was the page's one live element; it added a line to a
+                  plate that already read correctly without it, and `DeskClock.tsx`
+                  went with the plate rather than being left as dead code
+
+              So the band is now the headline, the one action and the photograph. The
+              figure keeps no `figcaption`: with nothing overlaying the lower edge the
+              crop is free to sit at the frame's centre, and `object-position` no
+              longer has to defend the faces from a box. Re-adding a plate here means
+              restating a band — see au-no-invented-content, which cuts both ways. */}
           <figure className="chero-banner">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -246,24 +215,6 @@ export default function ContactPage() {
               decoding="async"
               fetchPriority="high"
             />
-            <figcaption className="chero-plate">
-              <div className="chero-plate-txt">
-                <span className="chero-plate-k">Quoting desk</span>
-                <p className="chero-plate-t">
-                  Somebody is on the desk at every hour of every day.
-                </p>
-                <div className="chero-plate-d">
-                  <DeskClock />
-                </div>
-              </div>
-              <a
-                className="chero-plate-go"
-                href="tel:+17147054780"
-                aria-label="Call the desk on +1-714-705-4780"
-              >
-                <ContactIcon name="arrow-br" />
-              </a>
-            </figcaption>
           </figure>
 
         </div>
@@ -274,7 +225,7 @@ export default function ContactPage() {
 
               · the stat row — "15 min", "24/7/365" and a filled card carrying the
                 phone number. Every figure in it is published again in the routing
-                fork and in the accent response-times band.
+                accent response-times band.
               · the detail strip — the two inboxes and the Anaheim address with their
                 copy controls. All three, with the same copy controls, are in the
                 Direct details band, and the inboxes are in Which desk as well.
@@ -288,14 +239,14 @@ export default function ContactPage() {
 
             The ONE thing this band no longer shows in type is the phone number; it
             survives here only as the plate's icon-only tel link, and is set in full
-            in the header, the fork's AOG route, Direct details and the closing card. */}
+            in the header, Direct details and the closing card. */}
       </section>
 
       {/* ====================================================================
            THE ENQUIRY FORM — FIRST BAND AFTER THE HEADER, by the client's
-           instruction (2026-08-04). It previously sat last, below the fork and the
-           direct details, so that it was the route offered rather than the one
-           pushed.
+           instruction (2026-08-04). It previously sat last, below the routing fork
+           and the direct details, so that it was the route offered rather than the
+           one pushed. The fork was deleted the same day.
 
            THE TRADE THIS MAKES, recorded because it is a real one: the fastest
            route on the page is the quote form (fifteen minutes, in writing) and the
@@ -391,9 +342,9 @@ export default function ContactPage() {
 
            THE SWITCHBOARD PANEL IS GONE and its number is now a rail entry. The
            panel was the band's strongest object and it was built entirely from the
-           page's most repeated content: the header, the hero, the fork's AOG route
-           and the closing card all publish that number, and its coverage and cutoff
-           figures are in the Hours entry's own note. Nothing was dropped.
+           page's most repeated content: the header, the hero and the closing card
+           publish that number, and its coverage and cutoff figures are in the Hours
+           entry's own note. Nothing was dropped.
 
            MOTION IS THE SPINE, and only the spine. The rail draws itself between
            nodes as they are read, the node being read fills and haloes, the ones
@@ -417,9 +368,9 @@ export default function ContactPage() {
             {/* THE PHOTOGRAPH REPLACED AN INVERTED SWITCHBOARD PANEL that carried
                 the phone number at display scale, the 24/7 note, a copy control and
                 the coverage / cutoff pair. Every one of those already appears two or
-                three times on this page — the header, the hero's switchboard, the
-                fork's AOG route and the closing card all publish the number, and
-                the coverage and cutoff are in the Hours entry's own note — so the
+                three times on this page — the header, the hero's switchboard and
+                the closing card all publish the number, and the coverage and cutoff
+                are in the Hours entry's own note — so the
                 strongest object in the band was its most repeated content. The
                 number moved into the rail, where it is one value among five, and the
                 space it held now shows the desk it rings.
@@ -568,99 +519,6 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* ====================================================================
-           THE ROUTING FORK — the single most important block on the page.
-
-           Quote-intent traffic landing in a general inbox is the expensive
-           failure here: it is triaged by hand, answered in a day rather than
-           fifteen minutes, and frequently lost. Publishing the response time
-           against each route makes the fast path self-selecting — the buyer
-           chooses the quote form because it is obviously better for them, not
-           because the alternative was hidden.
-
-           IT IS A REGISTER READ DOWNWARD, NOT THREE CARDS SIDE BY SIDE, and that
-           is a correction rather than a preference. As three equal columns — each
-           with a big figure on top, a short line under it, a full-width button at
-           the bottom, and one column inverted as the "recommended" one — it read as
-           a PRICING TABLE. That is the exact shape of a subscription tier grid, and
-           a reader who has seen ten of those arrives expecting to compare prices
-           and pick a plan. These are not plans; they are three doors, and only one
-           of them is right for any given visitor. A register says that: the times
-           sit in one column so they can be compared at a glance, and each row is a
-           single sentence about who should use it, ending in one action.
-
-           No card chrome, no repeated block buttons, no highlighted middle column.
-           The fast route is marked by its accent spine and the one filled button on
-           the band, which is emphasis without a tier.
-
-           MOTION — the route at the reading line takes the band's marks: its spine
-           lights to full strength and the faintest tint comes up behind it. The
-           other two rows are left exactly as they are. It used to put them behind
-           glass — blur(4px) at 0.4 opacity, depth of field — and the client asked
-           for that off (2026-08-04); nothing replaced it in kind, so all three rows
-           are readable at every scroll position. Still gated: the rules live only
-           under `[data-route-live="on"]`, which FocusRail writes after mount and
-           removes when the band leaves the viewport.
-           See au-motion-safety and components/contact/FocusRail.
-           ==================================================================== */}
-      <section className="section fork" id="routes">
-        <div className="u-page">
-          {/* THE HEAD SPANS THE REGISTER, it does not sit in a column beside it.
-              Left-aligned at h2 size it filled 491px of the register's 1,180 and
-              opened the band on 690px of nothing. The claim now runs at display
-              scale over the time and route columns and the standfirst crosses to
-              the right edge, above the action column, where it reads as a note in
-              the register's own margin. Same two sentences, no new copy. */}
-          <div className="section-head section-head-row fork-head" data-reveal="up">
-            <div className="fork-head-t">
-              <p className="eyebrow">How to reach us</p>
-              <h2>Three routes in, and the time each one takes.</h2>
-            </div>
-            <p className="fork-head-note">
-              All three are staffed. They are not equally fast.
-            </p>
-          </div>
-
-          <ol className="routes" data-route-rail>
-            {ROUTES.map((r, i) => (
-              <li className={`route route-${r.tone}`} key={r.tone} data-route-step>
-                <span className="route-idx" aria-hidden="true">{`0${i + 1}`}</span>
-
-                <p className="route-time">
-                  <span className="route-time-v">{r.time}</span>
-                  <span className="route-time-k">{r.timeNote}</span>
-                </p>
-
-                <div className="route-t">
-                  <h3 className="route-title">
-                    <span className="route-ico"><ContactIcon name={r.icon} /></span>
-                    {r.title}
-                  </h3>
-                  <p className="route-body">{r.body}</p>
-                </div>
-
-                <div className="route-act">
-                  {r.cta.href.startsWith("tel:") || r.cta.href.startsWith("#") ? (
-                    <a
-                      className={`btn ${r.cta.kind === "primary" ? "btn-primary" : "btn-quiet"}`}
-                      href={r.cta.href}
-                    >
-                      {r.cta.label} <span className="route-arrow" aria-hidden="true">→</span>
-                    </a>
-                  ) : (
-                    <Link
-                      className={`btn ${r.cta.kind === "primary" ? "btn-primary" : "btn-quiet"}`}
-                      href={r.cta.href}
-                    >
-                      {r.cta.label} <span className="route-arrow" aria-hidden="true">→</span>
-                    </Link>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
 
       {/* ====================================================================
            RESPONSE TIMES — THIS PAGE'S ONE ACCENT BAND. (au-visual-system: never

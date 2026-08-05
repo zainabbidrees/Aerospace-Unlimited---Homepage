@@ -18,10 +18,14 @@ import { Nav } from "./Nav";
    acts on, and it moves inline.
 
    Two actions, not three. "Request a Quote" and "Quote List" were
-   competing for the same intent; they are now one button that changes
-   with state. AOG stays because it is a different job at a different
-   urgency, and it is a phone link — the live site sells AOG as a 24/7
-   service, and for a grounded aircraft the phone is the mechanism. */
+   competing for the same intent; they are now one button whose BEHAVIOUR
+   changes with state while its label does not — it reads "Request a Quote"
+   throughout and a count badge carries the staged parts. It used to rename
+   itself to "Quote List" once anything was collected; that was reverted on
+   2026-08-05, see QuoteButton.tsx. AOG stays because it is a different job
+   at a different urgency, and it is a phone link — the live site sells AOG
+   as a 24/7 service, and for a grounded aircraft the phone is the
+   mechanism. */
 export function SiteHeader({ showSearch = true }: { showSearch?: boolean }) {
   return (
     <>

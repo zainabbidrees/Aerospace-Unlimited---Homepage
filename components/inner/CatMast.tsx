@@ -48,19 +48,25 @@ export function CatMast({
   /* object-position for the wide letterbox crop — these are ~3:2 sources cropped
      to a banner, so the caller biases toward the subject. */
   imgPosition = "50% 42%",
+  /* Optional page-scoped modifier — e.g. a longer title that needs a wider
+     measure to keep its two-line break. Appended to `.catmast`. */
+  className,
 }: {
   crumbs: Crumb[];
   eyebrow?: string;
   title: string[];
   lede: ReactNode;
   actions?: ReactNode;
-  img: string;
+  /* The banner is optional: omit `img` for a copy-only header that lets the
+     page's first content section follow straight after the lede. */
+  img?: string;
   imgSm?: string;
-  alt: string;
+  alt?: string;
   imgPosition?: string;
+  className?: string;
 }) {
   return (
-    <header className="catmast" data-cue>
+    <header className={`catmast${className ? ` ${className}` : ""}`} data-cue>
       <div className="u-page">
         <ol className="breadcrumb catmast-crumbs">
           {crumbs.map((c) => (
@@ -76,25 +82,27 @@ export function CatMast({
                 <span key={line}>{line}</span>
               ))}
             </h1>
-            <p className="catmast-lede">{lede}</p>
+            <div className="catmast-lede">{lede}</div>
           </div>
           {actions ? <div className="catmast-actions">{actions}</div> : null}
         </div>
 
-        <figure className="catmast-media">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={img}
-            srcSet={imgSm ? `${imgSm} 1200w, ${img} 2400w` : undefined}
-            sizes={imgSm ? "(max-width: 760px) 100vw, 1200px" : undefined}
-            alt={alt}
-            width={2400}
-            height={1600}
-            style={{ ["--catmast-pos" as string]: imgPosition }}
-            decoding="async"
-            fetchPriority="high"
-          />
-        </figure>
+        {img ? (
+          <figure className="catmast-media">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={img}
+              srcSet={imgSm ? `${imgSm} 1200w, ${img} 2400w` : undefined}
+              sizes={imgSm ? "(max-width: 760px) 100vw, 1200px" : undefined}
+              alt={alt ?? ""}
+              width={2400}
+              height={1600}
+              style={{ ["--catmast-pos" as string]: imgPosition }}
+              decoding="async"
+              fetchPriority="high"
+            />
+          </figure>
+        ) : null}
       </div>
     </header>
   );

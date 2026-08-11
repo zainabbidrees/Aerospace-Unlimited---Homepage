@@ -18,14 +18,16 @@
    a list of certifications to a screen reader, not sixteen unlabelled images.
    ========================================================================== */
 
-interface Cert {
+export interface Cert {
   img: string;
   label: string;
 }
 
 /* Ordered for rhythm, not ranking: the round badges and the wordmarks are
-   interleaved so the rail never runs several near-identical seals in a row. */
-const CERTS: Cert[] = [
+   interleaved so the rail never runs several near-identical seals in a row.
+   Exported: the RFQ page's reassurance rail shows this same set as a tile
+   grid — one inventory, so a mark added here appears there too. */
+export const CERTS: Cert[] = [
   { img: "asa", label: "Aviation Suppliers Association member" },
   { img: "as9120b", label: "AS9120B and ISO 9001:2015 certified" },
   { img: "faa", label: "FAA AC 00-56B certified company" },

@@ -152,34 +152,25 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
    offsets position, the worst case is content sitting 12px lower than
    intended — fully legible, fully present. Never animate a property whose
    failure state is "gone". */
-/* The copy block is also the pointer-parallax target — it floats a few pixels
-   against the photograph (vars set by HeroParallax; 0 when absent). This
-   transform is the PARENT's; the children's entrance rise below is a separate
-   transform on separate elements, so the two never fight. */
-.hero-enter {
-  transform: translate3d(var(--hero-cx, 0px), var(--hero-cy, 0px), 0);
-  transition: transform 220ms var(--au-ease);
-  will-change: transform;
-}
-
-.hero-enter > * {
+/* Copy children stagger in; the console pops in last. Scoped to `.hero-copy > *`
+   because the copy now lives in its own column — the two direct children of
+   `.hero-enter` are the copy block and the console. */
+.hero-copy > * {
   animation: au-rise 760ms var(--au-ease) both;
 }
-.hero-enter > *:nth-child(1) { animation-delay: 140ms; }   /* label */
-.hero-enter > *:nth-child(2) { animation-delay: 0ms; }     /* h1 — its lines rise instead */
-.hero-enter > *:nth-child(3) { animation-delay: 480ms; }   /* lede */
-.hero-enter > *:nth-child(5) { animation-delay: 700ms; }   /* chip row */
+.hero-copy > *:nth-child(1) { animation-delay: 140ms; }   /* eyebrow */
+.hero-copy > h1 { animation: none; }                       /* h1 — its lines rise instead */
+.hero-copy > .lede { animation-delay: 480ms; }             /* lede */
 
 /* The headline itself does not rise — each line does, so the two sentences
    settle in turn. A bigger travel than the rest: it is the focal line. */
-.hero-enter > h1 { animation: none; }
 .hero-line { display: block; animation: au-rise 860ms var(--au-ease) both; }
 .hero-line:nth-child(1) { animation-delay: 260ms; }
 .hero-line:nth-child(2) { animation-delay: 380ms; }
 
-/* The search slab arrives last and settles up from a hair smaller — the field
-   the buyer came for is the closing beat of the entrance. */
-.hero-enter > .hero-search {
+/* The console arrives last and settles up from a hair smaller — the thing the
+   buyer came for is the closing beat of the entrance. */
+.hero-enter > .hero-rfq {
   animation: au-rise-pop 900ms var(--au-ease) 580ms both;
 }
 
@@ -193,8 +184,8 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
 }
 
 /* The photograph resolves out of a slow push-in on load — the scene settling as
-   the page arrives. One authored moment, then it holds still; the living touch
-   is the pointer-parallax on the copy, not a perpetual drift behind the search.
+   the page arrives. One authored moment, then it holds still — no perpetual
+   drift behind the search.
    Failure state (a renderer that never advances the timeline) holds the `from`:
    the photo sits scaled up 8%, soft-edged but entirely present — never gone. */
 .hero-media {
@@ -212,8 +203,7 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .hero-enter { transform: none; }
-  .hero-enter > *, .hero-line { animation: none; opacity: 1; transform: none; }
+  .hero-enter > *, .hero-copy > *, .hero-line { animation: none; opacity: 1; transform: none; }
   .hero-media { animation: none; transform: none; }
 }
 
@@ -537,6 +527,51 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--au-stock-out) 20%, transparent);
 }
 
+/* The AOG popover — a small confirm-and-call panel so the badge never dials
+   silently. See components/AogButton.tsx. */
+.aog { position: relative; display: inline-flex; }
+.aog-pop {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 80;
+  width: 264px;
+  max-width: calc(100vw - var(--au-s-5) * 2);
+  padding: var(--au-s-4);
+  border-radius: var(--au-radius-md);
+  border: var(--au-hairline);
+  background: var(--au-surface);
+  box-shadow: var(--au-raised-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--au-s-3);
+  text-align: left;
+}
+.aog-pop-k {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--au-s-2);
+  font-size: var(--au-text-eyebrow);
+  font-weight: var(--au-weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--au-ink-heading);
+}
+.aog-pop-k .dot {
+  width: 6px; height: 6px; border-radius: var(--au-radius-circle);
+  background: var(--au-stock-out); flex-shrink: 0;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--au-stock-out) 20%, transparent);
+}
+.aog-pop-t { font-size: var(--au-text-small); line-height: 1.5; color: var(--au-ink-muted); }
+.aog-pop-call { text-transform: none; letter-spacing: var(--au-tracking-body); }
+@media (prefers-reduced-motion: no-preference) {
+  .aog-pop { animation: aog-pop-in 160ms var(--au-ease); }
+  @keyframes aog-pop-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: none; }
+  }
+}
+
 /* eleken's own two filled sizes are 36px and 40px, so `lg` is 40 rather than the
    46 that was here. 13px holds at both — they do not scale the label. */
 .btn-lg { min-height: 40px; padding-inline: var(--au-s-5); }
@@ -597,11 +632,17 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
   color: var(--au-accent-ink); background: rgba(255, 255, 255, 0.16);
 }
 
-.quote-count {
+/* The quote cart button — a compact icon control that appears in the header
+   once parts are staged (see CartButton.tsx). Outline, like the AOG button, so
+   it sits quietly beside the accent "Request a Quote"; the count rides in an
+   accent pill so the number reads at a glance on the light button. */
+.cart-button { padding-inline: var(--au-s-3); gap: var(--au-s-2); }
+.cart-button .cart-glyph { display: block; flex-shrink: 0; }
+.cart-count {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 20px; height: 20px; padding-inline: 5px;
   border-radius: var(--au-radius-pill);
-  background: var(--au-accent-ink); color: var(--au-accent);
+  background: var(--au-accent); color: var(--au-accent-ink);
   font-size: 11px; font-variant-numeric: tabular-nums;
 }
 
@@ -802,26 +843,116 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
   .search-suggest { background: var(--au-surface); }
 }
 .search-suggest[hidden] { display: none; }
-.search-suggest li + li { border-top: var(--au-hairline-quiet); }
-.search-suggest button {
-  display: flex; align-items: baseline; gap: var(--au-s-3);
-  width: 100%; padding: var(--au-s-3) var(--au-s-4);
-  background: transparent; border: 0; text-align: left; cursor: pointer;
+/* The rich, sectioned dropdown: recent / popular / browse when empty, grouped
+   matches while typing. Dividers live on section HEADERS, not between every row,
+   so the panel reads as grouped rather than as one long ruled list. */
+.search-suggest { padding-block: var(--au-s-2); }
+
+.suggest-head {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--au-s-3);
+  padding: var(--au-s-3) var(--au-s-4) var(--au-s-2);
 }
-.search-suggest button:hover,
-.search-suggest button[aria-selected="true"] { background: var(--au-tint-hover); }
-.search-suggest .s-primary {
-  font-family: var(--au-font-mono); font-size: var(--au-text-code);
-  font-variant-numeric: tabular-nums; color: var(--au-ink);
+.suggest-head:not(:first-child) {
+  border-top: var(--au-hairline);
+  margin-top: var(--au-s-2);
+  padding-top: var(--au-s-4);
 }
-.search-suggest .s-secondary { font-size: var(--au-text-caption); color: var(--au-ink-muted); flex: 1; }
-.search-suggest .s-kind {
+.suggest-head-label {
   font-family: var(--au-font-sans); font-size: 11px;
   text-transform: uppercase; letter-spacing: var(--au-tracking-label);
   color: var(--au-ink-muted);
 }
-.search-suggest .s-fallback { background: var(--au-accent); }
-.search-suggest .s-fallback .s-secondary { color: var(--au-accent-ink); }
+.suggest-clear {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font-size: var(--au-text-caption); color: var(--au-link);
+}
+.suggest-clear:hover { color: var(--au-ink); text-decoration: underline; }
+
+/* One row shape for every option — parts, nav rows, recents. */
+.suggest-opt {
+  display: flex; align-items: center; gap: var(--au-s-3);
+  padding: var(--au-s-3) var(--au-s-4);
+  cursor: pointer; scroll-margin-block: var(--au-s-6);
+}
+.suggest-opt:hover,
+.suggest-opt[aria-selected="true"] { background: var(--au-tint-hover); }
+
+.suggest-ic {
+  flex: none; width: 17px; height: 17px; color: var(--au-ink-muted);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.suggest-ic svg { width: 100%; height: 100%; }
+
+.search-suggest .s-primary {
+  flex: none;
+  font-family: var(--au-font-mono); font-size: var(--au-text-code);
+  font-variant-numeric: tabular-nums; color: var(--au-ink);
+}
+.search-suggest .s-secondary {
+  flex: 1; min-width: 0;
+  font-size: var(--au-text-caption); color: var(--au-ink-muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.suggest-name {
+  flex: 1; min-width: 0;
+  font-size: var(--au-text-small); color: var(--au-ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.suggest-sub {
+  flex: none;
+  font-family: var(--au-font-mono); font-size: var(--au-text-caption);
+  color: var(--au-ink-muted); font-variant-numeric: tabular-nums;
+}
+.suggest-meta {
+  flex: none; margin-left: auto;
+  font-size: var(--au-text-caption); color: var(--au-ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+.suggest-recall { text-transform: uppercase; letter-spacing: var(--au-tracking-label); font-size: 10px; opacity: 0.75; }
+
+/* Stock state is the one warm signal the system keeps — always with its word. */
+.s-stock {
+  flex: none; margin-left: auto;
+  font-family: var(--au-font-sans); font-size: 11px;
+  text-transform: uppercase; letter-spacing: var(--au-tracking-label);
+}
+.s-stock[data-stock="in"] { color: var(--au-stock-in); }
+.s-stock[data-stock="limited"] { color: var(--au-stock-limited); }
+.s-stock[data-stock="quote"] { color: var(--au-ink-muted); }
+
+.search-suggest mark {
+  background: var(--au-accent-soft); color: var(--au-ink);
+  border-radius: var(--au-radius-xs); padding: 0 1px;
+}
+
+/* Browse chips — categories and manufacturers as a flowing, tappable set. */
+.suggest-chips {
+  display: flex; flex-wrap: wrap; gap: var(--au-s-2);
+  padding: 0 var(--au-s-4) var(--au-s-3);
+}
+.suggest-chip {
+  font-family: var(--au-font-sans); font-size: var(--au-text-caption);
+  padding: var(--au-s-1) var(--au-s-3);
+  background: var(--au-surface); border: var(--au-hairline);
+  border-radius: var(--au-radius-pill); color: var(--au-ink-body);
+  cursor: pointer; white-space: nowrap;
+  transition: border-color var(--au-dur-fast) var(--au-ease),
+              color var(--au-dur-fast) var(--au-ease),
+              background var(--au-dur-fast) var(--au-ease);
+}
+.suggest-chip:hover,
+.suggest-chip[aria-selected="true"] {
+  border-color: var(--au-accent); color: var(--au-accent);
+  background: var(--au-accent-soft);
+}
+
+/* The escape hatch — always the last row, always reachable. */
+.suggest-opt.s-fallback { background: var(--au-accent); margin-top: var(--au-s-2); }
+.suggest-opt.s-fallback .suggest-ic,
+.suggest-opt.s-fallback .s-secondary { color: var(--au-accent-ink); }
+.suggest-opt.s-fallback .s-secondary { white-space: normal; }
+.suggest-opt.s-fallback:hover,
+.suggest-opt.s-fallback[aria-selected="true"] { background: var(--au-accent-hover); }
 
 .chip-row { display: flex; flex-wrap: wrap; gap: var(--au-s-2); align-items: center; }
 .chip {
@@ -1139,7 +1270,10 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
   position: relative;
   min-height: min(86vh, 820px);
   display: flex; flex-direction: column; justify-content: flex-end;
-  padding-block: var(--au-s-9) var(--au-s-8);
+  /* Top pad trimmed from s-9 when the hero's closing beat became a multi-field
+     quote card rather than a single search line: the taller card needs the
+     room back so its CTA clears the fold on a standard laptop. */
+  padding-block: var(--au-s-7) var(--au-s-8);
   background: var(--au-surface-dark);
   color: var(--au-ink-inverse);
   overflow: hidden;
@@ -1147,36 +1281,26 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
 }
 .hero-media {
   position: absolute; inset: 0; z-index: -2;
-  background-image: url("/img/hero-freight.jpg");
+  background-image: url("/img/hero-jet.jpg");
   background-size: cover;
-  /* 58% across, not centre. The frame is narrower than the 3:2 source, so
-     `cover` crops horizontally; biasing right pushes the nose, control tower and
-     terminal lights clear of the copy instead of parking the empty mid-fuselage
-     in the middle of the composition.
+  /* A Gulfstream's rear quarter — engine, winglet and mirror-polished fuselage
+     against a cloudy sky. The sky fills the left third of the frame, so the copy
+     and the quote card in the left column sit over open sky while the engine and
+     fuselage hold the right. On wide viewports `cover` fits to width and only
+     crops top and bottom; on narrower and portrait crops the horizontal bias
+     keeps the engine — the striking element — in frame rather than the tail.
 
-     Both JPEGs are unmodified-orientation crops of the client photograph, whose
-     full-resolution master sits beside them as `hero-source-original.png`. The
-     aircraft faces LEFT, so this bias hands the subject the right of the frame
-     and the copy is placed opposite it in the left column — see
-     `.hero > .u-page` below. The image is deliberately NOT mirrored: flipping an
-     airframe puts doors, engine and gear on the wrong side, which this audience
-     notices.
-
-     Shipped crops live in `public/img/` and are referenced from the site root,
-     because this stylesheet no longer sits beside them. The full-resolution
-     masters stay in `prototype/assets/img/`, which is where these commands run
-     (write the output into `public/img/`):
-       sips -s format jpeg -s formatOptions 72 --resampleWidth 2400 \
-         hero-source-original.png --out ../../../public/img/hero.jpg
-       sips -s format jpeg -s formatOptions 70 --resampleWidth 1200 \
-         hero-source-original.png --out ../../../public/img/hero-sm.jpg */
-  background-position: 58% 50%;
+     Shipped crops live in `public/img/`, referenced from the site root. Both are
+     resampled from the client's 9000px master (shutterstock_2691982269.jpg):
+       sips -s format jpeg -s formatOptions 72 --resampleWidth 2400 <master> --out public/img/hero-jet.jpg
+       sips -s format jpeg -s formatOptions 70 --resampleWidth 1200 <master> --out public/img/hero-jet-sm.jpg */
+  background-position: 48% 50%;
   background-repeat: no-repeat;
 }
 @media (max-width: 760px) {
-  /* A quarter of the bytes, and at this width the detail is invisible anyway.
-     Biased further right so the nose survives the much narrower crop. */
-  .hero-media { background-image: url("/img/hero-freight-sm.jpg"); background-position: 66% 50%; }
+  /* A fraction of the bytes; at this width the fine detail is invisible anyway.
+     Centred on the engine so the subject survives the much narrower crop. */
+  .hero-media { background-image: url("/img/hero-jet-sm.jpg"); background-position: 44% 52%; }
 }
 
 /* A scrim, not decoration. The copy sits bottom-left and the photograph's
@@ -1267,14 +1391,299 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
    middle of the frame. */
 .hero > .u-page {
   display: grid;
-  grid-template-columns: minmax(0, min(620px, 58%)) minmax(0, 1fr);
-  column-gap: var(--au-s-7);
+  /* The hero split: copy left (flexible), quote console right (capped). Centred
+     against each other so a short copy block and a taller console still balance.
+     Two direct children — `.hero-copy` and `.hero-rfq` — auto-place one per
+     column. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 512px);
+  column-gap: clamp(var(--au-s-6), 5vw, var(--au-s-9));
+  align-items: center;
   width: 100%;
 }
-.hero > .u-page > * { grid-column: 1; }
+/* The copy column keeps a comfortable measure so the display headline does not
+   run the full flexible column on a wide screen. */
+.hero-copy { max-width: 34rem; }
 .hero h1,
 .hero .lede,
 .hero .hero-search { max-width: none; }
+
+/* ==========================================================================
+   Hero RFQ — the compact quote request that replaces the hero search slab.
+
+   AN AVIONICS CONSOLE, not a web form. A deep-navy glass panel lit from above
+   and dropped onto the photograph on a long shadow: white recessed wells for
+   the data, a live status readout that pulses, and a guarded AOG switch that
+   arms red. The dark ground is what makes it read as instrumentation rather
+   than a contact form, and it ties the panel to the dark jet behind it.
+
+   Wells stay light on purpose — the qty counter is the shared `.numfield`
+   (white), so every control matches it. Fields keep the shared `.field`
+   contract; everything hero-specific is namespaced `.hero-rfq-*`. No markup of
+   its own beyond that — see HeroRfq.tsx. */
+.hero-rfq {
+  margin-top: 0;
+  max-width: 528px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--au-s-3);
+  padding: var(--au-s-5);
+  border-radius: var(--au-radius-xl);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  /* Deep navy glass: opaque enough to seat white text, translucent enough that
+     the jet reads faintly through the backdrop blur. */
+  background: linear-gradient(152deg,
+    rgba(20, 23, 31, 0.90) 0%,
+    rgba(28, 51, 88, 0.82) 100%);
+  -webkit-backdrop-filter: var(--au-glass-blur);
+  backdrop-filter: var(--au-glass-blur);
+  box-shadow: var(--au-inner-top-dark), var(--au-shadow-xl);
+  color: var(--au-ink-inverse);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .hero-rfq { background: linear-gradient(152deg, #14171f, #1c3358); }
+}
+
+/* Head — the panel's title and a live reply readout, divided from the fields
+   by a lit hairline. The mono readout and the pulsing dot are the instrument
+   cue; the dot is the panel's one authored motion. */
+.hero-rfq-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--au-s-3);
+  padding-bottom: var(--au-s-3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.13);
+}
+.hero-rfq-kicker {
+  font-size: var(--au-text-eyebrow);
+  font-weight: var(--au-weight-semibold);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--au-ink-inverse);
+}
+.hero-rfq-eta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--au-s-2);
+  font-family: var(--au-font-mono);
+  font-size: var(--au-text-caption);
+  letter-spacing: 0.02em;
+  color: var(--au-ink-inverse-muted);
+}
+.hero-rfq-eta-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--au-stock-in);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--au-stock-in) 28%, transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-rfq-eta-dot { animation: au-rfq-pulse 2.4s var(--au-ease) infinite; }
+}
+@keyframes au-rfq-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--au-stock-in) 30%, transparent); }
+  55%      { box-shadow: 0 0 0 7px color-mix(in srgb, var(--au-stock-in) 4%, transparent); }
+}
+
+/* Fields — light instrument labels over white recessed wells. The `.hero-rfq`
+   prefix is load-bearing: it lifts specificity past the base `.field > label`
+   (which sets dark ink and would otherwise win the tie by source order). */
+.hero-rfq-field { gap: var(--au-s-2); }
+.hero-rfq .hero-rfq-field > label {
+  font-size: var(--au-text-caption);
+  font-weight: var(--au-weight-regular);
+  letter-spacing: 0.02em;
+  color: var(--au-ink-inverse-muted);
+}
+.hero-rfq-field .required { color: var(--au-link-inverse); }
+
+/* The well is a relative box so a leading mark sits inside the input. Block,
+   not flex — the input (and the qty stepper's own `.numfield`) lay themselves
+   out full-width; the mark is layered over the top rather than sharing a row. */
+.hero-rfq-well { position: relative; display: block; }
+.hero-rfq-mark {
+  position: absolute;
+  left: var(--au-s-4);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  color: var(--au-ink-muted);
+  pointer-events: none;
+}
+.hero-rfq-well input {
+  min-height: 52px;
+  border-radius: var(--au-radius-md);
+  border: 1px solid var(--au-border-strong);
+  background: var(--au-surface);
+  color: var(--au-ink);
+  font-size: var(--au-text-body);
+  box-shadow: var(--au-recessed);
+}
+/* Only marked wells inset the text past the glyph — the qty well has no mark. */
+.hero-rfq-well:has(.hero-rfq-mark) input {
+  padding-left: calc(var(--au-s-4) + 18px + var(--au-s-3));
+}
+.hero-rfq-well input:focus {
+  border-color: var(--au-accent);
+  box-shadow: var(--au-recessed),
+              0 0 0 3px color-mix(in srgb, var(--au-link-inverse) 40%, transparent);
+}
+
+/* Qty is a stub; email takes the rest of the row. 140px fits the − / +
+   counter (two 38px steps plus a two-digit value) without squeezing email.
+   On phone widths the pair stacks — email's placeholder needs the full row. */
+.hero-rfq-row {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: var(--au-s-4);
+  align-items: start;
+}
+@media (max-width: 480px) {
+  .hero-rfq-row { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* NumberField (the − / + quantity counter) styles live at the end of this
+   sheet — search ".numfield". Kept there on purpose so the bare-input resets
+   win the specificity ties against `.field input` by order. */
+
+/* AOG — a guarded switch on its own dark rail, set apart from the white data
+   wells because it is an urgency flag, not a field. It arms RED, echoing the
+   header's live AOG control. Still a real, focusable checkbox posting aog=1. */
+.hero-rfq-aog {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--au-s-3);
+  padding: var(--au-s-3) var(--au-s-4);
+  border-radius: var(--au-radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: border-color var(--au-dur-fast) var(--au-ease),
+              background var(--au-dur-fast) var(--au-ease);
+}
+.hero-rfq-aog:has(.hero-rfq-aog-input:checked) {
+  border-color: color-mix(in srgb, var(--au-stock-out) 55%, transparent);
+  background: color-mix(in srgb, var(--au-stock-out) 15%, rgba(255, 255, 255, 0.04));
+}
+.hero-rfq-aog-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--au-s-2);
+  font-size: var(--au-text-small);
+  color: var(--au-ink-inverse);
+}
+.hero-rfq-aog-sub { color: var(--au-ink-inverse-muted); }
+.hero-rfq-aog-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--au-stock-out);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--au-stock-out) 26%, transparent);
+  flex-shrink: 0;
+}
+.hero-rfq-aog-input {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  position: relative;
+  flex-shrink: 0;
+  width: 42px;
+  height: 23px;
+  border-radius: var(--au-radius-pill);
+  background: rgba(255, 255, 255, 0.22);
+  cursor: pointer;
+  transition: background var(--au-dur-fast) var(--au-ease);
+}
+.hero-rfq-aog-input::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--au-shadow-sm);
+  transition: transform var(--au-dur-fast) var(--au-ease);
+}
+.hero-rfq-aog-input:checked { background: var(--au-stock-out); }
+.hero-rfq-aog-input:checked::after { transform: translateX(19px); }
+.hero-rfq-aog-input:focus-visible { outline: 2px solid var(--au-ink-inverse); outline-offset: 2px; }
+
+/* CTA — a flat, confident full-width accent (no sheen: the design system's
+   filled buttons are plain colour blocks). The arrow nudges on hover. */
+.hero-rfq-submit {
+  width: 100%;
+  min-height: 54px;
+  margin-top: var(--au-s-1);
+  border-radius: var(--au-radius-md);
+  font-size: var(--au-text-body);
+  gap: var(--au-s-2);
+}
+.hero-rfq-arrow { transition: transform var(--au-dur-fast) var(--au-ease); }
+.hero-rfq-submit:hover .hero-rfq-arrow { transform: translateX(3px); }
+
+.hero-rfq-note {
+  margin: 0;
+  font-size: var(--au-text-caption);
+  line-height: 1.35;
+  color: var(--au-ink-inverse-muted);
+  text-align: center;
+}
+
+/* ---- Inline confirmation, in the same dark panel ---------------------- */
+.hero-rfq-done { gap: var(--au-s-3); align-items: flex-start; text-align: left; }
+.hero-rfq-done-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--au-stock-in) 22%, transparent);
+  color: var(--au-stock-in);
+}
+.hero-rfq-done-badge {
+  font-size: var(--au-text-eyebrow);
+  font-weight: var(--au-weight-semibold);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--au-ink-inverse);
+}
+.hero-rfq-done-line {
+  margin: 0;
+  font-size: var(--au-text-body);
+  line-height: var(--au-leading-body);
+  color: var(--au-ink-inverse);
+}
+.hero-rfq-done-line b { color: #fff; }
+.hero-rfq-done-ref {
+  margin: 0;
+  font-size: var(--au-text-caption);
+  color: var(--au-ink-inverse-muted);
+}
+.hero-rfq-done-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--au-s-3);
+  margin-top: var(--au-s-2);
+}
+/* The recovery links sit on the dark panel, so they take inverse treatment
+   rather than the light-ground defaults that would vanish here. */
+.hero-rfq-done .btn-quiet {
+  background: transparent;
+  color: var(--au-ink-inverse);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+.hero-rfq-done .btn-quiet:hover {
+  background: var(--au-ink-inverse);
+  color: var(--au-ink);
+  border-color: var(--au-ink-inverse);
+}
+.hero-rfq-done .btn-ghost { color: var(--au-link-inverse); }
+.hero-rfq-done .btn-ghost:hover { color: #fff; background: rgba(255, 255, 255, 0.1); }
 
 @media (max-width: 760px) {
   /* The 240px search floor plus a nowrap submit button was what could not
@@ -1297,16 +1706,19 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
   }
   .hero .lede { font-size: var(--au-text-small); margin-top: var(--au-s-4); }
   .hero .eyebrow { margin-bottom: var(--au-s-4); }
-  .hero-search { margin-top: var(--au-s-5); }
+  .hero-rfq { margin-top: var(--au-s-5); max-width: none; }
+  /* Keep the AOG row on one line at phone widths — the sub-phrase is what wraps. */
+  .hero-rfq-aog-sub { display: none; }
 
-  /* The empty second column collapses. At this width the crop is a tall sliver
-     with no open half to sit opposite, and the scrim is already a straight
-     bottom-up ramp, so the copy takes the full measure. */
+  /* The two columns collapse to one: copy first, then the console stacked under
+     it, each at the full measure. */
   .hero > .u-page {
     grid-template-columns: minmax(0, 1fr);
     column-gap: 0;
+    align-items: start;
   }
   .hero > .u-page > * { grid-column: 1; }
+  .hero-copy { max-width: none; }
 }
 
 /* The four feature points, as a hairline-divided strip. Deliberately not the
@@ -1355,29 +1767,47 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
 
 .about {
   display: grid;
-  /* 880 : 400 in the design ≈ 2.2 : 1, with an 80px gutter. */
-  grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr);
+  /* Text left, photo right — roughly 55 : 45, the reference's split. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.82fr);
   gap: clamp(var(--au-s-6), 5vw, var(--au-s-8));
   align-items: stretch;
 }
 
-/* ---- Left column ------------------------------------------------------- */
+/* ---- Left column: the body -------------------------------------------- */
 
-.about-intro {
+.about-body {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
 }
 
-/* Matches the rest of the homepage: every other section heading is a plain
-   `.section-head h2`, so this takes the same h2 token, weight and navy ink
-   rather than the Figma design's oversized Inter-Regular display. The one
-   accented word keeps the steel emphasis. */
+/* The reference's pill eyebrow — an outlined badge rather than the page's
+   ruled-caps `.eyebrow`, which is this section's own treatment. */
+.about-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 6px 14px;
+  border: var(--au-hairline-strong);
+  border-radius: var(--au-radius-pill);
+  font-family: var(--au-font-sans);
+  font-size: var(--au-text-eyebrow);
+  font-weight: var(--au-weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--au-ink-muted);
+}
+
+/* Larger than the page's other section headings — the reference makes the
+   About headline a focal display line, so it steps up from the h2 token. */
 .about-title {
   margin-top: var(--au-s-4);
-  max-width: 22ch;
-  font-size: var(--au-text-h2);
-  line-height: var(--au-leading-h2);
-  letter-spacing: var(--au-tracking-h2);
+  /* Fill the column so the headline sets in two lines, not three. */
+  max-width: none;
+  font-size: clamp(1.875rem, 1.1rem + 2.4vw, 2.75rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
   font-weight: var(--au-weight-medium);
   color: var(--au-ink-heading);
   text-wrap: balance;
@@ -1386,79 +1816,93 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
 
 .about-lede {
   margin-top: var(--au-s-4);
-  max-width: 60ch;
+  /* Fill the column so the body runs two–three lines rather than four. */
+  max-width: none;
   font-size: var(--au-text-body);
   line-height: var(--au-leading-body);
   color: var(--au-ink-muted);
 }
 
+/* The reference's button pair: a filled primary and an outlined secondary. */
+.about-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--au-s-3);
+  margin-top: var(--au-s-5);
+}
+
+/* Hairline between the copy/actions and the stat row, as in the reference. */
+.about-divider {
+  width: 100%;
+  height: 0;
+  border: 0;
+  border-top: var(--au-hairline);
+  margin: var(--au-s-5) 0 0;
+}
+
+/* ---- Horizontal stat row ---------------------------------------------- */
+
+.about-stats {
+  list-style: none;
+  margin: var(--au-s-5) 0 0;
+  padding: 0;
+  /* Content-width items, not a fixed 4-column grid: a long single-word value
+     ("Competitive") was overflowing its 1/4 cell and spilling across the gap
+     into the photo. Flex sizes each stat to its content and wraps if needed. */
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--au-s-5) clamp(var(--au-s-5), 3.5vw, var(--au-s-7));
+}
+.about-stats > li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--au-s-2);
+}
+.about-stat-value {
+  font-size: clamp(1.5rem, 0.9rem + 1.5vw, 2rem);
+  font-weight: var(--au-weight-medium);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--au-ink-heading);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.about-stat-label {
+  font-size: var(--au-text-small);
+  line-height: var(--au-leading-tight);
+  color: var(--au-ink-muted);
+}
+
+/* No entrance on this row — the client asked for this band to render static
+   (2026-08-07); the hide-then-rise that lived here was removed with it. The
+   count-up in AboutStats.tsx is the row's only motion and hides nothing. */
+
+/* ---- Right column: the photo card ------------------------------------- */
+
 .about-media {
-  margin: clamp(var(--au-s-6), 3vw, var(--au-s-7)) 0 0;
+  margin: 0;
   overflow: hidden;
-  border-radius: var(--au-radius-md);
+  border-radius: var(--au-radius-lg);
   border: var(--au-hairline);
-  background: var(--au-surface-alt);
-  /* 880 x 421 in the design ≈ 2 : 1; the image fills it with object-fit. */
-  aspect-ratio: 2 / 1;
+  /* A dark placeholder tone sampled from the photograph, so the card reads as an
+     intentional panel (not an empty box) while the optimised image loads. */
+  background: #29343f;
+  /* Fills the column to the height of the copy so it reads as a tall portrait
+     card, the reference's proportion; the floor keeps it a strong panel when
+     the copy is short. */
+  height: 100%;
+  min-height: clamp(320px, 34vw, 440px);
 }
 .about-media img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: 50% 42%;
   transition: transform 900ms var(--au-ease);
 }
 .about-media:hover img { transform: scale(1.04); }
-
-/* ---- Right column: stacked stat rail ----------------------------------- */
-
-.about-stats {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
-.about-stats > li {
-  position: relative;
-  flex: 1 1 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--au-s-2);
-  padding: clamp(var(--au-s-6), 4vw, var(--au-s-8)) var(--au-s-5);
-  text-align: center;
-  border-top: var(--au-hairline);
-}
-.about-stats > li:last-child { border-bottom: var(--au-hairline); }
-
-/* The short vertical accent tick the design sets at the leading edge of each
-   row — decorative, so it is a pseudo-element and carries no content. */
-.about-stats > li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 1px;
-  height: 56px;
-  transform: translateY(-50%);
-  background: var(--au-accent);
-  opacity: 0.55;
-}
-
-.about-stat-value {
-  font-size: var(--au-text-h3);
-  font-weight: var(--au-weight-medium);
-  line-height: 1.2;
-  letter-spacing: var(--au-tracking-h2);
-  color: var(--au-ink-heading);
-  font-variant-numeric: tabular-nums;
-}
-.about-stat-label {
-  font-size: var(--au-text-small);
-  color: var(--au-ink-muted);
-}
 
 /* ---- Stacked ----------------------------------------------------------- */
 
@@ -1467,17 +1911,12 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
     grid-template-columns: minmax(0, 1fr);
     gap: var(--au-s-7);
   }
-  /* The rail unstacks into a 2x2 grid under the copy; the vertical ticks read
-     as clutter once the rows are no longer a single column, so they go. */
-  .about-stats {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .about-stats > li:last-child { border-bottom: var(--au-hairline); }
-  .about-stats > li::before { display: none; }
+  /* Photo below the copy, back to a landscape band at this width. */
+  .about-media { min-height: 0; aspect-ratio: 16 / 10; height: auto; }
 }
 @media (max-width: 560px) {
-  .about-stats { grid-template-columns: minmax(0, 1fr); }
+  /* Four across is too tight on a phone; the facts drop to a 2×2. */
+  .about-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* ==========================================================================
@@ -1625,6 +2064,25 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
   .hot[data-phase="in"] .hot-card:nth-of-type(4) { transition-delay: 250ms; }
   .hot-more { transition: opacity 600ms var(--au-ease); }
   .hot[data-phase="in"] .hot-more { transition-delay: 360ms; }
+
+  /* DELIGHT — the live-stock heartbeat. As each card settles, its in-stock dot
+     gives a single confident ping: a ring emanates and fades on one soft beat,
+     so the card does not merely appear, it reports "stock confirmed" — the one
+     promise a "ready to ship" section makes. Timed to the fan-in, fires once,
+     never loops, and is gated on this motion-safe block. */
+  .hot[data-phase="in"] .hot-card-stock[data-stock="in"]::before {
+    animation: hot-stock-ping 860ms var(--au-ease) backwards;
+  }
+  .hot[data-phase="in"] .hot-card:nth-of-type(1) .hot-card-stock::before,
+  .hot[data-phase="in"] .hot-card:nth-of-type(3) .hot-card-stock::before { animation-delay: 470ms; }
+  .hot[data-phase="in"] .hot-card:nth-of-type(2) .hot-card-stock::before,
+  .hot[data-phase="in"] .hot-card:nth-of-type(4) .hot-card-stock::before { animation-delay: 590ms; }
+  @keyframes hot-stock-ping {
+    0%   { box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 20%, transparent); transform: scale(1); }
+    22%  { box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 60%, transparent); transform: scale(1.32); }
+    60%  { box-shadow: 0 0 0 13px color-mix(in srgb, currentColor 0%, transparent); transform: scale(1); }
+    100% { box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 20%, transparent); transform: scale(1); }
+  }
 }
 
 @media (max-width: 1000px) {
@@ -2234,7 +2692,7 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
      hands the open slat *all* the free space, which at this container width is
      about 1300px of panel holding four lines of text in one corner. Fixing the
      open width is what keeps the proportion the reference actually has. */
-  --res-slat-w: 92px;   /* a closed slat: numeral over a vertical name */
+  --res-slat-w: 108px;  /* a closed slat: numeral over a vertical name */
   --res-panel-w: 480px; /* the open panel's content, fixed — see .res-panel */
   --res-pad: var(--au-s-4);
 
@@ -2246,12 +2704,10 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
      the pointer is never in a no-slat-hovered state and the row never snaps. */
   gap: 0;
   /* Floored by the longest spine, not chosen for looks: "Parts by Aircraft /
-     Helicopter Model" runs ~202px vertically at 12px, and the numeral plus
-     padding costs another 66px. Below ~270px it clips, and a clipped name on a
-     closed slat is the one thing this layout cannot afford. Capped low as well
-     — the open panel holds four short lines, and at the 336px this first used,
-     half the box was empty. */
-  height: clamp(272px, 22vw, 300px);
+     Helicopter Model" runs ~252px vertically at 15px, and the numeral plus
+     padding costs another ~64px. Below ~320px it clips, and a clipped name on a
+     closed slat is the one thing this layout cannot afford. */
+  height: clamp(348px, 26vw, 384px);
 }
 
 .res-slat {
@@ -2411,7 +2867,7 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
   justify-content: flex-end;
   writing-mode: vertical-rl;
   overflow: hidden;
-  font-size: 0.75rem;
+  font-size: 0.9375rem;
   font-weight: var(--au-weight-medium);
   letter-spacing: 0.01em;
   white-space: nowrap;
@@ -2655,10 +3111,12 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
   margin-inline: auto;
   padding-inline: max(var(--au-s-5), 2.5vw);
   display: grid;
-  grid-template-columns: 3rem minmax(0, 0.84fr) minmax(0, 1.16fr);
-  gap: clamp(var(--au-s-5), 3.2vw, var(--au-s-8));
+  grid-template-columns: 2.5rem minmax(0, 0.92fr) minmax(0, 1.08fr);
+  gap: clamp(var(--au-s-4), 2.4vw, var(--au-s-6));
   align-items: stretch;
-  height: min(80vh, 760px);
+  /* Shorter than the first cut (80vh/760px): with the count promoted to the
+     column's centrepiece the height was pure air, and the user called it. */
+  height: min(68vh, 600px);
 }
 
 @media (min-width: 1001px) {
@@ -2671,8 +3129,8 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
     top: clamp(144px, 128px + 3vh, 176px);
     /* Shorter than the viewport below the header so a sliver of the section's
        ground shows under the stage — it reads as pinned, not as a second fixed
-       header. */
-    height: min(72vh, 660px);
+       header. Trimmed with the static height above (was 72vh/660px). */
+    height: min(64vh, 560px);
   }
 }
 
@@ -2753,7 +3211,12 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
    photograph beside it. */
 .cat-stage-text {
   display: grid;
-  align-content: center;
+  /* Fill the stage height rather than centring a compact cluster: the title
+     block anchors to the top (aligned with the photograph's top edge and the
+     rail's 01) and the CTA anchors to the foot, so the column reads as full and
+     deliberate instead of floating in the middle. */
+  align-content: stretch;
+  padding-block: var(--au-s-2);
 }
 .cat-slide-text {
   grid-area: 1 / 1;
@@ -2761,6 +3224,7 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
   flex-direction: column;
   align-items: flex-start;
   gap: var(--au-s-4);
+  height: 100%;
   text-decoration: none;
   /* Non-active slides fade under the active one and leave the tab order. */
   opacity: 0;
@@ -2799,17 +3263,53 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
   text-wrap: balance;
   max-width: 15ch;
 }
+/* The catalogue depth as the slide's centrepiece — display-scale digits that
+   change with every step. `margin-block: auto` centres it in what used to be
+   the empty middle: the title still anchors the top, the facts and the action
+   still anchor the foot, and the figure owns the space between. */
+.cat-slide-stat {
+  margin-block: auto;
+  padding-block: var(--au-s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--au-s-1);
+}
+.cat-slide-count {
+  font-size: var(--au-text-display);
+  font-weight: var(--au-weight-medium);
+  line-height: var(--au-leading-display);
+  letter-spacing: var(--au-tracking-display);
+  font-variant-numeric: tabular-nums;
+  color: var(--au-ink-heading);
+}
+.cat-slide-count-label {
+  font-size: var(--au-text-small);
+  color: var(--au-ink-muted);
+}
+
 .cat-slide-meta {
   display: flex;
   align-items: center;
   gap: var(--au-s-3);
   flex-wrap: wrap;
 }
+/* Real rows from the sample catalog, as identifiers — mono, like every other
+   part number on the site. */
+.cat-egs {
+  font-size: var(--au-text-caption);
+  color: var(--au-ink-muted);
+}
+.cat-egs b {
+  font-family: var(--au-font-mono);
+  font-weight: var(--au-weight-regular);
+  color: var(--au-ink-body);
+  white-space: nowrap;
+}
 .cat-slide-cta {
   display: inline-flex;
   align-items: center;
   gap: var(--au-s-2);
-  margin-top: var(--au-s-2);
+  margin-top: var(--au-s-4);
   font-size: var(--au-text-label);
   font-weight: var(--au-weight-medium);
   color: var(--au-link);
@@ -2898,6 +3398,10 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
   /* The vertical progress line has no place in a horizontal tab bar. */
   .cat-rail-track { display: none; }
   .cat-slide-name { font-size: var(--au-text-h2); letter-spacing: var(--au-tracking-h2); }
+  /* Unpinned, the column is only as tall as its content — the stat needs no
+     centring air, just its own row at a calmer size. */
+  .cat-slide-stat { margin-block: 0; padding-block: var(--au-s-2); }
+  .cat-slide-count { font-size: var(--au-text-h2); letter-spacing: var(--au-tracking-h2); }
 }
 
 @media (max-width: 520px) {
@@ -2934,12 +3438,6 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
   font-weight: var(--au-weight-regular);
   font-variant-numeric: tabular-nums;
   color: var(--au-ink);
-}
-.cat-count {
-  font-size: var(--au-text-caption);
-  font-variant-numeric: tabular-nums;
-  color: var(--au-ink-muted);
-  white-space: nowrap;
 }
 
 
@@ -3082,6 +3580,18 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
 }
 .field input[data-mono] { font-family: var(--au-font-mono); font-variant-numeric: tabular-nums; }
 
+/* Selects drop the OS arrow (cramped and clipped on some browsers) for a clean
+   chevron with real padding from the edge — matching the date picker's caret. */
+.field select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: calc(var(--au-s-4) + 22px);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%235F6880' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--au-s-4) center;
+  background-size: 18px 18px;
+}
+
 .field .error {
   font-family: var(--au-font-sans);
   font-size: var(--au-text-caption);
@@ -3100,32 +3610,199 @@ a { color: inherit; text-decoration-color: var(--au-border); text-underline-offs
 fieldset { border: 0; padding: 0; margin: 0; }
 legend { padding: 0; font-size: var(--au-text-h3); letter-spacing: var(--au-tracking-h3); margin-bottom: var(--au-s-4); color: var(--au-ink); }
 
+/* The AOG (aircraft-on-ground) urgency flag — the one control on the form that
+   signals an emergency, so it is deliberately prominent: a red-tinted panel
+   with a red border that deepens when armed, and a red status dot echoing the
+   header's AOG control. Emphasis comes from colour and border, NOT shadow
+   (there is none, by request). */
 .check {
-  display: flex; gap: var(--au-s-3); align-items: flex-start;
-  padding: var(--au-s-4);
-  border: var(--au-hairline-glass);
+  display: flex;
+  gap: var(--au-s-3);
+  align-items: flex-start;
+  padding: var(--au-s-4) var(--au-s-5);
+  border: 1.5px solid color-mix(in srgb, var(--au-stock-out) 34%, var(--au-border));
   border-radius: var(--au-radius-md);
   cursor: pointer;
-  background: var(--au-glass-fill);
-  box-shadow: var(--au-raised);
+  background: color-mix(in srgb, var(--au-stock-out) 5%, var(--au-surface));
+  transition: border-color var(--au-dur-fast) var(--au-ease),
+              background var(--au-dur-fast) var(--au-ease);
+}
+.check:hover {
+  border-color: color-mix(in srgb, var(--au-stock-out) 55%, var(--au-border));
+  background: color-mix(in srgb, var(--au-stock-out) 8%, var(--au-surface));
+}
+.check input {
+  width: 20px;
+  height: 20px;
+  min-height: 0;
+  margin-top: 1px;
+  flex-shrink: 0;
+  accent-color: var(--au-stock-out);
+  cursor: pointer;
+}
+.check:has(input:checked) {
+  border-color: var(--au-stock-out);
+  background: color-mix(in srgb, var(--au-stock-out) 13%, var(--au-surface));
+}
+.check .t {
+  display: flex;
+  align-items: center;
+  gap: var(--au-s-2);
+  font-size: var(--au-text-body);
+  font-weight: var(--au-weight-semibold);
+  color: var(--au-ink);
+}
+.check .t::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: var(--au-radius-circle);
+  background: var(--au-stock-out);
+  flex-shrink: 0;
+}
+.check .d {
+  display: block;
+  margin-top: var(--au-s-2);
+  font-size: var(--au-text-small);
+  line-height: var(--au-leading-tight);
+  color: var(--au-ink-muted);
+}
+
+.qty-input { max-width: 130px; }
+
+/* ==========================================================================
+   DatePicker — the custom calendar that replaces `<input type="date">`.
+   See components/DatePicker.tsx.
+   ========================================================================== */
+.datepick { position: relative; }
+
+/* Trigger: field-styled, value on the left, a padded chevron on the right. */
+.datepick-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--au-s-3);
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--au-s-4) 0 var(--au-s-4);
+  background: var(--au-surface);
+  border: 1px solid var(--au-border-strong);
+  border-radius: var(--au-radius-sm);
+  box-shadow: var(--au-recessed);
+  color: var(--au-ink);
+  font-size: var(--au-text-body);
+  cursor: pointer;
   transition: border-color var(--au-dur-fast) var(--au-ease),
               box-shadow var(--au-dur-fast) var(--au-ease);
 }
-.check:hover { box-shadow: var(--au-raised-md); }
-.check input { width: 18px; height: 18px; min-height: 0; margin-top: 2px; flex-shrink: 0; accent-color: var(--au-ink); }
-.check:has(input:checked) {
-  border-color: transparent;
-  background: var(--au-accent-sheen), var(--au-accent);
-  box-shadow: var(--au-raised-md);
+.datepick-trigger:focus-visible {
+  outline: none;
+  border-color: var(--au-link);
+  box-shadow: var(--au-recessed), var(--au-focus-ring);
 }
-.check .t { display: block; font-size: var(--au-text-small); font-weight: var(--au-weight-medium); color: var(--au-ink); }
-.check .d { display: block; margin-top: 3px; font-size: var(--au-text-caption); color: var(--au-ink-muted); }
-/* Checked fills with the accent, which is dark, so both lines invert. The
-   label was previously left at --au-ink because the accent used to be light. */
-.check:has(input:checked) .t { color: var(--au-accent-ink); }
-.check:has(input:checked) .d { color: rgba(255, 255, 255, 0.78); }
+.datepick-val { color: var(--au-ink); }
+.datepick-val.is-placeholder { color: var(--au-ink-muted); }
+/* The chevron keeps the field's right padding as breathing room, so it is
+   never crowded against the edge. */
+.datepick-caret {
+  flex-shrink: 0;
+  color: var(--au-ink-muted);
+  transition: transform var(--au-dur-fast) var(--au-ease);
+}
+.datepick-caret.is-open { transform: rotate(180deg); }
 
-.qty-input { max-width: 130px; }
+/* Popover calendar. */
+.datepick-pop {
+  position: absolute;
+  z-index: var(--au-z-dropdown);
+  top: calc(100% + 8px);
+  left: 0;
+  width: min(336px, calc(100vw - 2 * var(--au-s-5)));
+  padding: var(--au-s-4);
+  background: var(--au-surface);
+  border: var(--au-hairline);
+  border-radius: var(--au-radius-lg);
+  box-shadow: var(--au-shadow-md);
+}
+.datepick-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--au-s-2);
+  margin-bottom: var(--au-s-3);
+}
+.datepick-title {
+  font-size: var(--au-text-body);
+  font-weight: var(--au-weight-medium);
+  color: var(--au-ink-heading);
+}
+.datepick-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: transparent;
+  border-radius: var(--au-radius-sm);
+  color: var(--au-ink-muted);
+  cursor: pointer;
+  transition: background var(--au-dur-fast) var(--au-ease), color var(--au-dur-fast) var(--au-ease);
+}
+.datepick-nav:hover { background: var(--au-tint-hover); color: var(--au-ink); }
+
+.datepick-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.datepick-weekdays { margin-bottom: var(--au-s-1); }
+.datepick-wd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  font-size: var(--au-text-caption);
+  color: var(--au-ink-muted);
+}
+.datepick-day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-height: 38px;
+  border: 0;
+  background: transparent;
+  border-radius: var(--au-radius-sm);
+  color: var(--au-ink);
+  font-size: var(--au-text-small);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background var(--au-dur-fast) var(--au-ease), color var(--au-dur-fast) var(--au-ease);
+}
+.datepick-day:hover { background: var(--au-tint-hover); }
+.datepick-day.is-out { color: var(--au-ink-muted); opacity: 0.55; }
+/* Today: a hairline ring via outline (no shadow). */
+.datepick-day.is-today { outline: 1px solid var(--au-border-strong); outline-offset: -1px; }
+.datepick-day.is-sel,
+.datepick-day.is-sel:hover {
+  background: var(--au-accent);
+  color: var(--au-accent-ink);
+}
+.datepick-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--au-s-3);
+  padding-top: var(--au-s-3);
+  border-top: var(--au-hairline);
+}
+.datepick-link {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: var(--au-s-1) var(--au-s-2);
+  font-size: var(--au-text-small);
+  color: var(--au-link);
+  border-radius: var(--au-radius-xs);
+}
+.datepick-link:hover { color: var(--au-link-hover); text-decoration: underline; }
 
 /* ==========================================================================
    Empty / recovery states — the highest-risk screens on the site
@@ -3186,6 +3863,7 @@ legend { padding: 0; font-size: var(--au-text-h3); letter-spacing: var(--au-trac
 .filter-option .count { margin-left: auto; font-family: var(--au-font-mono); font-size: var(--au-text-caption); color: var(--au-ink-muted); font-variant-numeric: tabular-nums; }
 
 .results-bar { display: flex; align-items: center; justify-content: space-between; gap: var(--au-s-4); flex-wrap: wrap; margin-bottom: var(--au-s-4); }
+.results-actions { display: flex; align-items: center; gap: var(--au-s-2) var(--au-s-4); flex-wrap: wrap; }
 .results-count { font-family: var(--au-font-sans); font-size: var(--au-text-label); text-transform: uppercase; letter-spacing: 0.04em; color: var(--au-ink-muted); }
 .results-count strong { color: var(--au-ink); font-weight: var(--au-weight-regular); font-variant-numeric: tabular-nums; }
 
@@ -3249,7 +3927,8 @@ legend { padding: 0; font-size: var(--au-text-h3); letter-spacing: var(--au-trac
    card gets tight. */
 .rfq-line { padding: var(--au-s-4); margin-bottom: var(--au-s-3); }
 .rfq-line .field-row {
-  grid-template-columns: minmax(0, 2.2fr) minmax(0, 0.9fr) minmax(0, 1.5fr);
+  /* Quantity's 132px floor is the − / + counter: two 38px steps + a value. */
+  grid-template-columns: minmax(0, 2.2fr) minmax(132px, 0.9fr) minmax(0, 1.5fr);
 }
 @media (max-width: 620px) {
   .rfq-line .field-row { grid-template-columns: minmax(0, 1fr); }
@@ -3295,6 +3974,92 @@ legend { padding: 0; font-size: var(--au-text-h3); letter-spacing: var(--au-trac
 .rfq-done-again { display: flex; flex-wrap: wrap; gap: var(--au-s-3); margin-top: var(--au-s-7); }
 .rfq-done-aog { margin-top: var(--au-s-6); }
 
+
+/* ==========================================================================
+   QuoteCue — the quiet contextual "start a quote" prompt (components/QuoteCue.tsx)
+
+   Three shapes, all deliberately secondary: they name the next step without
+   competing with a section's primary action. The link stays clearly a link
+   (accent), but everything around it is muted and small so the cue reads as a
+   quiet aside. See QuoteCue.tsx.
+   ========================================================================== */
+
+.qcue-line {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--au-s-2) var(--au-s-3);
+  margin-top: clamp(var(--au-s-5), 3vw, var(--au-s-6));
+  padding-top: var(--au-s-4);
+  border-top: var(--au-hairline);
+}
+.qcue-line .qcue-text {
+  margin: 0;
+  font-size: var(--au-text-caption);
+  color: var(--au-ink-muted);
+  max-width: 62ch;
+}
+
+/* The inline slab, for article prose: bounded, subtle fill, a clear but quiet
+   hand-off. One accent tick on the leading edge, at the 1px the craft floor
+   allows — it marks the aside without shouting. */
+.qcue-inline {
+  margin-block: clamp(var(--au-s-5), 3vw, var(--au-s-6));
+  padding: var(--au-s-5);
+  border: var(--au-hairline);
+  border-radius: var(--au-radius-md);
+  background: var(--au-surface-subtle, rgba(0, 0, 0, 0.02));
+}
+.qcue-inline .qcue-text {
+  margin: 0 0 var(--au-s-3);
+  font-size: var(--au-text-small);
+  line-height: 1.55;
+  color: var(--au-ink-body);
+}
+
+/* The plate variant sits on a dark band (the identifier data-plate), so its
+   ink inverts and the link takes the on-dark link colour. */
+.qcue-plate {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--au-s-2) var(--au-s-3);
+  margin-top: var(--au-s-5);
+}
+.qcue-plate .qcue-text {
+  margin: 0;
+  font-size: var(--au-text-caption);
+  color: var(--au-ink-inverse-muted);
+  max-width: 62ch;
+}
+
+/* The link itself — small, medium-weight, accent; the arrow nudges on hover so
+   the cue acknowledges the cursor. */
+.qcue-link {
+  flex: none;
+  font-size: var(--au-text-caption);
+  font-weight: var(--au-weight-medium);
+  color: var(--au-link);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.qcue-inline .qcue-link { font-size: var(--au-text-small); }
+.qcue-plate .qcue-link { color: var(--au-link-inverse); }
+.qcue-link span { display: inline-block; transition: transform var(--au-dur-fast) var(--au-ease); }
+.qcue-link:hover span { transform: translateX(3px); }
+.qcue-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* On an accent band the light-ground inks would sink into the colour, so the
+   cue takes the band's own foreground and the link stays underlined to read
+   clearly against text of the same hue. */
+.section-accent .qcue-line { border-top-color: rgba(255, 255, 255, 0.28); }
+.section-accent .qcue-text { color: var(--au-accent-ink); opacity: 0.82; }
+.section-accent .qcue-link {
+  color: var(--au-accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .copy-btn {
   border: 0; background: transparent; cursor: pointer;
   border-radius: var(--au-radius-xs);
@@ -3309,7 +4074,9 @@ legend { padding: 0; font-size: var(--au-text-h3); letter-spacing: var(--au-trac
    and foot are full-bleed bands inside it, and without the clip their square
    corners poke out past the panel's radius. */
 .rfq-panel {
-  position: sticky; top: 132px;
+  /* NOT sticky (it was, at top:132px). The rail is a one-time read; pinned,
+     it shadowed the visitor down the whole form and drew attention every
+     scroll frame. It now scrolls away with the page like any other aside. */
   border: var(--au-hairline-glass);
   border-radius: var(--au-radius-lg);
   background: var(--au-glass-fill-strong);
@@ -3726,29 +4493,6 @@ legend { padding: 0; font-size: var(--au-text-h3); letter-spacing: var(--au-trac
   [data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(4) { transition-delay: 0.28s; }
   [data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(5) { transition-delay: 0.36s; }
   [data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(6) { transition-delay: 0.44s; }
-
-  /* ---- About ASAP: a slow, sequenced arrival --------------------------
-     The band's request is that everything appears slowly as it scrolls in.
-     Both columns are stagger containers; here the transition is lengthened and
-     the steps widened so the eyebrow, headline, lede and image settle one after
-     another on the left while the four facts count in down the right — a calm
-     unfold rather than the default quick stagger. */
-  .about-intro[data-reveal="stagger"] > *,
-  .about-stats[data-reveal="stagger"] > * {
-    transition-duration: 1000ms;
-  }
-  .about-intro[data-reveal="stagger"][data-reveal-state="armed"] > * {
-    transform: translateY(26px);
-  }
-  .about-intro[data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(1) { transition-delay: 0.05s; }
-  .about-intro[data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(2) { transition-delay: 0.24s; }
-  .about-intro[data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(3) { transition-delay: 0.43s; }
-  .about-intro[data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(4) { transition-delay: 0.62s; }
-  .about-stats[data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(1) { transition-delay: 0.30s; }
-  .about-stats[data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(2) { transition-delay: 0.46s; }
-  .about-stats[data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(3) { transition-delay: 0.62s; }
-  .about-stats[data-reveal="stagger"][data-reveal-state="in"] > *:nth-child(4) { transition-delay: 0.78s; }
-
 }
 
 /* ==========================================================================
@@ -7946,6 +8690,10 @@ a.close-v:hover { color: var(--au-link-inverse); text-decoration: underline; tex
   color: var(--au-ink-muted);
   max-width: 54ch;
 }
+/* The lede is a block wrapper so a header can carry more than one paragraph;
+   inline-only ledes render identically. */
+.catmast-lede > p { margin: 0; }
+.catmast-lede > p + p { margin-top: var(--au-s-4); }
 
 /* `flex: none` so the button never stretches or shrinks; the small bottom nudge
    optically seats its baseline against the lede's last line rather than its box. */
@@ -7975,6 +8723,16 @@ a.close-v:hover { color: var(--au-link-inverse); text-decoration: underline; tex
   .catmast-actions { padding-bottom: 0; }
   .catmast-actions .btn { width: 100%; }
 }
+
+/* A longer title (e.g. "Federal Supply Groups and Classes" / "(FSG/FSC) Lookup
+   Catalog") wraps badly under the shared 20ch title cap — each array line breaks
+   again, giving four visual lines and a lot of dead space to the right. This
+   modifier widens the measure so each array line holds on ONE line — the
+   intended two-line break — and lets the lede track the same wider column so the
+   copy fills the space rather than hugging a narrow gutter. */
+.catmast--wide .catmast-lead { max-width: 66rem; }
+.catmast--wide .catmast-title { max-width: none; }
+.catmast--wide .catmast-lede { max-width: 66ch; }
 
 
 /* ==========================================================================
@@ -8458,7 +9216,9 @@ a.close-v:hover { color: var(--au-link-inverse); text-decoration: underline; tex
   border-color: var(--au-border-strong);
   box-shadow: var(--au-raised-md);
 }
-.acplate:focus-visible { outline: none; box-shadow: var(--au-focus-ring); }
+/* The plate is a container now, not an anchor, so the ring follows focus of
+   either inner link. */
+.acplate:focus-within { outline: none; box-shadow: var(--au-focus-ring); }
 
 .ac-top { display: flex; align-items: center; gap: var(--au-s-3); }
 
@@ -8552,18 +9312,50 @@ a.close-v:hover { color: var(--au-link-inverse); text-decoration: underline; tex
 }
 .acplate:hover .ac-scale > i { filter: saturate(1.12) brightness(1.08); }
 
+/* The foot now carries two links: the primary "Browse parts" (stretched to the
+   whole plate) and a quiet "request a quote" secondary. */
 .ac-go {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--au-s-2);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--au-s-3);
   padding-top: var(--au-s-4);
   border-top: var(--au-hairline-quiet);
   font-size: var(--au-text-caption);
   font-weight: var(--au-weight-medium);
-  color: var(--au-link);
 }
-.ac-go span { transition: transform var(--au-dur-fast) var(--au-ease); }
-.acplate:hover .ac-go span { transform: translateX(4px); }
+.ac-go-browse {
+  color: var(--au-link);
+  text-decoration: none;
+}
+/* THE STRETCH. An empty overlay makes the entire plate the Browse-parts target,
+   so the plate stays one-click even though it is no longer an anchor itself. */
+.ac-go-browse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.ac-go-browse span { display: inline-block; transition: transform var(--au-dur-fast) var(--au-ease); }
+.acplate:hover .ac-go-browse span { transform: translateX(4px); }
+
+/* THE QUIET SECONDARY. Recessed to muted by default so it never competes with
+   Browse parts, brightening to the link colour when the plate is hovered or the
+   link itself is focused. `position: relative; z-index` lifts it above the
+   stretch overlay so it remains its own click target — and it stays visible
+   (not display:none), so it works on touch and for keyboards. */
+.ac-go-quote {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  color: var(--au-ink-muted);
+  text-decoration: none;
+  font-weight: var(--au-weight-regular);
+  transition: color var(--au-dur-fast) var(--au-ease);
+}
+.acplate:hover .ac-go-quote,
+.ac-go-quote:focus-visible { color: var(--au-link); }
+.ac-go-quote:hover { color: var(--au-link); text-decoration: underline; text-underline-offset: 3px; }
 
 /* ---- No featured plate, and that is the third answer to one problem ------
    Five platforms in a three-column grid leave a row of two beside an empty cell.
@@ -8733,6 +9525,21 @@ a.azkey:hover { background: var(--au-tint-hover); color: var(--au-ink); }
   font-variant-numeric: tabular-nums;
 }
 
+/* Sort control — a compact native select in the index bar. */
+.idxsort-field { display: inline-flex; align-items: center; gap: var(--au-s-2); justify-self: end; min-width: 0; }
+.idxsort-k {
+  font-family: var(--au-font-sans); font-size: var(--au-text-caption);
+  text-transform: uppercase; letter-spacing: 0.04em; color: var(--au-ink-muted); white-space: nowrap;
+}
+.idxsort-field select {
+  font-family: var(--au-font-sans); font-size: var(--au-text-small); color: var(--au-ink);
+  padding: var(--au-s-2) var(--au-s-3);
+  border: var(--au-hairline); border-radius: var(--au-radius-sm);
+  background: var(--au-surface); cursor: pointer; max-width: 100%;
+  transition: border-color var(--au-dur-fast) var(--au-ease);
+}
+.idxsort-field select:hover { border-color: var(--au-border-strong); }
+
 @media (max-width: 1000px) {
   .idxbar-inner { grid-template-columns: minmax(0, 1fr) auto; }
   .azrail { grid-column: 1 / -1; order: 3; justify-content: flex-start; }
@@ -8843,6 +9650,58 @@ a.resopt:hover { background: var(--au-tint-hover); color: var(--au-ink); }
   font-variant-numeric: tabular-nums;
 }
 .resask { margin-top: var(--au-s-4); }
+
+/* ── FacetFilter — the interactive, multi-facet variant of the filter panel.
+   Reuses .filters / .card.resfilter / .resopt; adds the keyword box, the
+   grouped facets, checkbox affordances and a clear control. ── */
+.facetbar-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--au-s-3);
+}
+.facet-clear {
+  border: 0; background: none; padding: 0; cursor: pointer;
+  font-family: var(--au-font-sans); font-size: var(--au-text-caption);
+  color: var(--au-accent); text-decoration: underline; text-underline-offset: 2px;
+}
+.facet-clear:hover { color: var(--au-accent-hover); }
+
+.facet-search { margin-top: var(--au-s-3); }
+.facet-search input { font-size: var(--au-text-small); }
+
+/* Each facet is a titled block inside the one card, divided by a quiet rule. */
+.facetgroup { margin-top: var(--au-s-4); padding-top: var(--au-s-4); border-top: var(--au-hairline-quiet); }
+.facetgroup-h { margin-bottom: var(--au-s-1); }
+
+/* The option becomes a full-width button but keeps the .resopt look. A button
+   defaults to centered text; the facet label is left-aligned and, when it is long
+   enough to wrap (e.g. "Airbus A318, A319, A320, A321"), the checkbox and count
+   stay seated on the FIRST line rather than floating to the vertical middle. */
+button.resopt {
+  width: 100%; border: 0; background: none; font: inherit; cursor: pointer;
+  text-align: left; align-items: flex-start;
+}
+button.resopt .resopt-t { align-items: flex-start; flex: 1 1 auto; min-width: 0; }
+button.resopt .resopt-check { margin-top: 2px; }
+button.resopt .resopt-n { flex: 0 0 auto; margin-top: 1px; }
+.resopt-check {
+  flex: 0 0 auto; width: 15px; height: 15px;
+  border: 1.5px solid var(--au-border-strong); border-radius: var(--au-radius-xs);
+  display: inline-grid; place-items: center; color: transparent;
+  transition: background var(--au-dur-fast) var(--au-ease), border-color var(--au-dur-fast) var(--au-ease);
+}
+.resopt-check svg { width: 11px; height: 11px; display: block; }
+.resopt[data-on] .resopt-check {
+  background: var(--au-accent); border-color: var(--au-accent); color: var(--au-accent-ink);
+}
+
+/* A long value list (manufacturers) scrolls inside the panel rather than pushing
+   the page down. */
+.resfilter-list--scroll { max-height: 232px; overflow-y: auto; }
+
+/* When FacetFilter decides a table is too short to be worth filtering it renders
+   an empty aside — hide it and collapse the two-column results layout back to
+   one, so a short listing never carries a dead 250px gutter. */
+.results-layout > .filters:empty { display: none; }
+.results-layout:has(> .filters:empty) { grid-template-columns: minmax(0, 1fr); }
 
 .results-of { color: var(--au-ink-muted); font-weight: var(--au-weight-regular); }
 
@@ -10369,3 +11228,1342 @@ a.resopt:hover { background: var(--au-tint-hover); color: var(--au-ink); }
 @media (max-width: 620px) {
   .acgrid, .acgrid-page { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ==========================================================================
+   NumberField — the − / + quantity counter (components/NumberField.tsx).
+
+   The wrapper takes over the well look from the input: same recessed surface
+   as `.field input`, with the focus ring moved to :focus-within so the whole
+   counter lights up when the value is being edited. The inner input is
+   stripped bare (these resets sit at the end of the sheet on purpose — they
+   win the specificity ties against `.field input` and `.hero-rfq-well input`
+   by order). Buttons step; the input stays the accessible, typeable control.
+   ========================================================================== */
+.numfield {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-height: 48px;
+  background: var(--au-surface);
+  border: 1px solid var(--au-border-strong);
+  border-radius: var(--au-radius-sm);
+  box-shadow: var(--au-recessed);
+  transition: border-color var(--au-dur-fast) var(--au-ease),
+              box-shadow var(--au-dur-fast) var(--au-ease);
+}
+.numfield:focus-within {
+  border-color: var(--au-link);
+  box-shadow: var(--au-recessed), var(--au-focus-ring);
+}
+
+.numfield input,
+.numfield input:focus {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+  padding: 0 var(--au-s-1);
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.numfield input::-webkit-outer-spin-button,
+.numfield input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.numfield-step {
+  flex: 0 0 auto;
+  width: 38px;
+  margin: 3px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: calc(var(--au-radius-sm) - 2px);
+  background: transparent;
+  color: var(--au-ink-muted);
+  cursor: pointer;
+  transition: background var(--au-dur-fast) var(--au-ease),
+              color var(--au-dur-fast) var(--au-ease);
+}
+.numfield-step:hover {
+  background: color-mix(in srgb, var(--au-ink) 8%, transparent);
+  color: var(--au-ink);
+}
+.numfield-step:active {
+  background: color-mix(in srgb, var(--au-ink) 14%, transparent);
+}
+
+/* Invalid state follows the field, same as a bare input would. */
+.field[data-invalid="true"] .numfield { border-color: var(--au-stock-out); }
+
+/* In the hero's form the counter takes the well treatment of its siblings:
+   taller, the bigger radius, and the accent-colored focus glow. */
+.hero-rfq-well .numfield {
+  min-height: 52px;
+  border-radius: var(--au-radius-md);
+  font-size: var(--au-text-body);
+}
+.hero-rfq-well .numfield:focus-within {
+  border-color: var(--au-accent);
+  box-shadow: var(--au-recessed),
+              0 0 0 3px color-mix(in srgb, var(--au-accent) 22%, transparent);
+}
+.hero-rfq-well .numfield .numfield-step { border-radius: calc(var(--au-radius-md) - 2px); }
+
+/* ==========================================================================
+   Testimonials — the closing "What our clients say" block
+   (home/Testimonials.tsx), reused at the foot of /rfq.
+
+   Redesigned off the client's note that the panel-of-cards read box-in-box
+   and template-generic. There is now ONE surface level — the section ground
+   itself — and an asymmetric editorial split: a single large pull-quote on
+   the left, a hairline-divided roster of the other voices on the right that
+   swaps the featured quote. The only rule between the two columns is the
+   roster's own left edge; nothing is boxed or nested. Real sourced reviews
+   (see Testimonials.tsx); monogram avatars, never stock faces.
+   ========================================================================== */
+.tstm { display: block; }
+
+/* Left-aligned head — the centred, ruled version was the template tell. */
+.tstm-head { max-width: 54ch; }
+.tstm-head .eyebrow { color: var(--au-accent); }
+.tstm-head h2 { color: var(--au-ink-heading); }
+.tstm-sub {
+  margin-top: var(--au-s-3);
+  color: var(--au-ink-muted);
+  font-size: var(--au-text-body);
+  line-height: var(--au-leading-body);
+}
+
+/* The split: the quote gets the room, the roster is a narrow index beside it. */
+.tstm-stage {
+  margin-top: var(--au-s-7);
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(232px, 1fr);
+  gap: clamp(var(--au-s-5), 4vw, var(--au-s-8));
+  align-items: start;
+}
+
+/* ---- Featured pull-quote ------------------------------------------------ */
+.tstm-feature { margin: 0; }
+/* One oversized mark, tinted to the accent — the section's single ornament. */
+.tstm-mark {
+  display: block;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 96px;
+  line-height: 0.5;
+  color: color-mix(in srgb, var(--au-accent) 26%, transparent);
+}
+.tstm-quote {
+  margin: var(--au-s-4) 0 0;
+  /* Reserve height for the longest passage so the counter below doesn't
+     hop as quotes swap. */
+  min-height: 5.6em;
+}
+.tstm-quote p {
+  margin: 0;
+  font-size: clamp(1.25rem, 1.85vw, 1.75rem);
+  line-height: 1.5;
+  font-weight: var(--au-weight-medium);
+  letter-spacing: -0.01em;
+  color: var(--au-ink-heading);
+  text-wrap: balance;
+}
+/* Each swap fades the new passage up. Motion-safe: instant when reduced. */
+@media (prefers-reduced-motion: no-preference) {
+  .tstm-quote { animation: tstm-in 520ms var(--au-ease) both; }
+}
+@keyframes tstm-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.tstm-by {
+  display: flex;
+  align-items: center;
+  gap: var(--au-s-3);
+  margin-top: var(--au-s-5);
+}
+.tstm-by-txt,
+.tstm-item-txt {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.tstm-name {
+  font-size: var(--au-text-body);
+  font-weight: var(--au-weight-semibold);
+  color: var(--au-ink-heading);
+}
+.tstm-role {
+  font-size: var(--au-text-small);
+  color: var(--au-ink-muted);
+}
+
+/* Monogram avatar — refined initials, never an "egg" icon or a stock face. */
+.tstm-avatar {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--au-radius-circle);
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--au-accent) 12%, var(--au-surface));
+  border: 1px solid color-mix(in srgb, var(--au-accent) 34%, var(--au-border));
+  color: var(--au-accent);
+  font-size: var(--au-text-small);
+  font-weight: var(--au-weight-semibold);
+  letter-spacing: 0.04em;
+}
+.tstm-avatar-sm { width: 38px; height: 38px; font-size: 0.8125rem; }
+
+/* Prev / index / next — an editorial counter, not a pair of centred pills. */
+.tstm-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--au-s-4);
+  margin-top: var(--au-s-6);
+}
+.tstm-arrow {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--au-radius-circle);
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 1px solid var(--au-border-strong);
+  color: var(--au-ink);
+  cursor: pointer;
+  transition: border-color var(--au-dur-fast) var(--au-ease),
+              color var(--au-dur-fast) var(--au-ease),
+              transform var(--au-dur-fast) var(--au-ease);
+}
+.tstm-arrow:hover { border-color: var(--au-accent); color: var(--au-accent); }
+.tstm-arrow:active { transform: translateY(1px); }
+.tstm-count {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.14em;
+  font-size: var(--au-text-small);
+  color: var(--au-ink-muted);
+}
+.tstm-count em {
+  font-style: normal;
+  font-weight: var(--au-weight-semibold);
+  color: var(--au-ink-heading);
+}
+
+/* ---- Roster (the swap list) --------------------------------------------- */
+/* The list's rows carry the divider as their own left edge; stacked, those
+   edges draw one continuous vertical rule, and the active row turns its edge
+   to the accent. So the column separator and the active marker are the same
+   1px — no box, no extra chrome. */
+.tstm-list { list-style: none; margin: 0; padding: 0; }
+.tstm-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--au-s-3);
+  padding: var(--au-s-4) var(--au-s-4);
+  background: none;
+  border: 0;
+  border-left: 2px solid var(--au-border);
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.58;
+  transition: opacity var(--au-dur-fast) var(--au-ease),
+              border-color var(--au-dur-fast) var(--au-ease),
+              background var(--au-dur-fast) var(--au-ease);
+}
+.tstm-list li + li .tstm-item { border-top: var(--au-hairline); }
+.tstm-item:hover,
+.tstm-item:focus-visible { opacity: 1; }
+.tstm-item.is-active {
+  opacity: 1;
+  border-left-color: var(--au-accent);
+  background: color-mix(in srgb, var(--au-accent) 6%, transparent);
+}
+
+@media (max-width: 900px) {
+  .tstm-stage { grid-template-columns: 1fr; gap: var(--au-s-6); }
+  .tstm-quote { min-height: 0; }
+  .tstm-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 var(--au-s-4);
+  }
+  .tstm-list li + li .tstm-item { border-top: var(--au-hairline); }
+  /* On the two-up roster, the first row of the right column has no row above
+     it, so drop its top border to keep the grid tidy. */
+  .tstm-list li:nth-child(2) .tstm-item { border-top: 0; }
+}
+@media (max-width: 560px) {
+  .tstm-mark { font-size: 76px; }
+  .tstm-list { grid-template-columns: 1fr; }
+  .tstm-list li:nth-child(2) .tstm-item { border-top: var(--au-hairline); }
+  .tstm-item { padding: var(--au-s-3) var(--au-s-4); }
+}
+
+/* ==========================================================================
+   Partner with ASAP — the homepage's closing CTA band, after the
+   testimonials. Built to a supplied reference: a dark ground ruled like
+   graph paper, a centred display headline, two routes, one reassurance line.
+
+   The graph-paper rule is two repeating hairline gradients at 4% white — a
+   texture, not a pattern: at full contrast it would read as a table waiting
+   for content. The radial mask pools the light behind the headline and lets
+   the grid dissolve toward the band's edges, which is what keeps the seams
+   with the plain dark bands above and below invisible.
+   ========================================================================== */
+.homecta { position: relative; }
+.homecta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 80% at 50% 45%, #000 30%, transparent 100%);
+          mask-image: radial-gradient(ellipse 70% 80% at 50% 45%, #000 30%, transparent 100%);
+  pointer-events: none;
+}
+.homecta-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.homecta-title {
+  font-size: var(--au-text-display);
+  letter-spacing: var(--au-tracking-display, normal);
+  line-height: var(--au-leading-display, 1.1);
+}
+/* The offer's object, set in light steel — the accent's dark-ground voice.
+   Steel Blue itself measures 2.38:1 on Midnight; mixed 55% toward white it
+   keeps the hue and clears the band's own headline contrast. */
+.homecta-accent {
+  color: color-mix(in srgb, var(--au-accent) 55%, #fff);
+}
+.homecta-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--au-s-4);
+  /* The section-head's own 54px bottom margin is the gap above this row. */
+  margin-top: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.homecta-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--au-s-2);
+  margin-top: var(--au-s-6);
+  font-size: var(--au-text-small);
+  color: var(--au-ink-inverse-muted);
+  text-wrap: balance;
+}
+.homecta-note svg { color: color-mix(in srgb, var(--au-accent) 55%, #fff); flex-shrink: 0; }
+
+/* ==========================================================================
+   RFQ reassurance rail — the compact steps and the full accreditation grid
+   (rfq/RfqForm.tsx). Replaces the generic full-width `.steps` primitive that
+   was squeezed in here: ink rules and h3-scale titles read as a template at
+   rail width. This is a quiet numbered list and a tile grid instead.
+   ========================================================================== */
+.rfq-steps { display: flex; flex-direction: column; }
+.rfq-steps > li {
+  display: flex;
+  gap: var(--au-s-3);
+  padding-block: var(--au-s-3);
+}
+.rfq-steps > li + li { border-top: var(--au-hairline); }
+.rfq-steps > li:first-child { padding-top: 0; }
+.rfq-step-num {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--au-radius-circle);
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--au-accent) 12%, var(--au-surface));
+  border: 1px solid color-mix(in srgb, var(--au-accent) 30%, var(--au-border));
+  color: var(--au-accent);
+  font-size: var(--au-text-caption);
+  font-weight: var(--au-weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+.rfq-steps h3 {
+  font-size: var(--au-text-small);
+  font-weight: var(--au-weight-medium);
+  color: var(--au-ink-heading);
+  /* Level with the numeral chip's centre. */
+  line-height: 24px;
+}
+.rfq-steps p {
+  margin-top: var(--au-s-1);
+  font-size: var(--au-text-caption);
+  color: var(--au-ink-muted);
+}
+
+.rfq-certs-title {
+  font-size: var(--au-text-caption);
+  font-weight: var(--au-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--au-ink-muted);
+  margin-bottom: var(--au-s-3);
+}
+/* Every mark, four to a row — monochrome at rest like the homepage marquee's
+   cards, full colour under the pointer. The tile, not the image, carries the
+   hover title. */
+.rfq-certs-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--au-s-2);
+}
+.rfq-certs-grid > li {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  padding: var(--au-s-2);
+  background: var(--au-surface);
+  border: var(--au-hairline);
+  border-radius: var(--au-radius-sm);
+  box-shadow: var(--au-inner-top);
+}
+.rfq-certs-grid img {
+  max-width: 100%;
+  max-height: 44px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  /* Full colour — these are real accreditation marks and keep their own
+     identity; greying them out read as "unverified". */
+}
+/* On phones the rail is full-width below the form; the tiles can afford to
+   sit five across. */
+@media (max-width: 900px) {
+  .rfq-certs-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .rfq-certs-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+
+/* ==========================================================================
+   /quality — Quality & certifications
+
+   The page is an auditor's evidence file, so most bands ride primitives that
+   already exist — .card, .grid, .spec-table, .check, .field, .notice,
+   .empty-state, .certs. This block is the page's own spacing plus the two
+   shapes those primitives did not cover: the ACCREDITATION REGISTER (the
+   signature band — the seven real standards as a mono-coded controlled
+   document) and the divided EXPORT CLAUSE REGISTER, which exists so a second
+   four-item band does not read as the counterfeit card grid repeated.
+   ========================================================================== */
+
+/* ---- The approval-file index: a compressed statement of record ---------- */
+.qindex-lead { color: var(--au-ink-muted); }
+.qindex-chips {
+  display: flex; flex-wrap: wrap; gap: var(--au-s-2);
+  margin-top: var(--au-s-3);
+}
+
+/* ---- 01 · The accreditation register — the signature band -------------- */
+
+/* The three PRIMARY accreditations: raised glass plates, each a small
+   controlled document. The mono code is the anchor a reviewer scans for. */
+.qreg-primary {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: var(--au-s-4);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.qreg-plate {
+  display: flex; flex-direction: column;
+  padding: var(--au-s-5);
+  background: var(--au-glass-fill-strong);
+  border: var(--au-hairline-glass);
+  border-radius: var(--au-radius-lg);
+  box-shadow: var(--au-inner-top), var(--au-shadow-md);
+}
+/* A hairline row carrying the code and its index, the way a document carries a
+   reference and a page number. */
+.qreg-plate-top {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--au-s-3);
+  padding-bottom: var(--au-s-3);
+  border-bottom: var(--au-hairline);
+}
+.qreg-code {
+  font-size: var(--au-text-h3);
+  letter-spacing: -0.01em;
+  color: var(--au-ink-heading);
+  font-variant-numeric: tabular-nums;
+}
+.qreg-idx { font-size: var(--au-text-caption); color: var(--au-ink-muted); }
+.qreg-scope {
+  margin-top: var(--au-s-3);
+  font-size: 11px; text-transform: uppercase; letter-spacing: var(--au-tracking-label);
+  color: var(--au-ink-muted);
+}
+.qreg-governs {
+  margin-top: var(--au-s-3);
+  font-size: var(--au-text-small); line-height: 1.5; color: var(--au-ink-body);
+}
+/* The evidence footer is what turns a plate into a controlled document: it
+   states what we will actually hand over, set off by its own hairline. */
+.qreg-evidence {
+  margin-top: var(--au-s-4); padding-top: var(--au-s-4);
+  border-top: var(--au-hairline);
+  font-size: var(--au-text-caption); line-height: 1.5; color: var(--au-ink-muted);
+}
+.qreg-evidence-k {
+  display: block;
+  font-weight: var(--au-weight-medium); color: var(--au-ink);
+  text-transform: uppercase; letter-spacing: 0.04em; font-size: 11px;
+  margin-bottom: var(--au-s-1);
+}
+
+/* The four ADDITIONAL standards: a flat register, deliberately quieter than the
+   raised plates above so the two tiers read as primary vs supporting. */
+.qreg-more { margin-top: var(--au-s-6); }
+.qreg-more-h { color: var(--au-ink-muted); }
+.qreg-add {
+  list-style: none; margin: var(--au-s-3) 0 0; padding: 0;
+  display: grid; gap: var(--au-s-3);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.qreg-add-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: var(--au-s-2); row-gap: var(--au-s-2);
+  padding: var(--au-s-4);
+  background: var(--au-surface);
+  border: var(--au-hairline);
+  border-radius: var(--au-radius-md);
+}
+.qreg-add-mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--au-accent-soft); color: var(--au-accent);
+}
+.qreg-add-mark svg { width: 13px; height: 13px; }
+.qreg-add-code {
+  font-size: var(--au-text-small); color: var(--au-ink-heading);
+  font-variant-numeric: tabular-nums;
+}
+.qreg-add-title {
+  grid-column: 1 / -1;
+  font-weight: var(--au-weight-medium); color: var(--au-ink);
+  font-size: var(--au-text-small);
+}
+.qreg-add-body {
+  grid-column: 1 / -1;
+  font-size: var(--au-text-caption); line-height: 1.5; color: var(--au-ink-muted);
+}
+.qreg-note { margin-top: var(--au-s-6); }
+
+/* ---- 02 · Certificate request ------------------------------------------ */
+.qcert-card { padding: var(--au-s-6); }
+.cert-docs { border: 0; margin: 0; padding: 0; }
+.cert-docs-legend {
+  padding: 0; margin-bottom: var(--au-s-3);
+  font-size: var(--au-text-small); font-weight: var(--au-weight-medium);
+  color: var(--au-ink);
+}
+.cert-docs-grid {
+  display: grid; gap: var(--au-s-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.cert-row { margin-top: var(--au-s-4); }
+.cert-notes { margin-top: var(--au-s-4); }
+.cert-submit {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--au-s-3);
+  margin-top: var(--au-s-5);
+}
+
+/* The in-place receipt, modelled on the contact page's enquiry confirmation. */
+.cert-done { text-align: center; padding: var(--au-s-5) 0; }
+.cert-done-mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--au-accent-soft); color: var(--au-accent);
+  margin-bottom: var(--au-s-4);
+}
+.cert-done-mark svg { width: 26px; height: 26px; }
+.cert-done h3 { font-size: var(--au-text-h3); letter-spacing: var(--au-tracking-h3); }
+.cert-done p {
+  margin: var(--au-s-3) auto 0; max-width: 56ch;
+  color: var(--au-ink-body); line-height: 1.6;
+}
+.cert-done .btn { margin-top: var(--au-s-5); }
+
+/* ---- 03 · Traceability — the spec-table sits inside a padded card ------- */
+.qtrace-card { padding: var(--au-s-2) var(--au-s-6); }
+.qtrace-foot { display: block; margin-top: var(--au-s-4); max-width: 72ch; }
+
+/* ---- 04 · Counterfeit — a four-card grid ------------------------------- */
+.qcf-card h3 { font-size: var(--au-text-h4); }
+
+/* ---- 05 · Receiving inspection — the one sequential band --------------- */
+.qinsp-steps {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: var(--au-s-5);
+  position: relative;
+}
+/* The spine that threads the numerals. Static and always drawn — motion-safe:
+   the entrance staggers the steps but never gates the connector on a script. */
+.qinsp-steps::before {
+  content: ""; position: absolute; top: 18px; bottom: 18px;
+  left: 17px; width: 1px; background: var(--au-border);
+}
+.qinsp-step {
+  display: grid; grid-template-columns: 36px 1fr; gap: var(--au-s-4);
+  align-items: start; position: relative;
+}
+.qinsp-n {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--au-surface); border: 1px solid var(--au-border-strong);
+  box-shadow: var(--au-shadow-sm);
+  font-size: var(--au-text-caption); color: var(--au-ink-heading);
+  font-variant-numeric: tabular-nums;
+}
+.qinsp-body { padding-top: var(--au-s-1); }
+.qinsp-body h3 { font-size: var(--au-text-h4); }
+.qinsp-body p {
+  margin-top: var(--au-s-2);
+  font-size: var(--au-text-small); line-height: 1.6; color: var(--au-ink-body);
+  max-width: 72ch;
+}
+
+/* ---- 06 · Export compliance — a divided clause register ---------------- */
+.qexp-reg { margin: 0; }
+.qexp-row {
+  display: grid; grid-template-columns: minmax(0, 22ch) 1fr; gap: var(--au-s-5);
+  padding: var(--au-s-5) 0; border-top: var(--au-hairline);
+}
+.qexp-row:last-child { border-bottom: var(--au-hairline); }
+.qexp-k {
+  display: flex; align-items: baseline; gap: var(--au-s-2);
+  font-size: var(--au-text-h4); letter-spacing: -0.01em; color: var(--au-ink-heading);
+}
+.qexp-n { font-size: var(--au-text-caption); color: var(--au-ink-muted); }
+.qexp-v {
+  margin: 0; font-size: var(--au-text-small); line-height: 1.6;
+  color: var(--au-ink-body); max-width: 72ch;
+}
+
+/* ---- 07 · Quality contacts --------------------------------------------- */
+.qcon-card { display: flex; flex-direction: column; }
+.qcon-card h3 { display: flex; align-items: center; gap: var(--au-s-2); font-size: var(--au-text-h4); }
+.qcon-val { margin-top: var(--au-s-4); }
+.qcon-val a { font-family: var(--au-font-mono); font-size: var(--au-text-small); }
+.qcon-sla { margin-top: var(--au-s-2); color: var(--au-ink-muted); }
+/* The urgent desk carries a warm status dot — the one place stock semantics
+   apply here, because "call, do not wait" is a state, not a preference. */
+.qcon-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--au-stock-out); flex: none;
+}
+.qcon-foot { display: block; margin-top: var(--au-s-5); }
+
+/* ---- Closing — the page's one accent panel ----------------------------- */
+.qclose-search { max-width: 640px; margin: var(--au-s-6) auto 0; }
+
+/* ---- Responsive -------------------------------------------------------- */
+@media (max-width: 900px) {
+  .qreg-primary { grid-template-columns: 1fr; }
+  .qreg-add { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cert-docs-grid { grid-template-columns: 1fr; }
+  .qexp-row { grid-template-columns: 1fr; gap: var(--au-s-2); }
+}
+@media (max-width: 560px) {
+  .qreg-add { grid-template-columns: 1fr; }
+  .qcert-card { padding: var(--au-s-4); }
+  .qtrace-card { padding: var(--au-s-2) var(--au-s-4); }
+}
+
+
+/* ==========================================================================
+   Resource data tables — the four "Other Resource" pages' listings
+   (GSE tooling, PMA parts, PMA supplements). One shape: a real multi-column
+   table with a header row. `.spec-table` could not be reused because its `th`
+   is a fixed 220px row-label; here the `th` are column headers.
+
+   Wrapped in `.restable-wrap` so a wide table scrolls inside its own box on
+   narrow screens rather than pushing the page body sideways.
+   ========================================================================== */
+.restable-wrap { overflow-x: auto; margin-top: var(--au-s-5); }
+.restable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--au-text-small);
+  min-width: 560px;
+}
+.restable th,
+.restable td {
+  text-align: left;
+  padding: var(--au-s-3) var(--au-s-4) var(--au-s-3) 0;
+  border-bottom: var(--au-hairline);
+  vertical-align: top;
+}
+.restable thead th {
+  font-family: var(--au-font-sans);
+  font-weight: var(--au-weight-regular);
+  font-size: var(--au-text-label);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--au-ink-muted);
+  white-space: nowrap;
+}
+.restable td { color: var(--au-ink-body); }
+.restable td.mono {
+  font-family: var(--au-font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--au-ink);
+  white-space: nowrap;
+}
+.restable tbody tr:hover { background: var(--au-surface-subtle, rgba(0, 0, 0, 0.02)); }
+.restable .restable-rfq { text-align: right; white-space: nowrap; }
+.restable-note { margin-top: var(--au-s-4); font-size: var(--au-text-caption); color: var(--au-ink-muted); }
+
+/* The certificate checklist is neutral document selection, not urgency. The
+   shared .check primitive is hard-wired to --au-stock-out (its only other use is
+   the RFQ form's AOG flag, where red is the right signal); here eight red boxes
+   read as errors and break the cool-only palette. Remap them to the accent. */
+.cert-docs .check {
+  border-color: var(--au-border);
+  background: var(--au-surface);
+}
+.cert-docs .check:hover {
+  border-color: color-mix(in srgb, var(--au-accent) 45%, var(--au-border));
+  background: var(--au-tint-hover);
+}
+.cert-docs .check:has(input:checked) {
+  border-color: var(--au-accent);
+  background: var(--au-accent-soft);
+}
+.cert-docs .check input { accent-color: var(--au-accent); }
+/* A quiet neutral bullet, not the red status dot the AOG flag needs. */
+.cert-docs .check .t::before { background: var(--au-border-strong); }
+.cert-docs-error {
+  margin: 0 0 var(--au-s-3);
+  font-size: var(--au-text-caption); color: var(--au-stock-out);
+}
+
+/* ==========================================================================
+   /quality — the masthead (.qhero)
+
+   NOT PageMast. A light, asymmetric, photograph-free hero on Warm Paper: the
+   claim on the left, a stamped COMPLIANCE RECORD panel on the right. Light
+   ground is the whole point — it reads as a document, not the homepage's dark
+   full-bleed hero. See au-imast-band / the contact page's .chero for the same
+   move made once before.
+   ========================================================================== */
+.qhero {
+  position: relative;
+  overflow: hidden;
+  padding-block: clamp(32px, 5vw, 64px) clamp(56px, 8vw, 104px);
+  border-bottom: var(--au-hairline);
+}
+/* A faint blueprint lattice in the top-right — texture without a subject, the
+   drawn-line motif the About numbers band and the contact hero already own. */
+.qhero-grid {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(var(--au-border-quiet) 1px, transparent 1px),
+    linear-gradient(90deg, var(--au-border-quiet) 1px, transparent 1px);
+  background-size: 34px 34px;
+  opacity: 0.55;
+  -webkit-mask-image: radial-gradient(125% 105% at 100% 0%, #000 0%, transparent 56%);
+  mask-image: radial-gradient(125% 105% at 100% 0%, #000 0%, transparent 56%);
+}
+.qhero .u-page { position: relative; z-index: 1; }
+
+.qhero-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.86fr);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+  margin-top: var(--au-s-6);
+}
+.qhero-head { max-width: 40ch; }
+.qhero-title {
+  font-size: clamp(2.25rem, 4.2vw, 3.25rem);
+  font-weight: var(--au-weight-medium);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: var(--au-ink-heading);
+}
+/* Emphasis by colour, not a gradient — the one steel-blue phrase gives the
+   headline a point of view without spending the page's accent band. */
+.qhero-title-accent { color: var(--au-accent); }
+.qhero-lede {
+  margin-top: var(--au-s-4);
+  max-width: 52ch;
+  font-size: var(--au-text-body);
+  line-height: 1.6;
+  color: var(--au-ink-body);
+}
+.qhero-cta {
+  margin-top: var(--au-s-5);
+  display: flex; flex-wrap: wrap; gap: var(--au-s-3); align-items: center;
+}
+.qhero-note {
+  margin-top: var(--au-s-4);
+  font-size: var(--au-text-caption); color: var(--au-ink-muted);
+}
+
+/* The credential panel — the hero's thesis object. */
+.qhero-record {
+  position: relative;
+  padding: var(--au-s-5);
+  background: var(--au-glass-fill-strong);
+  border: var(--au-hairline-glass);
+  border-radius: var(--au-radius-lg);
+  box-shadow: var(--au-inner-top), var(--au-shadow-lg);
+}
+.qhero-record-head {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--au-s-3);
+  padding-bottom: var(--au-s-4);
+  border-bottom: var(--au-hairline);
+  margin-bottom: var(--au-s-4);
+}
+.qhero-record-eyebrow {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--au-ink-muted);
+}
+.qhero-seal {
+  flex: none; width: 46px; height: 46px;
+  color: color-mix(in srgb, var(--au-accent) 78%, var(--au-ink-muted));
+}
+.qhero-seal svg { width: 100%; height: 100%; }
+
+.qhero-marks { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--au-s-3); }
+.qhero-mark {
+  display: grid; grid-template-columns: 20px 1fr auto; align-items: center;
+  gap: var(--au-s-3);
+}
+.qhero-mark-tick {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--au-accent-soft); color: var(--au-accent);
+}
+.qhero-mark-tick svg { width: 12px; height: 12px; }
+.qhero-mark-code {
+  font-size: var(--au-text-small); color: var(--au-ink-heading);
+  font-variant-numeric: tabular-nums;
+}
+.qhero-mark-scope {
+  font-size: var(--au-text-caption); color: var(--au-ink-muted);
+  text-align: right; white-space: nowrap;
+}
+.qhero-record-more {
+  margin-top: var(--au-s-4); padding-top: var(--au-s-4);
+  border-top: var(--au-hairline);
+  font-size: var(--au-text-caption); line-height: 1.6; color: var(--au-ink-muted);
+}
+.qhero-record-foot {
+  margin-top: var(--au-s-3);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--au-s-3);
+  font-size: var(--au-text-caption);
+}
+.qhero-record-foot-k { color: var(--au-ink-muted); }
+
+@media (max-width: 900px) {
+  .qhero-top { grid-template-columns: 1fr; gap: var(--au-s-6); align-items: stretch; }
+  .qhero-head { max-width: none; }
+  .qhero-record { order: 2; }
+}
+@media (max-width: 420px) {
+  .qhero-mark { grid-template-columns: 20px 1fr; }
+  .qhero-mark-scope { grid-column: 2; text-align: left; white-space: normal; }
+}
+
+
+/* ==========================================================================
+   Legacy lookup & resource pages — the FSC / NIIN / NSN / Part-Type / CAGE
+   catalogs and the Other-Resource pages, rebuilt to the live site's own
+   structure.
+
+   These pages carry the live site's copy verbatim, so the primitives here are
+   deliberately restrained: divided editorial rows over boxed cards (a 1px rule
+   groups the "support" bullets and the how-to steps, so a page of three claims
+   never reads as three stamped tiles), a mono chip wall for the identifier
+   walls, and two hairline-ruled link columns for the salvage lists. Everything
+   reuses the existing tokens, so the pages stay in the site's material world.
+   ========================================================================== */
+
+/* THE HOW-TO STEPS — the /fscs "How to use the FSG/FSC catalog" block. A
+   numbered, hairline-divided list; the numeral is mono and quiet so it counts
+   without shouting. */
+.steps { list-style: none; margin-top: var(--au-s-2); border-top: var(--au-hairline-quiet); }
+.step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: clamp(var(--au-s-4), 3vw, var(--au-s-6));
+  align-items: start;
+  padding-block: clamp(var(--au-s-5), 3vw, var(--au-s-6));
+  border-bottom: var(--au-hairline-quiet);
+}
+.step-n {
+  font-family: var(--au-font-mono);
+  font-size: var(--au-text-h3);
+  line-height: 1;
+  color: var(--au-ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+.step-b { font-size: var(--au-text-body); font-weight: var(--au-weight-medium); color: var(--au-ink); }
+.step-t { margin-top: var(--au-s-2); color: var(--au-ink-muted); max-width: 68ch; }
+
+/* THE LOOKUP ROW VARIANT — the base .idxrow grid is [name 1fr][code 6ch]
+   [count 8ch], tuned for the manufacturer/aircraft indexes where the name leads.
+   The FSC and NSN lookups lead with the CODE and follow with a natural-language
+   name (FSC) or the unformatted number (NSN), so they need [code auto][name 1fr]
+   [→ auto] — otherwise the class name is crushed into the 6ch code track and
+   wraps one word per line. */
+.idxlist.look .idxrow { grid-template-columns: auto minmax(0, 1fr) auto; }
+.idxlist.look .idxrow-cage { white-space: nowrap; }
+
+/* THE SUPPORT DEFINITION LIST — the "…Sourcing and Quality Assurance" three-up
+   blocks on NSN, Part Types, CAGE, GSE, PMA Supplements and PMA Parts. Rendered
+   as a definition list (term left, prose right) divided by hairlines, NOT as
+   three boxed feature cards — three identical tiles is the AI-slop tell the
+   design pass is built to avoid. */
+/* A full-width grid of "spec" cards — each def is a card, so three items fill
+   the measure instead of stacking as narrow left-aligned rows with a wide empty
+   gutter on the right. auto-fit collapses to fewer columns, then one, as space
+   tightens. */
+.deflist {
+  margin-top: var(--au-s-5);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  gap: clamp(var(--au-s-4), 2.5vw, var(--au-s-5));
+}
+.def {
+  display: flex; flex-direction: column;
+  padding: clamp(var(--au-s-5), 3vw, var(--au-s-6));
+  background: var(--au-surface);
+  border: var(--au-hairline);
+  border-radius: var(--au-radius-md);
+  box-shadow: var(--au-raised);
+}
+.def dt { font-size: var(--au-text-body); font-weight: var(--au-weight-medium); color: var(--au-ink); margin-bottom: var(--au-s-3); }
+.def dd { margin: 0; color: var(--au-ink-muted); max-width: none; }
+@media (max-width: 720px) {
+  .def { padding: clamp(var(--au-s-4), 5vw, var(--au-s-5)); }
+}
+
+/* THE NIIN PROSE CARD + TICK LIST — the "Reliable NIIN Parts Sourcing" needs
+   list. A single quiet surface, ticks in the accent. */
+.cx-split > .prosecard { margin-top: 0; max-width: none; }
+.prosecard {
+  margin-top: var(--au-s-5);
+  max-width: 72ch;
+  padding: clamp(var(--au-s-5), 4vw, var(--au-s-6));
+  background: var(--au-surface);
+  border: var(--au-hairline);
+  border-radius: var(--au-radius-md);
+  box-shadow: var(--au-raised);
+}
+.ticklist { list-style: none; display: grid; gap: var(--au-s-2); margin: var(--au-s-4) 0; }
+.ticklist li { position: relative; padding-left: 1.6em; color: var(--au-ink-body); }
+.ticklist li::before {
+  content: "";
+  position: absolute; left: 0; top: 0.5em;
+  width: 0.55em; height: 0.3em;
+  border-left: 2px solid var(--au-accent);
+  border-bottom: 2px solid var(--au-accent);
+  transform: rotate(-45deg);
+}
+
+/* THE IDENTIFIER WALLS — the NIIN and CAGE code lists, rendered as a wrapping
+   wall of mono chips exactly as the live pages present them (the code alone). */
+.codewall { list-style: none; display: flex; flex-wrap: wrap; gap: var(--au-s-2); margin-top: var(--au-s-4); }
+.codechip {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 11ch;
+  padding: var(--au-s-2) var(--au-s-3);
+  border: var(--au-hairline);
+  border-radius: var(--au-radius-sm);
+  background: var(--au-surface);
+  color: var(--au-ink);
+  font-size: var(--au-text-caption);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  transition: border-color var(--au-dur-fast) var(--au-ease),
+              color var(--au-dur-fast) var(--au-ease),
+              box-shadow var(--au-dur-fast) var(--au-ease),
+              background var(--au-dur-fast) var(--au-ease);
+}
+.codechip:hover {
+  border-color: var(--au-border-strong);
+  color: var(--au-link);
+  background: var(--au-tint-hover);
+  box-shadow: var(--au-raised);
+}
+
+/* THE SALVAGE TWIN LISTS — "Top Commercial Aircraft Manufacturers" and "Top
+   Part Categories", two hairline-ruled link columns with a View All action. */
+.twinlist {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(var(--au-s-6), 5vw, var(--au-s-8));
+}
+@media (max-width: 760px) { .twinlist { grid-template-columns: 1fr; } }
+.twincol-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--au-s-3);
+  padding-bottom: var(--au-s-3);
+  border-bottom: var(--au-hairline);
+}
+.twincol-head h2 {
+  font-size: var(--au-text-h3);
+  line-height: var(--au-leading-tight);
+  letter-spacing: var(--au-tracking-h3);
+}
+.linklist { list-style: none; margin-top: var(--au-s-2); }
+.linklist li { border-bottom: var(--au-hairline-quiet); }
+.linklist a {
+  display: block;
+  padding-block: var(--au-s-3);
+  color: var(--au-ink);
+  text-decoration: none;
+  transition: color var(--au-dur-fast) var(--au-ease), padding-left var(--au-dur-fast) var(--au-ease);
+}
+.linklist a:hover { color: var(--au-link); padding-left: var(--au-s-2); }
+
+
+/* ==========================================================================
+   Legacy inner / detail pages — /fscs/<code>, /part/<pn> (NSN), /niin/<niin>,
+   /cage-codes/<code>, /part-types/<slug>, /manufacturers/<cage>.
+
+   The live site's detail pages are single-column documents: a plain heading, a
+   run of prose, then hairline-headed sections (a manufacturer link grid, a part
+   table, a spec block, an FAQ). These primitives reproduce that shape on the
+   site's own tokens, reusing .restable / .spec-table / .deflist / .codewall /
+   .twinlist for the tables, blocks and lists. See au-legacy-faithful-lookups.
+   ========================================================================== */
+.dmast { margin-top: var(--au-s-5); max-width: 62ch; }
+.dmast-title {
+  margin-top: var(--au-s-3);
+  font-size: clamp(1.6rem, 1.1rem + 2.4vw, 2.4rem);
+  line-height: var(--au-leading-tight);
+  letter-spacing: var(--au-tracking-h2);
+  color: var(--au-ink-heading);
+}
+
+.dprose { max-width: 74ch; margin-top: var(--au-s-5); }
+.dprose > p { margin-top: var(--au-s-4); color: var(--au-ink-body); }
+.dprose > p:first-child { margin-top: 0; }
+.dprose .ticklist { margin-block: var(--au-s-4); }
+.dprose-cta { display: flex; flex-wrap: wrap; gap: var(--au-s-3); margin-top: var(--au-s-6); align-items: center; }
+
+.dsection { margin-top: clamp(var(--au-s-7), 5vw, var(--au-s-8)); }
+.dsection-h {
+  padding-bottom: var(--au-s-3);
+  margin-bottom: var(--au-s-5);
+  border-bottom: var(--au-hairline);
+  font-size: var(--au-text-h3);
+  line-height: var(--au-leading-tight);
+  letter-spacing: var(--au-tracking-h3);
+  color: var(--au-ink-heading);
+}
+
+/* THE MANUFACTURER'S LIST — a divided grid of maker links that wraps into as
+   many columns as the measure allows, echoing the live page's link table. */
+.mfrgrid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  border-top: var(--au-hairline-quiet);
+}
+.mfrgrid li { border-bottom: var(--au-hairline-quiet); }
+.mfrgrid a {
+  display: block;
+  padding: var(--au-s-3) var(--au-s-3) var(--au-s-3) 0;
+  color: var(--au-link);
+  text-decoration: none;
+  transition: color var(--au-dur-fast) var(--au-ease), background var(--au-dur-fast) var(--au-ease);
+}
+.mfrgrid a:hover { color: var(--au-link-hover); background: var(--au-tint-hover); }
+
+/* THE FAQ — question in ink, answer in muted prose, hairline-divided. */
+.faqlist { margin-top: var(--au-s-2); border-top: var(--au-hairline-quiet); }
+.faq { padding-block: clamp(var(--au-s-4), 3vw, var(--au-s-5)); border-bottom: var(--au-hairline-quiet); }
+.faq dt { font-size: var(--au-text-body); font-weight: var(--au-weight-medium); color: var(--au-ink); }
+.faq dd { margin: var(--au-s-2) 0 0; color: var(--au-ink-muted); max-width: 82ch; }
+
+/* Detail part tables link the identifier cells; keep those links quiet until hover. */
+.restable td.mono a { color: var(--au-link); text-decoration: none; }
+.restable td.mono a:hover { color: var(--au-link-hover); }
+
+
+/* ==========================================================================
+   /fscs — bespoke UI ("The Register")
+
+   The catalog carries the live site's copy and structure, but its UI is the
+   site's own technical language turned up: a blueprint-lattice hero split
+   asymmetrically against a class-decoder plate, an engineered three-step
+   process ruled by a single heavy line, and a two-column register — a sticky
+   FSG jump-rail beside groups indexed by a large mono FSG glyph. No boxed
+   feature cards; grouping is done with rules, the mono index and negative
+   space. Built entirely on existing tokens + the site's lattice device.
+   ========================================================================== */
+
+/* ── The premium catalog hero (.cx-*) — photographic Midnight band with a dark
+   glass decoder plate. Shared vocabulary for the lookup pages' heroes. ── */
+.cx-hero {
+  position: relative; isolation: isolate; overflow: hidden;
+  background: var(--au-midnight);
+  padding-block: clamp(var(--au-s-7), 7vw, calc(var(--au-s-9, 96px)));
+  padding-top: clamp(var(--au-s-8), 9vw, 132px);
+}
+.cx-hero-media {
+  position: absolute; inset: 0; z-index: -2;
+  width: 100%; height: 100%; object-fit: cover; object-position: 50% 42%;
+}
+.cx-hero-scrim {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    linear-gradient(94deg, rgba(11, 13, 18, 0.94) 0%, rgba(11, 13, 18, 0.82) 34%, rgba(11, 13, 18, 0.42) 66%, rgba(11, 13, 18, 0.30) 100%),
+    linear-gradient(0deg, rgba(11, 13, 18, 0.72) 0%, transparent 42%);
+}
+.cx-hero-grid {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 46px 46px, 46px 46px;
+  -webkit-mask-image: radial-gradient(80% 84% at 92% 8%, #000 0%, transparent 62%);
+  mask-image: radial-gradient(80% 84% at 92% 8%, #000 0%, transparent 62%);
+}
+.cx-hero-inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.9fr);
+  gap: clamp(var(--au-s-6), 5vw, var(--au-s-8));
+  align-items: center;
+}
+.cx-hero-lead { max-width: 60ch; }
+.cx-crumbs { margin-bottom: var(--au-s-5); }
+.cx-crumbs, .cx-crumbs a { color: rgba(255, 255, 255, 0.66); }
+.cx-crumbs a:hover { color: #fff; }
+.cx-eyebrow { color: var(--au-wash); }
+.cx-eyebrow::before { background: var(--au-wash); opacity: 0.6; }
+.cx-title {
+  margin-top: var(--au-s-4);
+  font-size: clamp(2.2rem, 1.2rem + 4vw, 3.7rem);
+  line-height: 1.02; letter-spacing: -0.022em;
+  color: #fff; text-wrap: balance;
+}
+.cx-title span { display: block; color: rgba(255, 255, 255, 0.62); font-weight: var(--au-weight-regular); }
+.cx-lede { margin-top: var(--au-s-5); max-width: 56ch; color: rgba(255, 255, 255, 0.82); }
+.cx-cta { display: flex; flex-wrap: wrap; gap: var(--au-s-3); margin-top: var(--au-s-6); }
+
+/* A ghost button that reads on a dark photographic ground. */
+.btn-ghost-light {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #fff;
+  backdrop-filter: var(--au-glass-blur-sm);
+  -webkit-backdrop-filter: var(--au-glass-blur-sm);
+}
+.btn-ghost-light:hover:not(:disabled) { background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.55); }
+
+/* The decoder plate — dark glass, the homepage instant-quote panel's material. */
+.cx-glass {
+  position: relative;
+  background: var(--au-glass-fill-dark);
+  border: 1px solid var(--au-glass-border-dark);
+  border-radius: var(--au-radius-lg, 20px);
+  box-shadow: var(--au-shadow-xl), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: var(--au-glass-blur);
+  -webkit-backdrop-filter: var(--au-glass-blur);
+  padding: clamp(var(--au-s-5), 3vw, var(--au-s-6));
+}
+.cx-glass-k {
+  font-size: var(--au-text-eyebrow); letter-spacing: var(--au-tracking-label);
+  text-transform: uppercase; color: rgba(255, 255, 255, 0.6); font-weight: var(--au-weight-semibold);
+}
+.cx-glass-code {
+  margin-top: var(--au-s-3);
+  font-size: clamp(3rem, 2.2rem + 4.5vw, 4.4rem);
+  line-height: 1; letter-spacing: 0.03em; color: rgba(255, 255, 255, 0.92);
+}
+.cx-glass-code b { color: var(--au-wash); font-weight: inherit; }
+.cx-glass-rows { margin-top: var(--au-s-5); display: grid; gap: 0; }
+.cx-glass-rows > div {
+  display: grid; grid-template-columns: minmax(0, auto) 1fr; gap: var(--au-s-3); align-items: baseline;
+  padding-block: var(--au-s-3); border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+.cx-glass-rows dt { color: var(--au-wash); font-size: var(--au-text-caption); white-space: nowrap; }
+.cx-glass-rows dd { margin: 0; color: rgba(255, 255, 255, 0.82); font-size: var(--au-text-small); }
+.cx-glass-note { margin-top: var(--au-s-4); font-size: var(--au-text-caption); color: rgba(255, 255, 255, 0.55); }
+
+/* The record strip along the hero foot — hairline-divided figures on the photo. */
+.cx-record {
+  position: relative;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: clamp(var(--au-s-6), 5vw, var(--au-s-8));
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+.cx-record > div { padding: var(--au-s-4) var(--au-s-4) 0 0; border-right: 1px solid rgba(255, 255, 255, 0.1); }
+.cx-record > div:last-child { border-right: 0; }
+.cx-record dt { font-size: clamp(1.4rem, 1rem + 1.6vw, 2rem); color: #fff; line-height: 1; }
+.cx-record dd { margin: var(--au-s-2) 0 0; font-size: var(--au-text-caption); color: rgba(255, 255, 255, 0.6); text-transform: uppercase; letter-spacing: var(--au-tracking-label); }
+
+@media (max-width: 900px) {
+  .cx-hero-inner { grid-template-columns: 1fr; align-items: start; }
+  .cx-glass { max-width: 480px; }
+}
+@media (max-width: 560px) {
+  .cx-record { grid-template-columns: 1fr 1fr; }
+  .cx-record > div:nth-child(2) { border-right: 0; }
+}
+
+/* The three-step process — one heavy rule, mono numerals, no boxes. */
+.fscx-steps {
+  list-style: none; margin-top: var(--au-s-6);
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 2px solid var(--au-ink-heading);
+}
+.fscx-step { padding: var(--au-s-5) var(--au-s-5) var(--au-s-5) 0; }
+.fscx-step + .fscx-step { padding-left: var(--au-s-5); border-left: var(--au-hairline-quiet); }
+.fscx-step-n { display: block; font-size: var(--au-text-h3); color: var(--au-accent); line-height: 1; }
+.fscx-step-b { margin-top: var(--au-s-4); font-size: var(--au-text-body); font-weight: var(--au-weight-medium); color: var(--au-ink); }
+.fscx-step-t { margin-top: var(--au-s-2); color: var(--au-ink-muted); font-size: var(--au-text-small); max-width: 42ch; }
+
+/* The register — sticky FSG rail beside indexed groups. */
+/* The class filter — a keyword field + count above the register (IndexFilter). */
+.fscx-filterbar { display: flex; align-items: center; gap: var(--au-s-4); flex-wrap: wrap; margin-bottom: clamp(var(--au-s-5), 3vw, var(--au-s-6)); }
+.fscx-filterfield { flex: 1 1 20rem; max-width: 30rem; }
+/* A supply group with nothing matching the filter drops its rail key out of play. */
+.fscx-railkey[data-empty] { opacity: 0.3; pointer-events: none; }
+
+.fscx-reg { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(var(--au-s-5), 4vw, var(--au-s-8)); margin-top: var(--au-s-6); }
+.fscx-rail { position: sticky; top: 100px; align-self: start; display: flex; flex-direction: column; gap: 2px; }
+.fscx-railkey {
+  display: flex; align-items: center; justify-content: center;
+  min-width: 3.4ch; padding: var(--au-s-2);
+  font-size: var(--au-text-caption); color: var(--au-ink-muted);
+  border-left: 2px solid transparent; text-decoration: none;
+  transition: color var(--au-dur-fast) var(--au-ease), border-color var(--au-dur-fast) var(--au-ease), background var(--au-dur-fast) var(--au-ease);
+}
+.fscx-railkey:hover { color: var(--au-accent); border-left-color: var(--au-accent); background: var(--au-tint-hover); }
+
+.fscx-groups { display: grid; gap: clamp(var(--au-s-5), 3vw, var(--au-s-6)); }
+/* Each group is an elevated "spec sheet" panel — depth instead of a flat list.
+   The FSG number is carried once, by the accent badge in the header. */
+.fscx-group {
+  position: relative;
+  scroll-margin-top: 116px;
+  padding: clamp(var(--au-s-5), 3vw, var(--au-s-6));
+  background: var(--au-surface);
+  border: var(--au-hairline);
+  border-radius: var(--au-radius-md);
+  box-shadow: var(--au-raised);
+}
+.fscx-grouphead {
+  position: relative; z-index: 1;
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--au-s-4);
+  padding-bottom: var(--au-s-4); border-bottom: 2px solid var(--au-ink-heading);
+}
+.fscx-fsg {
+  display: flex; align-items: center; justify-content: center;
+  min-width: 2.4em; padding: 0.24em 0.3em;
+  font-size: clamp(1.4rem, 1rem + 1.8vw, 2.1rem); line-height: 1;
+  color: var(--au-accent-ink); background: var(--au-accent);
+  border-radius: var(--au-radius-sm);
+  box-shadow: var(--au-raised);
+}
+.fscx-groupmeta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fscx-grouplabel { font-size: var(--au-text-caption); color: var(--au-accent); }
+.fscx-groupname { font-size: var(--au-text-h3); color: var(--au-ink-heading); letter-spacing: var(--au-tracking-h3); line-height: var(--au-leading-tight); }
+.fscx-groupn { font-size: var(--au-text-caption); color: var(--au-ink-muted); white-space: nowrap; }
+
+.fscx-classes {
+  position: relative; z-index: 1;
+  list-style: none; margin-top: var(--au-s-4);
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
+  gap: 0 clamp(var(--au-s-5), 3vw, var(--au-s-6));
+}
+.fscx-class {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: baseline; gap: var(--au-s-3);
+  padding: var(--au-s-3) var(--au-s-3) var(--au-s-3) var(--au-s-4);
+  border-bottom: var(--au-hairline-quiet);
+  border-left: 2px solid transparent;
+  text-decoration: none;
+  transition: background var(--au-dur-fast) var(--au-ease), border-color var(--au-dur-fast) var(--au-ease);
+}
+.fscx-class:hover { background: var(--au-tint-hover); border-left-color: var(--au-accent); }
+.fscx-code { font-size: var(--au-text-caption); color: var(--au-ink-muted); white-space: nowrap; }
+.fscx-name { color: var(--au-ink); font-size: var(--au-text-body); }
+.fscx-class:hover .fscx-name { color: var(--au-link); }
+.fscx-go { color: var(--au-ink-muted); opacity: 0; transform: translateX(-4px); transition: transform var(--au-dur-fast) var(--au-ease), opacity var(--au-dur-fast) var(--au-ease); }
+.fscx-class:hover .fscx-go { opacity: 1; transform: none; color: var(--au-accent); }
+
+@media (max-width: 900px) {
+  .fscx-hero-inner { grid-template-columns: 1fr; align-items: start; }
+  .fscx-plate { max-width: 460px; }
+  .fscx-steps { grid-template-columns: 1fr; }
+  .fscx-step { padding: var(--au-s-5) 0; }
+  .fscx-step + .fscx-step { padding-left: 0; border-left: 0; border-top: var(--au-hairline-quiet); }
+  .fscx-reg { grid-template-columns: 1fr; }
+  .fscx-rail { position: static; flex-direction: row; flex-wrap: wrap; gap: var(--au-s-2); border-bottom: var(--au-hairline); padding-bottom: var(--au-s-4); }
+  .fscx-railkey { border-left: 0; border-bottom: 2px solid transparent; }
+  .fscx-railkey:hover { border-left: 0; border-bottom-color: var(--au-accent); }
+}
+@media (max-width: 560px) {
+  .fscx-stats { grid-template-columns: 1fr 1fr; }
+  .fscx-stats > div:nth-child(2) { border-right: 0; }
+  .fscx-classes { grid-template-columns: 1fr; }
+}
+
+/* ── Premium catalog detail pieces (.cx-split / .cx-note / .cx-table) ── */
+.cx-split { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: clamp(var(--au-s-6), 5vw, var(--au-s-8)); align-items: start; }
+@media (max-width: 860px) { .cx-split { grid-template-columns: 1fr; } }
+.cx-note {
+  background: var(--au-surface-alt);
+  border: var(--au-hairline); border-left: 3px solid var(--au-accent);
+  border-radius: var(--au-radius-md);
+  padding: clamp(var(--au-s-5), 3vw, var(--au-s-6));
+}
+.cx-note p { color: var(--au-ink-body); font-size: var(--au-text-small); }
+.cx-note p + p { margin-top: var(--au-s-4); }
+
+.cx-tablewrap {
+  margin-top: var(--au-s-5);
+  background: var(--au-surface);
+  border: var(--au-hairline);
+  border-radius: var(--au-radius-md);
+  box-shadow: var(--au-raised);
+  overflow-x: auto;
+}
+.cx-table { width: 100%; min-width: 620px; border-collapse: collapse; }
+.cx-table thead th {
+  background: var(--au-midnight); color: rgba(255, 255, 255, 0.9);
+  text-align: left; padding: var(--au-s-3) var(--au-s-4);
+  font-size: var(--au-text-caption); font-weight: var(--au-weight-semibold);
+  text-transform: uppercase; letter-spacing: var(--au-tracking-label); white-space: nowrap;
+}
+.cx-table tbody td {
+  padding: var(--au-s-3) var(--au-s-4); border-top: var(--au-hairline-quiet);
+  color: var(--au-ink-body); font-size: var(--au-text-small); vertical-align: middle;
+}
+.cx-table tbody tr:hover { background: var(--au-tint-hover); }
+.cx-table td.mono, .cx-table th.mono { font-family: var(--au-font-mono); font-variant-numeric: tabular-nums; }
+.cx-table td.mono a { color: var(--au-link); text-decoration: none; }
+.cx-table td.mono a:hover { color: var(--au-link-hover); text-decoration: underline; }
+.cx-avl { color: var(--au-ink-muted); }
+.cx-table .cx-rfq { text-align: right; white-space: nowrap; }

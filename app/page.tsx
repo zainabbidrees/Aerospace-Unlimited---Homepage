@@ -1,21 +1,26 @@
 import Link from "next/link";
-import { CATEGORIES, MANUFACTURERS, RESOURCES } from "@/lib/data";
+import { CATEGORIES, MANUFACTURERS, PARTS, RESOURCES } from "@/lib/data";
 import { num } from "@/lib/format";
 import { CategoryScroller } from "@/components/home/CategoryScroller";
 import { CertMarquee } from "@/components/home/CertMarquee";
-import { HeroParallax } from "@/components/home/HeroParallax";
-import { HeroSearch } from "@/components/home/HeroSearch";
+import { AboutStats } from "@/components/home/AboutStats";
+import { HeroRfq } from "@/components/home/HeroRfq";
 import { HotStock } from "@/components/home/HotStock";
 import { ManufacturerStage } from "@/components/home/ManufacturerStage";
 import { NsnMarquee } from "@/components/home/NsnMarquee";
 import { ScrollReveal } from "@/components/home/ScrollReveal";
+import { Testimonials } from "@/components/home/Testimonials";
 
 /*
   SECTION INVENTORY — every section maps to one that exists on
-  aerospaceunlimited.com today. Nothing invented. Order changed so the search
-  leads, because that is the path to an RFQ.
+  aerospaceunlimited.com today. Nothing invented. The hero opens with the quote
+  request itself, because that is the destination the whole funnel points at.
 
-    Hero + search ............ existing hero + existing search bar
+    Hero + quote ............. existing hero, opening with a compact RFQ form
+                               (part number, qty, email, AOG). Replaces the
+                               hero search bar — that was redundant with the
+                               header's catalogue search, which stays. See
+                               HeroRfq.tsx.
     Four feature points ...... existing: Same Day Shipping / Quotes /
                                AOG Service 24/7 x 365 / Competitive Prices
     Certifications ........... existing value-prop badge row
@@ -29,6 +34,14 @@ import { ScrollReveal } from "@/components/home/ScrollReveal";
                                15-tile grid further down the live page
     Other Resources .......... existing section (5 items + PMA Parts)
     Certifications & Memberships ... existing section
+    Testimonials ............. existing section on the network flagship
+                               (asapsemi.com/testimonials), as a centre-stage
+                               carousel. Its content is that page's own
+                               placeholder set — see Testimonials.tsx for why
+                               it must stay placeholder until real quotes
+                               arrive.
+    Partner with ASAP ........ closing CTA to a supplied reference (2026-08-07);
+                               both routes (RFQ, contact) already exist.
 
   "A leading supplier" (the accent band + its four promises) was REMOVED at the
   client's request (2026-07-30). It was the page's one accent band; the palette
@@ -119,30 +132,34 @@ export default function HomePage() {
         <div
           className="hero-media"
           role="img"
-          aria-label="A wide-body freighter on the apron under a bright sky, a cargo pallet on a loader being raised to its forward hold"
+          aria-label="The rear quarter of a Gulfstream business jet — its turbofan engine, winglet and mirror-polished fuselage against a cloudy sky"
         />
         <div className="hero-scrim" aria-hidden="true" />
 
         {/* The one place an entrance animation is safe: always above the fold,
             so it plays on load rather than waiting for a scroll event. */}
-        <HeroParallax />
+        {/* Two columns: the copy on the left, the quote console on the right —
+            the classic hero split. Each is one grid cell so they size
+            independently; see `.hero > .u-page` in ux.css. */}
         <div className="u-page hero-enter">
-          <span className="eyebrow">Aviation &amp; aerospace parts distributor</span>
-          {/* Two sentences, each its own line so the headline arrives line by
-              line on load. The lines are block spans rather than a `<br>`, which
-              lets each carry its own entrance delay; the measure holds both
-              sentences on one line apiece down to the mobile breakpoint, where
-              they simply stack — the same shape the old explicit break gave. */}
-          <h1>
-            <span className="hero-line">Find the part.</span>
-            <span className="hero-line">Get a quote in 15 minutes.</span>
-          </h1>
-          <p className="lede">
-            Unlimited access to all your aviation supply needs — over 2 billion part numbers,
-            searchable by any identifier you already have.
-          </p>
+          <div className="hero-copy">
+            <span className="eyebrow">Aviation &amp; aerospace parts distributor</span>
+            {/* Two sentences, each its own line so the headline arrives line by
+                line on load. The lines are block spans rather than a `<br>`, which
+                lets each carry its own entrance delay; the measure holds both
+                sentences on one line apiece down to the mobile breakpoint, where
+                they simply stack — the same shape the old explicit break gave. */}
+            <h1>
+              <span className="hero-line">Find the part.</span>
+              <span className="hero-line">Get a quote in 15 minutes.</span>
+            </h1>
+            <p className="lede">
+              Unlimited access to all your aviation supply needs — over 2 billion part numbers,
+              searchable by any identifier you already have.
+            </p>
+          </div>
 
-          <HeroSearch />
+          <HeroRfq />
         </div>
       </section>
 
@@ -159,14 +176,25 @@ export default function HomePage() {
 
            The photograph is TREATMENT, not evidence — a flight-deck-on-approach
            scene carrying the section's mood, so it takes a scene-only alt and no
-           caption. See au-stock-photography-scope. Entrance uses the shared
-           [data-reveal] observer (ScrollReveal), same as the rest of the page.
+           caption. See au-stock-photography-scope.
+
+           MOTION — none, at the client's direction (2026-08-07): this band
+           renders static, with no entrance of any kind. An authored "landing"
+           arrival (clip-path wipe + push-in + specular pass) was built and
+           then REMOVED on the client's explicit instruction — do not re-add an
+           entrance here, including the generic [data-reveal] rise. The stat
+           row keeps its count-up (values never hidden); that is the section's
+           only motion. See au-about-band-static.
            ==================================================================== */}
       <section className="section">
         <div className="u-page">
           <div className="about">
-            <div className="about-intro" data-reveal="stagger">
-              <p className="eyebrow">About ASAP</p>
+            {/* Left column: the whole story — pill eyebrow, headline, lede, the
+                two calls to action, a divider, and the four service facts as a
+                horizontal stat row. Same copy and facts the section has always
+                carried; only the composition is the reference's. */}
+            <div className="about-body">
+              <p className="about-eyebrow">About ASAP</p>
               <h2 className="about-title">
                 An accredited{" "}
                 <span className="about-title-accent">distributor</span>, based in
@@ -177,38 +205,38 @@ export default function HomePage() {
                 to operators, MROs, repair stations and government contractors.
                 Unlimited access to all your aviation supplies.
               </p>
-              <figure className="about-media">
-                <img
-                  src="/img/feature-flightdeck.jpg"
-                  alt="The view from an airliner flight deck on final approach, runway lights ahead and the instrument panel glowing"
-                  width={1600}
-                  height={906}
-                  loading="lazy"
-                  decoding="async"
-                />
-              </figure>
+
+              <div className="about-actions">
+                <Link className="btn btn-primary" href="/rfq">
+                  Request a Quote <span aria-hidden="true">&rarr;</span>
+                </Link>
+                <Link className="btn btn-quiet" href="/about">
+                  About us
+                </Link>
+              </div>
+
+              <hr className="about-divider" />
+
+              {/* The four service facts as an animated stat row — a short accent
+                  rule, a count-up on the numeric values, and a staggered rise on
+                  scroll-in. Same four facts the section has always carried. */}
+              <AboutStats />
             </div>
 
-            {/* The four service facts, stacked as the design's right-hand rail.
-                Same four the section always carried, value over label. */}
-            <ul className="about-stats" data-reveal="stagger">
-              <li>
-                <span className="about-stat-value">Same Day</span>
-                <span className="about-stat-label">Shipping</span>
-              </li>
-              <li>
-                <span className="about-stat-value">15 Min</span>
-                <span className="about-stat-label">Quote turnaround</span>
-              </li>
-              <li>
-                <span className="about-stat-value">24/7</span>
-                <span className="about-stat-label">AOG service</span>
-              </li>
-              <li>
-                <span className="about-stat-value">Competitive</span>
-                <span className="about-stat-label">Pricing</span>
-              </li>
-            </ul>
+            {/* Right column: the photograph as a tall card. TREATMENT, not
+                evidence — a flight-deck-on-approach scene, scene-only alt, no
+                caption, and deliberately not a portrait of a person (which would
+                read as "ASAP's team"). See au-stock-photography-scope. */}
+            <figure className="about-media">
+              <img
+                src="/img/feature-flightdeck.jpg"
+                alt="The view from an airliner flight deck on final approach, runway lights ahead and the instrument panel glowing"
+                width={1600}
+                height={906}
+                loading="lazy"
+                decoding="async"
+              />
+            </figure>
           </div>
         </div>
       </section>
@@ -247,7 +275,7 @@ export default function HomePage() {
               <h2>Top NSN</h2>
               <p>The National Stock Numbers most often requested from us.</p>
             </div>
-            <Link className="btn btn-quiet" href="/browse#identifiers">
+            <Link className="btn btn-quiet" href="/nsn">
               NSN / NIIN / CAGE routes
             </Link>
           </div>
@@ -260,6 +288,7 @@ export default function HomePage() {
             Each card is a real NSN and a real link — the photography is the
             treatment, the section's content is unchanged. */}
         <NsnMarquee />
+
       </section>
 
       {/* ====================================================================
@@ -352,7 +381,13 @@ export default function HomePage() {
         <CategoryScroller
           steps={CAT_STEPS.map((c) => {
             const scene = CAT_SCENES[c.slug] ?? CAT_SCENE_FALLBACK;
-            return { slug: c.slug, name: c.name, fsc: c.fsc, count: c.count, img: scene.img, alt: scene.alt };
+            /* The "e.g." line is real rows from the sample catalog — two at
+               most, and empty is fine (the line simply doesn't render). Never
+               a hand-written part number. See au-no-invented-content. */
+            const egs = PARTS.filter((p) => p.category === c.slug)
+              .slice(0, 2)
+              .map((p) => p.pn);
+            return { slug: c.slug, name: c.name, fsc: c.fsc, count: c.count, img: scene.img, alt: scene.alt, egs };
           })}
         />
 
@@ -360,7 +395,7 @@ export default function HomePage() {
           {/* The escape hatch the user asked for: five are shown, the rest live
               one click away rather than stacked down the page. */}
           <div className="cat-viewall">
-            <Link className="btn btn-quiet" href="/browse#categories">
+            <Link className="btn btn-quiet" href="/part-types">
               View all {CATEGORIES.length} categories
               <span aria-hidden="true">&rarr;</span>
             </Link>
@@ -381,13 +416,13 @@ export default function HomePage() {
               in a row, one of them open. Hovering or focusing a slat opens it
               and the others close.
 
-              These six are the only items on the page a buyer *reads* rather
+              These four are the only items on the page a buyer *reads* rather
               than scans for a match, which is what makes an accordion the right
               affordance here and the wrong one for the category tiles — you
               read one of these at a time. The numerals are kept from the card
               version and now do double duty: they are the one thing visible on
               every slat in both states, so the set still reads as a fixed,
-              complete list of capabilities rather than a truncated top-six.
+              complete list of resources rather than a truncated subset.
 
               The name appears twice on purpose. `.res-spine` is the vertical
               copy on the closed slat and is aria-hidden; the copy inside
@@ -395,13 +430,13 @@ export default function HomePage() {
               rather than one because `writing-mode` cannot be transitioned —
               a single element would snap from vertical to horizontal mid-slide.
 
-              Keyed by index, not by `id`: two of these six share the id "pma"
-              deliberately. See lib/data.ts → RESOURCES. */}
+              Each resource now has a unique id and its own standalone page. See
+              lib/data.ts → RESOURCES. */}
           <div className="res-strip" data-reveal="up">
             {RESOURCES.map((r, i) => (
               <Link
                 className="res-slat"
-                href={r.href ?? `/capabilities#${r.id}`}
+                href={r.href ?? "/rfq"}
                 key={`${r.id}-${i}`}
               >
                 {/* Decorative, and revealed by the slat's own expansion rather
@@ -459,8 +494,73 @@ export default function HomePage() {
                 `color:var(--au-accent)` this replaces beat every stylesheet rule and
                 was left over from the amber palette, where the accent was light; the
                 accent is now Steel Blue and measured 2.38:1 here. */}
-            <Link href="/quality">see quality &amp; certifications</Link>.
+            <a href="https://www.asapsemi.com/quality/" target="_blank" rel="noopener noreferrer">see quality &amp; certifications</a>.
           </p>
+        </div>
+      </section>
+
+      {/* ====================================================================
+           WHAT OUR CLIENTS SAY — the testimonials carousel the client's
+           network site carries (asapsemi.com/testimonials), rebuilt to a
+           supplied reference: a rounded light panel, a quote-mark watermark,
+           and a card rail with the centre card emphasised.
+
+           An editorial split on the section ground — a featured pull-quote
+           beside a roster of the other voices — carrying real, sourced
+           customer reviews of ASAP Semiconductor (see Testimonials.tsx).
+           ==================================================================== */}
+      <section className="section section-subtle">
+        <div className="u-page">
+          <Testimonials />
+        </div>
+      </section>
+
+      {/* ====================================================================
+           PARTNER WITH ASAP — the closing call-to-action, built to a supplied
+           reference: a dark band ruled like graph paper, a centred display
+           headline with the offer's object set in light steel, the two routes
+           a buyer can take, and one reassurance line under them.
+
+           The last of the three dark bands, so the base runs unbroken into
+           the footer. Both buttons are routes that already exist — the RFQ
+           and the contact desk; the copy is the reference's own.
+           ==================================================================== */}
+      <section className="section section-dark homecta">
+        <div className="u-page">
+          <div className="homecta-inner" data-reveal="up">
+            <div className="section-head section-head-center">
+              <p className="eyebrow">Partner with ASAP</p>
+              <h2 className="homecta-title">
+                Let&rsquo;s get your{" "}
+                <span className="homecta-accent">parts moving</span>.
+              </h2>
+              <p>
+                You get more than parts, a team that answers, delivers on time,
+                and stands behind every certificate it ships.
+              </p>
+            </div>
+            <div className="homecta-actions">
+              <Link className="btn btn-primary btn-lg" href="/rfq">
+                Request a Quote <span aria-hidden="true">&rarr;</span>
+              </Link>
+              <Link className="btn btn-quiet btn-lg" href="/contact">
+                Contact Us
+              </Link>
+            </div>
+            <p className="homecta-note">
+              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                <path
+                  d="m3 8.5 3.5 3.5L13 4.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              No pressure, no placeholder pricing, a real quote, on your timeline.
+            </p>
+          </div>
         </div>
       </section>
     </>

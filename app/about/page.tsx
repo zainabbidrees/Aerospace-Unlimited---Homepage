@@ -257,7 +257,7 @@ export default function AboutPage() {
             <Link className="btn btn-primary btn-lg" href="/rfq">
               Request a Quote
             </Link>
-            <Link className="btn btn-quiet btn-lg" href="/capabilities">
+            <Link className="btn btn-quiet btn-lg" href="/gse-tooling">
               Our capabilities
             </Link>
           </div>
@@ -270,9 +270,9 @@ export default function AboutPage() {
           <figure className="ahero-media">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/img/hq-anaheim.jpg"
-              alt="The Aerospace Unlimited headquarters at dusk — a modern two-storey distribution facility with a lit sign above two charcoal loading-bay doors, warm uplighting on the planting, a palm tree and deep blue evening sky behind"
-              width={1535}
+              src="/img/hq-sinclair.jpg"
+              alt="The company's Anaheim distribution facility seen from the street — a long single-storey building with signage and the 1341 S. Sinclair address across its frontage, two grey roller loading-bay doors, clipped hedging and a tall palm tree under an overcast sky"
+              width={1536}
               height={1024}
               decoding="async"
               fetchPriority="high"
@@ -846,7 +846,7 @@ export default function AboutPage() {
         <div className="u-page">
           <p className="u-caption u-center" style={{ marginTop: "var(--au-s-6)" }}>
             Certificate copies are available on request &mdash;{" "}
-            <Link href="/quality">see quality &amp; certifications</Link>.
+            <a href="https://www.asapsemi.com/quality/" target="_blank" rel="noopener noreferrer">see quality &amp; certifications</a>.
           </p>
         </div>
       </section>

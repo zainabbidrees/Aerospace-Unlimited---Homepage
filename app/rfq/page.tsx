@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { RfqForm } from "@/components/rfq/RfqForm";
+import { ScrollReveal } from "@/components/home/ScrollReveal";
+import { Testimonials } from "@/components/home/Testimonials";
 
 /*
   /rfq — Instant Quote request. The route the whole site's primary CTA points at
@@ -24,9 +26,26 @@ export const metadata: Metadata = {
 export default function RfqPage() {
   return (
     <main id="main" className="section-tight">
+      {/* Arms the [data-reveal] entrance on the testimonials band, exactly as the
+          homepage does. Additive and motion-safe — the band is fully visible at
+          rest, so no-JS and reduced motion still get it. */}
+      <ScrollReveal />
+
       <Suspense fallback={null}>
         <RfqForm />
       </Suspense>
+
+      {/* ====================================================================
+           TESTIMONIALS — the homepage's "What our clients say" block, reused
+           at the end of the quote request: the same editorial split of a
+           featured pull-quote beside a roster, same real sourced reviews
+           (see Testimonials.tsx).
+           ==================================================================== */}
+      <section className="section section-subtle">
+        <div className="u-page">
+          <Testimonials />
+        </div>
+      </section>
     </main>
   );
 }

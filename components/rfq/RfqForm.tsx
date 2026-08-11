@@ -31,9 +31,13 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ValidatedForm } from "@/components/ValidatedForm";
+import { NumberField } from "@/components/NumberField";
+import { DatePicker } from "@/components/DatePicker";
+import { CERTS } from "@/components/home/CertMarquee";
 import { useQuote } from "@/components/QuoteProvider";
 import { useToast } from "@/components/ToastProvider";
 import { PARTS } from "@/lib/data";
+import { partsForContext } from "@/lib/rfq";
 
 const CONDITIONS = [
   "Any condition",
@@ -71,6 +75,25 @@ export function RfqForm() {
   const q = params.get("q") ?? "";
   const mode = params.get("mode") ?? "";
 
+  /* Entity context — a card elsewhere on the site said "quote this platform /
+     OEM / category / number". `for` is the human label; the rest resolve to
+     sample rows via partsForContext. */
+  const forLabel = params.get("for") ?? "";
+  const ctx = {
+    aircraft: params.get("aircraft") ?? undefined,
+    cage: params.get("cage") ?? undefined,
+    category: params.get("category") ?? undefined,
+    fsc: params.get("fsc") ?? undefined,
+    nsn: params.get("nsn") ?? undefined,
+    niin: params.get("niin") ?? undefined,
+  };
+  const hasCtx = Boolean(
+    forLabel || ctx.aircraft || ctx.cage || ctx.category || ctx.fsc || ctx.nsn || ctx.niin
+  );
+  /* When the sample carries no matching row, the label rides in as a note so
+     the account manager still has the context — never a fabricated part line. */
+  const noteDefault = forLabel ? `Parts for ${forLabel}.` : "";
+
   const { items, ready, clear } = useQuote();
   const { toast } = useToast();
 
@@ -91,6 +114,12 @@ export function RfqForm() {
       return [mkLine(pn, 1, found?.condition)];
     }
     if (q) return [mkLine(q, 1)];
+    if (hasCtx) {
+      const cp = partsForContext(ctx);
+      if (cp.length) return cp.map((p) => mkLine(p.pn, 1, p.condition));
+      /* No sample match — one empty line, with the context carried in the note. */
+      return [mkLine()];
+    }
     return [mkLine()];
   });
 
@@ -106,7 +135,7 @@ export function RfqForm() {
      when the URL did not already name a part, and only once, so a later list
      change does not overwrite what the buyer is editing. */
   useEffect(() => {
-    if (pn || q || filledFromList.current) return;
+    if (pn || q || hasCtx || filledFromList.current) return;
     if (ready && items.length) {
       filledFromList.current = true;
       setLines(items.map((i) => mkLine(i.pn, i.qty, i.condition)));
@@ -120,10 +149,11 @@ export function RfqForm() {
 
   const title = useMemo(() => {
     if (pn) return `Request a quote for ${pn}`;
+    if (forLabel) return `Request a quote — ${forLabel}`;
     if (!pn && !q && filledFromList.current && lines.length)
       return `Request quotes for ${lines.length} part${lines.length === 1 ? "" : "s"}`;
     return "Request a quote";
-  }, [pn, q, lines.length]);
+  }, [pn, q, forLabel, lines.length]);
 
   function updateLine(id: number, patch: Partial<Line>) {
     setLines((prev) => prev.map((l) => (l.id === id ? { ...l, ...patch } : l)));
@@ -204,7 +234,7 @@ export function RfqForm() {
             <button className="btn btn-primary btn-lg" type="button" onClick={() => setReceipt(null)}>
               Start another request
             </button>
-            <Link className="btn btn-quiet btn-lg" href="/browse">
+            <Link className="btn btn-quiet btn-lg" href="/part-types">
               Keep browsing the catalog
             </Link>
           </div>
@@ -325,10 +355,9 @@ export function RfqForm() {
                             <label htmlFor={`qty-${l.id}`}>
                               Quantity <span className="required" aria-hidden="true">*</span>
                             </label>
-                            <input
+                            <NumberField
                               id={`qty-${l.id}`}
                               name="qty"
-                              type="number"
                               min={1}
                               required
                               data-mono
@@ -475,7 +504,7 @@ export function RfqForm() {
                   <label htmlFor="needby">
                     Needed by <span className="optional">(optional)</span>
                   </label>
-                  <input id="needby" name="needby" type="date" />
+                  <DatePicker id="needby" name="needby" />
                   <div className="error" />
                 </div>
                 <div className="field" data-label="Notes">
@@ -486,6 +515,7 @@ export function RfqForm() {
                     id="notes"
                     name="notes"
                     className="rfq-notes"
+                    defaultValue={noteDefault}
                     placeholder="Condition requirements, certification requirements, alternates acceptable, target price…"
                   />
                   <div className="error" />
@@ -506,42 +536,70 @@ export function RfqForm() {
         </div>
 
         {/* REASSURANCE RAIL — the buyer's objections answered in peripheral
-            vision while they fill the form, not before it. */}
+            vision while they fill the form, not before it.
+
+            The copy is deliberately flat: each step is a subject and a fact,
+            no asides, no "not a…" contrasts. The full accreditation set (the
+            same CERTS inventory the homepage marquee scrolls) sits below it
+            as a tile grid — every mark, because "which certificates do they
+            hold" is exactly the question a vendor-approval buyer brings to
+            this page. The rail is NOT sticky: it reads once and gets out of
+            the way, rather than following the visitor down a long form. */}
         <aside className="rfq-panel">
           <div className="rfq-panel-head">
             <h2 className="u-h3">What happens next</h2>
           </div>
           <div className="rfq-panel-body">
-            <div className="steps rfq-panel-steps">
-              <div className="step-item">
-                <h3>You send this form</h3>
-                <p>It reaches a named account manager immediately — not a shared inbox.</p>
-              </div>
-              <div className="step-item">
-                <h3>We reply within 15 minutes</h3>
-                <p>Price, availability, condition and lead time for every line, in writing.</p>
-              </div>
-              <div className="step-item">
-                <h3>You decide</h3>
-                <p>No obligation. No follow-up calls unless you ask for one.</p>
-              </div>
-            </div>
+            <ol className="rfq-steps">
+              <li>
+                <span className="rfq-step-num" aria-hidden="true">1</span>
+                <div>
+                  <h3>Send your request</h3>
+                  <p>Your part numbers go straight to the quoting desk.</p>
+                </div>
+              </li>
+              <li>
+                <span className="rfq-step-num" aria-hidden="true">2</span>
+                <div>
+                  <h3>Get your quote in 15 minutes</h3>
+                  <p>Price, availability, condition and lead time for every line.</p>
+                </div>
+              </li>
+              <li>
+                <span className="rfq-step-num" aria-hidden="true">3</span>
+                <div>
+                  <h3>Order if it works for you</h3>
+                  <p>There is no obligation and no follow-up unless you ask.</p>
+                </div>
+              </li>
+            </ol>
 
-            <div className="certs rfq-panel-certs">
-              <span className="cert">
-                <span className="mark" aria-hidden="true">✓</span> AS9120B
-              </span>
-              <span className="cert">
-                <span className="mark" aria-hidden="true">✓</span> ISO 9001:2015
-              </span>
-              <span className="cert">
-                <span className="mark" aria-hidden="true">✓</span> FAA AC 00-56B
-              </span>
+            <div className="rfq-panel-certs">
+              <h3 className="rfq-certs-title">
+                Accreditations &amp; memberships
+              </h3>
+              {/* Every mark the company holds — the homepage marquee's own
+                  inventory, so the two can never disagree. Each tile's alt
+                  and title name the accreditation. */}
+              <ul className="rfq-certs-grid">
+                {CERTS.map((c) => (
+                  <li key={c.img}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={`/img/certs/${c.img}.png`}
+                      alt={c.label}
+                      title={c.label}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
           <div className="rfq-panel-foot">
-            Grounded aircraft right now? Call <a href="tel:+17147054780">+1-714-705-4780</a> —
-            answered by a person, 24/7.
+            Aircraft on ground? Call <a href="tel:+17147054780">+1-714-705-4780</a>.
+            The AOG desk answers 24/7.
           </div>
         </aside>
       </div>

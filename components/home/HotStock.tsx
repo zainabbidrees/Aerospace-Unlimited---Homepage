@@ -90,7 +90,7 @@ export function HotStock() {
                 className="btn btn-primary btn-sm"
                 href={`/rfq?pn=${encodeURIComponent(p.pn)}&instant=1`}
               >
-                Instant RFQ
+                Request a Quote
               </Link>
             </div>
           </article>
@@ -114,7 +114,7 @@ export function HotStock() {
       {/* Four parts is a thin slice of the shelf; the full catalog is the route
           to everything else. */}
       <p className="hot-more">
-        <Link className="btn btn-secondary" href="/browse">
+        <Link className="btn btn-secondary" href="/part-types">
           Full catalog
         </Link>
       </p>

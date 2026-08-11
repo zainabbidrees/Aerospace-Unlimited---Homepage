@@ -3,7 +3,6 @@ import "@/styles/ux.css";
 import { Providers } from "@/components/Providers";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { QuoteDrawer } from "@/components/QuoteDrawer";
 
 export const metadata: Metadata = {
   title: {
@@ -30,7 +29,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SiteHeader />
           <main id="main">{children}</main>
           <SiteFooter />
-          <QuoteDrawer />
         </Providers>
       </body>
     </html>

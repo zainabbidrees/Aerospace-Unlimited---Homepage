@@ -209,6 +209,37 @@ export const PARTS: Part[] = [
     mfr: "GE Aviation", category: "bearings", stock: "in", qty: 412,
     condition: "New / Factory Sealed", lead: "Same day", aircraft: ["b777"],
   },
+
+  /* ---- Extended working sample: at least two illustrative lines per Federal
+     Supply Class in FSCS, so every /fscs/<code> detail page (and the part-type
+     and manufacturer pages that draw from the same rows) is populated rather
+     than empty. Still illustrative, NOT real inventory. See au-no-invented-content. */
+  { pn: "S1560-4471", desc: "Fairing, Housing, Airframe", nsn: "1560-01-201-3344", niin: "012013344", cage: "F0203", fsc: "1560", mfr: "Safran Landing Systems", category: "seals", stock: "in", qty: 42, condition: "New / Factory Sealed", lead: "Same day", aircraft: ["a320"] },
+  { pn: "1560-STR-88", desc: "Panel, Access, Structural", nsn: "1560-01-202-7788", niin: "012027788", cage: "0MEV7", fsc: "1560", mfr: "Collins Aerospace", category: "seals", stock: "limited", qty: 6, condition: "Overhauled / 8130-3", lead: "2–3 days", aircraft: ["b737"] },
+  { pn: "PB-6109-1", desc: "Propeller Blade Retention Nut", nsn: "1610-01-035-4802", niin: "010354802", cage: "07482", fsc: "1610", mfr: "GE Aviation", category: "bearings", stock: "in", qty: 88, condition: "New / Factory Sealed", lead: "Same day", aircraft: ["c130"] },
+  { pn: "SB-1610-22", desc: "Spinner Bulkhead Assembly", nsn: "1610-01-019-0282", niin: "010190282", cage: "99251", fsc: "1610", mfr: "Woodward Inc.", category: "bearings", stock: "quote", qty: 0, condition: "Serviceable / Traceable", lead: "Quote required", aircraft: ["c130"] },
+  { pn: "BR-1630-C", desc: "Brake Disc, Carbon", nsn: "1630-01-114-2210", niin: "011142210", cage: "K0473", fsc: "1630", mfr: "Meggitt Aerospace", category: "landing-gear", stock: "limited", qty: 4, condition: "Overhauled / 8130-3", lead: "3–5 days", aircraft: ["a320"] },
+  { pn: "WH-1630-4", desc: "Wheel Half, Main Landing Gear", nsn: "1630-01-556-8090", niin: "015568090", cage: "56878", fsc: "1630", mfr: "Crane Aerospace", category: "landing-gear", stock: "in", qty: 12, condition: "New Surplus", lead: "1–2 days", aircraft: ["b737"] },
+  { pn: "CCA-1680-7", desc: "Control Cable Assembly", nsn: "1680-01-136-2567", niin: "011362567", cage: "0MEV7", fsc: "1680", mfr: "Collins Aerospace", category: "electrical", stock: "in", qty: 64, condition: "New / Factory Sealed", lead: "Same day", aircraft: ["crj"] },
+  { pn: "AB-1680-31", desc: "Accessory Bracket, Airframe", nsn: "1680-00-853-2001", niin: "008532001", cage: "F6218", fsc: "1680", mfr: "Zodiac Aerospace", category: "electrical", stock: "limited", qty: 9, condition: "New Surplus", lead: "1–2 days", aircraft: ["a320"] },
+  { pn: "GSV-1730-2", desc: "Hydraulic Servicing Cart Valve", nsn: "1730-01-330-9210", niin: "013309210", cage: "12345", fsc: "1730", mfr: "Parker Hannifin", category: "hydraulics", stock: "in", qty: 20, condition: "New / Factory Sealed", lead: "Same day", aircraft: ["b737"] },
+  { pn: "GPR-1730-8", desc: "Ground Power Receptacle", nsn: "1730-01-441-0033", niin: "014410033", cage: "73842", fsc: "1730", mfr: "Eaton Aerospace", category: "hydraulics", stock: "in", qty: 33, condition: "New / Factory Sealed", lead: "Same day", aircraft: ["c130"] },
+  { pn: "OF-2810-15", desc: "Oil Filter Element, Reciprocating Engine", nsn: "2810-01-221-3345", niin: "012213345", cage: "07482", fsc: "2810", mfr: "GE Aviation", category: "filters", stock: "in", qty: 140, condition: "New / Factory Sealed", lead: "Same day", aircraft: ["bell206"] },
+  { pn: "CHG-2810-3", desc: "Cylinder Head Gasket", nsn: "2810-00-877-5798", niin: "008775798", cage: "99193", fsc: "2810", mfr: "Honeywell International", category: "filters", stock: "in", qty: 210, condition: "New / Factory Sealed", lead: "Same day", aircraft: ["bell206"] },
+  { pn: "TB-2840-S1", desc: "Turbine Blade, Stage 1", nsn: "2840-01-106-2551", niin: "011062551", cage: "07482", fsc: "2840", mfr: "GE Aviation", category: "instruments", stock: "quote", qty: 0, condition: "Serviceable / Traceable", lead: "Quote required", aircraft: ["b777"] },
+  { pn: "EGT-2840-9", desc: "Exhaust Gas Temperature Probe", nsn: "2840-01-670-1110", niin: "016701110", cage: "99193", fsc: "2840", mfr: "Honeywell International", category: "instruments", stock: "limited", qty: 7, condition: "Overhauled / 8130-3", lead: "2–3 days", aircraft: ["a320"] },
+  { pn: "FCU-2915-4", desc: "Fuel Control Unit", nsn: "2915-01-556-7789", niin: "015567789", cage: "73842", fsc: "2915", mfr: "Eaton Aerospace", category: "pumps", stock: "quote", qty: 0, condition: "Serviceable / Traceable", lead: "Quote required", aircraft: ["crj"] },
+  { pn: "FBP-2915-1", desc: "Fuel Boost Pump, Engine", nsn: "2915-01-379-9058", niin: "013799058", cage: "99251", fsc: "2915", mfr: "Woodward Inc.", category: "pumps", stock: "in", qty: 18, condition: "New Surplus", lead: "1–2 days", aircraft: ["c130"] },
+  { pn: "IE-2925-6", desc: "Ignition Exciter", nsn: "2925-01-332-1101", niin: "013321101", cage: "80058", fsc: "2925", mfr: "Ametek Aerospace", category: "switches", stock: "limited", qty: 5, condition: "Overhauled / 8130-3", lead: "2–3 days", aircraft: ["bell206"] },
+  { pn: "EHC-2925-2", desc: "Engine Harness Connector", nsn: "2925-01-098-7655", niin: "010987655", cage: "0MEV7", fsc: "2925", mfr: "Collins Aerospace", category: "switches", stock: "in", qty: 74, condition: "New / Factory Sealed", lead: "Same day", aircraft: ["b777"] },
+  { pn: "UF-4730-8", desc: "Bulkhead Union Fitting", nsn: "4730-01-334-4456", niin: "013344456", cage: "12345", fsc: "4730", mfr: "Parker Hannifin", category: "seals", stock: "in", qty: 260, condition: "New / Factory Sealed", lead: "Same day", aircraft: ["ch47"] },
+  { pn: "HA-4730-PT", desc: "Hose Assembly, PTFE", nsn: "4730-01-334-4457", niin: "013344457", cage: "1AB29", fsc: "4730", mfr: "TransDigm Group", category: "seals", stock: "in", qty: 58, condition: "New / Factory Sealed", lead: "Same day", aircraft: ["c130"] },
+  { pn: "SV-4810-2", desc: "Solenoid Valve, Bleed Air", nsn: "4810-01-234-5679", niin: "012345679", cage: "94697", fsc: "4810", mfr: "Moog Inc.", category: "valves", stock: "limited", qty: 3, condition: "Overhauled / 8130-3", lead: "3–5 days", aircraft: ["b737"] },
+  { pn: "MOV-4810-7", desc: "Motor-Operated Shutoff Valve", nsn: "4810-01-234-5680", niin: "012345680", cage: "99193", fsc: "4810", mfr: "Honeywell International", category: "valves", stock: "quote", qty: 0, condition: "Serviceable / Traceable", lead: "Quote required", aircraft: ["b777"] },
+  { pn: "MS35206-263", desc: "Machine Screw, Pan Head", nsn: "5305-01-167-0822", niin: "011670822", cage: "12345", fsc: "5305", mfr: "Parker Hannifin", category: "fasteners", stock: "in", qty: 9800, condition: "New / Factory Sealed", lead: "Same day", aircraft: ["b737", "a320"] },
+  { pn: "NAS1102-3", desc: "Screw, Self-Tapping, Structural", nsn: "5305-01-167-0823", niin: "011670823", cage: "1AB29", fsc: "5305", mfr: "TransDigm Group", category: "fasteners", stock: "in", qty: 6400, condition: "New / Factory Sealed", lead: "Same day", aircraft: ["c130"] },
+  { pn: "NAS6204-8", desc: "Bolt, Hex Head, Alloy Steel", nsn: "5306-01-021-7992", niin: "010217992", cage: "12345", fsc: "5306", mfr: "Parker Hannifin", category: "fasteners", stock: "in", qty: 5200, condition: "New / Factory Sealed", lead: "Same day", aircraft: ["b737"] },
+  { pn: "BACB30NR6", desc: "Bolt, Close-Tolerance, Airframe", nsn: "5306-01-021-7993", niin: "010217993", cage: "99193", fsc: "5306", mfr: "Honeywell International", category: "fasteners", stock: "limited", qty: 320, condition: "New Surplus", lead: "1–2 days", aircraft: ["a320"] },
 ];
 
 /* "Top NSN" is a section on the live homepage. Stand-in values. */
@@ -237,24 +268,228 @@ export const TOP_NSN: TopNsn[] = [
     img: "cargo-load", alt: "A pallet of freight on a loader being raised to a wide-body's cargo door" },
 ];
 
-/* "Other Resources" — the five items in the live site's nav dropdown and
-   homepage section, kept verbatim.
-
-   NOTE: `id` is NOT unique — "Aircraft PMA Supplements" and "PMA Parts" both
-   carry id "pma" deliberately, because both anchor to the one PMA section
-   rather than inventing content for a second page. Anything rendering this
-   list must key on the index, not on `id`. Flag for the client to confirm
-   whether these are genuinely distinct offerings. */
+/* "Other Resources" — the live site's "Other Resource" dropdown, which is
+   exactly four standalone pages: GSE Tooling, PMA Supplements List, Salvaged
+   Aircraft Parts and PMA Parts. Each now has its own route, so every `id` is
+   unique and every `href` points at a real page rather than an anchor into a
+   shared hub. Kept in the live site's own dropdown order. */
 export const RESOURCES: Resource[] = [
-  { id: "gse", name: "GSE Tooling", note: "Ground support equipment and specialised maintenance tooling.", img: "gse" },
-  { id: "aircraft", name: "Parts by Aircraft / Helicopter Model", note: "Browse by airframe or rotorcraft platform.", href: "/browse/aircraft", img: "aircraft" },
-  { id: "pma", name: "Aircraft PMA Supplements", note: "Approved supplement listings by aircraft type.", img: "pma-supplements" },
-  { id: "repair", name: "Aircraft Repair Capabilities", note: "Send a unit for assessment and overhaul.", img: "repair" },
-  { id: "salvage", name: "Salvaged Aircraft Parts", note: "Traceable teardown inventory for legacy airframes.", img: "salvage" },
-  { id: "pma", name: "PMA Parts", note: "Parts Manufacturer Approval alternatives to OEM lines.", img: "pma-parts" },
+  { id: "gse", name: "GSE Tooling", note: "Ground support equipment and specialised maintenance tooling.", href: "/gse-tooling", img: "gse" },
+  { id: "pma-supplements", name: "PMA Supplements List", note: "Approved supplement listings by aircraft type.", href: "/pma-supplements", img: "pma-supplements" },
+  { id: "salvage", name: "Salvaged Aircraft Parts", note: "Traceable teardown inventory for legacy airframes.", href: "/salvaged-aircraft-parts", img: "salvage" },
+  { id: "pma-parts", name: "PMA Parts", note: "FAA-approved alternatives to OEM part lines.", href: "/pma-parts", img: "pma-parts" },
+];
+
+/* ==========================================================================
+   Federal Supply Groups & Classes — the live /fscs/ lookup catalog
+
+   The live FSG/FSC page is a nine-page paginated directory of class codes and
+   their names. Kept as data so the /fscs page can group classes under their
+   group heading exactly as the standard does. Illustrative, not the full FSC
+   register: every class here is real and correctly grouped, but the set is a
+   working sample the same way PARTS is. Every FSC used by CATEGORIES and PARTS
+   is present so the /fscs/<code> results pages all resolve.
+   ========================================================================== */
+export interface Fsc {
+  fsc: string;
+  name: string;
+  /* The two-digit Federal Supply Group this class belongs to. */
+  fsg: string;
+}
+
+/* FSG group names in the live /fscs/ catalog's own wording, so the group
+   headings read exactly as the live page's do. See au-no-invented-content. */
+export const FSG_NAMES: Record<string, string> = {
+  "15": "Aircraft and Airframe Structural Components",
+  "16": "Aircraft Components and Accessories",
+  "17": "Aircraft Launching, Landing and Ground Handling Equipment",
+  "28": "Engines, Turbines and Components",
+  "29": "Engine Accessories",
+  "31": "Bearings",
+  "43": "Pumps and Compressors",
+  "47": "Pipe, Tubing, Hose and Fittings",
+  "48": "Valves",
+  "53": "Hardware and Abrasives",
+  "59": "Electrical and Electronic Equipment Components",
+  "66": "Instruments and Laboratory Equipment",
+};
+
+/* FSC names in the live catalog's own wording (title case, no punctuation),
+   so each class row reads "FSC 1560 Airframe Structural Components" as the
+   live page renders it. */
+export const FSCS: Fsc[] = [
+  { fsc: "1560", name: "Airframe Structural Components", fsg: "15" },
+  { fsc: "1620", name: "Aircraft Landing Gear Components", fsg: "15" },
+  { fsc: "1650", name: "Aircraft Hydraulic Vacuum and De-icing System Components", fsg: "15" },
+  { fsc: "1610", name: "Aircraft Propellers and Components", fsg: "16" },
+  { fsc: "1630", name: "Aircraft Wheel and Brake Systems", fsg: "16" },
+  { fsc: "1680", name: "Miscellaneous Aircraft Accessories and Components", fsg: "16" },
+  { fsc: "1730", name: "Aircraft Ground Servicing Equipment", fsg: "17" },
+  { fsc: "2810", name: "Gasoline Reciprocating Engines, Aircraft Prime Mover and Components", fsg: "28" },
+  { fsc: "2840", name: "Gas Turbines and Jet Engines, Aircraft Prime Moving and Components", fsg: "28" },
+  { fsc: "2915", name: "Engine Fuel System Components, Aircraft and Missile Prime Movers", fsg: "29" },
+  { fsc: "2925", name: "Engine Electrical System Components, Aircraft Prime Moving", fsg: "29" },
+  { fsc: "2940", name: "Engine Air and Oil Filters, Strainers and Cleaners, Nonaircraft", fsg: "29" },
+  { fsc: "3110", name: "Bearings, Antifriction, Unmounted", fsg: "31" },
+  { fsc: "3120", name: "Bearings, Plain, Unmounted", fsg: "31" },
+  { fsc: "4320", name: "Power and Hand Pumps", fsg: "43" },
+  { fsc: "4730", name: "Fittings and Specialties; Hose, Pipe and Tube", fsg: "47" },
+  { fsc: "4810", name: "Valves, Powered", fsg: "48" },
+  { fsc: "4820", name: "Valves, Nonpowered", fsg: "48" },
+  { fsc: "5305", name: "Screws", fsg: "53" },
+  { fsc: "5306", name: "Bolts", fsg: "53" },
+  { fsc: "5310", name: "Nuts and Washers", fsg: "53" },
+  { fsc: "5330", name: "Packing and Gasket Materials", fsg: "53" },
+  { fsc: "5821", name: "Radio and Television Communication Equipment, Airborne", fsg: "59" },
+  { fsc: "5930", name: "Switches", fsg: "59" },
+  { fsc: "5935", name: "Connectors, Electrical", fsg: "59" },
+  { fsc: "6610", name: "Flight Instruments", fsg: "66" },
+];
+
+export function fscName(fsc: string): string | undefined {
+  return FSCS.find((f) => f.fsc === fsc)?.name;
+}
+
+/* The Federal Supply Group a class belongs to — the first two digits, with the
+   group's name where we carry it. Derived from the code so it can never drift
+   from the FSC it describes. */
+export function fsgOf(fsc: string): { code: string; name: string } {
+  const code = fsc.slice(0, 2);
+  return { code, name: FSG_NAMES[code] ?? `Federal Supply Group ${code}` };
+}
+
+/* The NATO Codification Bureau that assigned an item — the NIIN's first two
+   digits. 00 and 01 are the United States; everything else is another bureau.
+   A statement about the numbering system, not a claim about our inventory. */
+export function ncbOf(niin: string): { code: string; name: string } {
+  const code = niin.slice(0, 2);
+  const name = code === "00" || code === "01" ? "United States" : "NATO / allied bureau";
+  return { code, name };
+}
+
+/* ==========================================================================
+   Part types — the live /part-types/ A–Z index
+
+   The live page is an alphabetical wall of item-name links (Rod Radiator,
+   Coupling, Smoke Detector, …). Kept as a flat A–Z list; the /part-types page
+   groups them by initial and each links to a pre-seeded quote, since the item
+   name is what a buyer holds when they do not have a number. Illustrative
+   sample of the naming, not the full item-name register.
+   ========================================================================== */
+export const PART_TYPES: string[] = [
+  "Actuator, Linear", "Adaptor", "Amplifier, Horizontal", "Anti-Siphon Assembly, Fuel Filler", "Assy, Switch", "Attaching Ring",
+  "Bearing, Ball", "Bracket, Mounting", "Bushing, Sleeve",
+  "Cap, Filler", "Cartridge", "Circlip, Internal", "Clamp, Loop", "Clip", "Connector, Receptacle", "Coupling", "Cylinder, Discharge",
+  "Disc, Rupture", "Duct, Air",
+  "Elbow, Tube", "Element, Filter",
+  "Fairing, Housing", "Fastener, Quick-Release", "Fitting, Bulkhead",
+  "Gasket", "Grommet",
+  "Hose Assembly", "Housing, Bearing",
+  "Indicator, Altitude", "Insulator",
+  "Jack, Tripod",
+  "Knob, Control",
+  "Link, Drag Brace",
+  "Manifold", "Motor, Actuator",
+  "Nut, Self-Locking",
+  "O-Ring", "Orifice",
+  "Packing, Preformed", "Panel, Access", "Plate, Identification", "Pump, Fuel Boost",
+  "Rib Cap", "Ring, Retaining", "Rivet", "Rod, Radiator",
+  "Seal, Metallic", "Sensor, Temperature", "Shim", "Smoke Detector", "Spacer", "Switch, Toggle",
+  "Terminal, Lug", "Transceiver, VHF", "Tube Assembly",
+  "Union, Bulkhead",
+  "Valve, Check", "Valve, Pressure Regulating",
+  "Washer, Flat", "Wear Strip", "Wedge Assembly, Brake",
+  "Yoke, Control",
+  "Zero-Torque Fitting",
+];
+
+/* ==========================================================================
+   "Other Resource" catalog tables — one per live dropdown page
+
+   Each of the four resource pages carried its own listing on the live site,
+   with its own columns. These reproduce those column shapes with a working
+   sample of rows. Illustrative, like PARTS — see the file header.
+   ========================================================================== */
+
+/* GSE Tooling — live columns: Part No · Description · Aircraft Application. */
+export interface GsePart {
+  pn: string;
+  desc: string;
+  aircraft: string;
+}
+export const GSE_PARTS: GsePart[] = [
+  { pn: "OMP2505-3", desc: "Coupling half — bulkhead", aircraft: "Multiple aircraft" },
+  { pn: "MS3191-20", desc: "Clip", aircraft: "ATR 42, ATR 72" },
+  { pn: "460004941-2", desc: "Adaptor", aircraft: "Airbus A318, A319, A320, A321" },
+  { pn: "GSE-TB-737", desc: "Towbar head, nose gear", aircraft: "Boeing 737" },
+  { pn: "J-1250-AX", desc: "Axle jack, 12-ton", aircraft: "Multiple aircraft" },
+  { pn: "HTS-3000", desc: "Hydraulic test stand, 3000 psi", aircraft: "Multiple aircraft" },
+  { pn: "ES-CF6-14", desc: "Engine transport stand", aircraft: "CF6 powerplant" },
+  { pn: "SLG-2200", desc: "Engine sling, twin-point", aircraft: "Multiple aircraft" },
+  { pn: "WBD-320", desc: "Wheel & brake dolly", aircraft: "Airbus A320 family" },
+  { pn: "GPU-28V-600", desc: "Ground power unit, 28 VDC", aircraft: "Multiple aircraft" },
+];
+
+/* PMA Supplements — live columns: Part No · Manufacturer · Description. */
+export interface PmaSupplement {
+  pn: string;
+  mfr: string;
+  desc: string;
+}
+export const PMA_SUPPLEMENTS: PmaSupplement[] = [
+  { pn: "65334-17", mfr: "Air Cruisers", desc: "Cylinder" },
+  { pn: "65334-23", mfr: "Air Cruisers", desc: "Rupture disc" },
+  { pn: "6555-00", mfr: "Scott", desc: "Gasket" },
+  { pn: "630120-1", mfr: "Goodrich", desc: "Cylinder" },
+  { pn: "630122-1", mfr: "Goodrich", desc: "Cartridge" },
+  { pn: "630124-03", mfr: "Pacsci / HTL", desc: "Discharge valve" },
+  { pn: "AC-2210-1", mfr: "Air Cruisers", desc: "Discharge valve, inflation" },
+  { pn: "SC-118-2", mfr: "Scott", desc: "Rupture disc, oxygen" },
+];
+
+/* PMA Parts — live columns: Part No · Part Name · Holder Name · Holder Number ·
+   Make/Model. The holder number is the FAA PMA supplement number (PQ…). */
+export interface PmaPart {
+  pn: string;
+  name: string;
+  holder: string;
+  holderNo: string;
+  aircraft: string;
+}
+export const PMA_PARTS: PmaPart[] = [
+  { pn: "9621074-501", name: "Waste flap assembly", holder: "C & D Zodiac Inc", holderNo: "PQ1176NM", aircraft: "Bombardier (DHC-8-30 series)" },
+  { pn: "2-60677-4", name: "Support bracket", holder: "HEICO Aerospace", holderNo: "PQ0518SW", aircraft: "Boeing (737-300 series)" },
+  { pn: "AN6289-6", name: "Self-locking nut", holder: "SPS Technologies", holderNo: "PQ3944CE", aircraft: "Multiple aircraft" },
+  { pn: "BACB30LN5", name: "Shear fastener", holder: "Wencor Group", holderNo: "PQ2473NM", aircraft: "Airbus (A320 family)" },
+  { pn: "S9412-4", name: "Main wheel seal", holder: "Extex Aero", holderNo: "PQ2326NM", aircraft: "Boeing (757 series)" },
+  { pn: "3214987-1", name: "Avionics blower", holder: "Aerospace Systems & Components", holderNo: "PQ2412NM", aircraft: "Boeing (767 series)" },
+];
+
+/* Salvaged aircraft — the live "Salvage Aircraft Models and Parts List": donor
+   airframes, mostly out of production, with a note on what is recovered. */
+export interface SalvageModel {
+  model: string;
+  note: string;
+}
+export const SALVAGE_MODELS: SalvageModel[] = [
+  { model: "Boeing 737 Classic (300/400/500)", note: "Structure, interiors and rotables from parted-out airframes." },
+  { model: "McDonnell Douglas MD-80 series", note: "Closed OEM line — salvaged actuators, valves and instruments." },
+  { model: "Boeing 747-400", note: "Landing gear components, engine accessories and skin panels." },
+  { model: "Airbus A300 / A310", note: "Legacy widebody teardown inventory with removal tags." },
+  { model: "Fokker 50 / 100", note: "Hard-to-source components for a discontinued type." },
+  { model: "Lockheed L-1011 TriStar", note: "Heritage and restoration-grade recovered material." },
+  { model: "Bombardier CRJ100 / 200", note: "Regional-jet rotables and structure, condition-coded." },
+  { model: "Sikorsky UH-60 (retired airframes)", note: "Rotorcraft dynamic components, back-to-birth where available." },
 ];
 
 export function findPart(pn: string): Part | undefined {
   const target = pn.toUpperCase().replace(/[\s\-_./]/g, "");
   return PARTS.find((p) => p.pn.toUpperCase().replace(/[\s\-_./]/g, "") === target);
+}
+
+/* Look a part up by its NSN in any punctuation — the /nsn table and the part
+   detail page both arrive with a stock number rather than a part number. */
+export function findByNsn(nsn: string): Part | undefined {
+  const target = nsn.replace(/\D/g, "");
+  return PARTS.find((p) => p.nsn.replace(/\D/g, "") === target);
 }

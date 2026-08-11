@@ -41,9 +41,6 @@ interface QuoteApi {
   remove: (pn: string) => void;
   setQty: (pn: string, qty: number | string) => void;
   clear: () => void;
-  drawerOpen: boolean;
-  openDrawer: () => void;
-  closeDrawer: () => void;
 }
 
 const QuoteContext = createContext<QuoteApi | null>(null);
@@ -67,7 +64,6 @@ function read(): QuoteLine[] {
 export function QuoteProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<QuoteLine[]>([]);
   const [ready, setReady] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -171,20 +167,6 @@ export function QuoteProvider({ children }: { children: React.ReactNode }) {
     [items, add, remove, toast]
   );
 
-  const openDrawer = useCallback(() => setDrawerOpen(true), []);
-  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
-
-  /* Scroll lock belongs with the state that causes it, not with the drawer
-     component, so an unmount mid-open cannot leave the page frozen. */
-  useEffect(() => {
-    if (!drawerOpen) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, [drawerOpen]);
-
   const api = useMemo<QuoteApi>(
     () => ({
       items,
@@ -195,11 +177,8 @@ export function QuoteProvider({ children }: { children: React.ReactNode }) {
       remove,
       setQty,
       clear,
-      drawerOpen,
-      openDrawer,
-      closeDrawer,
     }),
-    [items, ready, has, toggle, add, remove, setQty, clear, drawerOpen, openDrawer, closeDrawer]
+    [items, ready, has, toggle, add, remove, setQty, clear]
   );
 
   return <QuoteContext.Provider value={api}>{children}</QuoteContext.Provider>;

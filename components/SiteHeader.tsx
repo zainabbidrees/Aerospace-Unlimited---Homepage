@@ -9,7 +9,9 @@
 
 import Link from "next/link";
 import { SearchField } from "./SearchField";
+import { AogButton } from "./AogButton";
 import { QuoteButton } from "./QuoteButton";
+import { CartButton } from "./CartButton";
 import { Nav } from "./Nav";
 
 /* Two rows, not three. The utility strip was carrying a promise already
@@ -17,15 +19,15 @@ import { Nav } from "./Nav";
    earned its removal — the phone number is the only part of it a buyer
    acts on, and it moves inline.
 
-   Two actions, not three. "Request a Quote" and "Quote List" were
-   competing for the same intent; they are now one button whose BEHAVIOUR
-   changes with state while its label does not — it reads "Request a Quote"
-   throughout and a count badge carries the staged parts. It used to rename
-   itself to "Quote List" once anything was collected; that was reverted on
-   2026-08-05, see QuoteButton.tsx. AOG stays because it is a different job
-   at a different urgency, and it is a phone link — the live site sells AOG
-   as a 24/7 service, and for a grounded aircraft the phone is the
-   mechanism. */
+   The quote actions are split so no control does two jobs. "Request a Quote"
+   (QuoteButton) always opens the RFQ form. The staged cart has its own button
+   (CartButton) that appears once parts are collected, carries the count, and
+   goes straight to the same form — no review drawer in between (the drawer was
+   removed 2026-08-06). Earlier this was one state-dependent button that opened
+   a drawer with a list but went to the form when empty, which is the confusion
+   this split removes. AOG stays because it is a different job at a different
+   urgency, and it is a phone link — the live site sells AOG as a 24/7 service,
+   and for a grounded aircraft the phone is the mechanism. */
 export function SiteHeader({ showSearch = true }: { showSearch?: boolean }) {
   return (
     <>
@@ -44,15 +46,8 @@ export function SiteHeader({ showSearch = true }: { showSearch?: boolean }) {
               <div style={{ flex: 1 }} />
             )}
             <div className="header-actions">
-              <a className="header-phone" href="tel:+17147054780">
-                +1-714-705-4780
-              </a>
-              <a className="btn btn-aog" href="tel:+17147054780">
-                <span className="dot" aria-hidden="true" />
-                <span>
-                  AOG<span className="label-desktop"> 24/7</span>
-                </span>
-              </a>
+              <AogButton />
+              <CartButton />
               <QuoteButton />
             </div>
           </div>

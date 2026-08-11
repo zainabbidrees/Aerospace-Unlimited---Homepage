@@ -340,7 +340,7 @@ export default async function BlogIndexPage({
               <Link className="btn btn-quiet btn-lg" href="/rfq">
                 Request a quote
               </Link>
-              <Link className="btn btn-ghost btn-lg" href="/browse">
+              <Link className="btn btn-ghost btn-lg" href="/part-types">
                 Browse the catalog
               </Link>
             </div>

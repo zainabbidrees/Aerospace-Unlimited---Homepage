@@ -523,7 +523,7 @@ export default function ContactPage() {
                 <span className="dial-val">Aerospace Unlimited, owned by ASAP Semiconductor LLC</span>
                 <span className="dial-note">
                   <Link href="/about">About us</Link> ·{" "}
-                  <Link href="/quality">Quality &amp; certifications</Link>
+                  <a href="https://www.asapsemi.com/quality/" target="_blank" rel="noopener noreferrer">Quality &amp; certifications</a>
                 </span>
               </dd>
             </div>
@@ -701,7 +701,7 @@ export default function ContactPage() {
               <Link className="btn btn-primary btn-lg" href="/rfq">
                 Request a quote <span aria-hidden="true">→</span>
               </Link>
-              <Link className="btn btn-quiet btn-lg" href="/browse">
+              <Link className="btn btn-quiet btn-lg" href="/part-types">
                 Browse the catalog
               </Link>
             </div>

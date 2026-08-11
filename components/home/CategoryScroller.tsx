@@ -32,6 +32,9 @@ export interface CatStep {
   count: number;
   img: string;
   alt: string;
+  /* Real part numbers from the sample catalog (lib/data.ts → PARTS), shown as
+     an "e.g." line — never write one in by hand. */
+  egs: string[];
 }
 
 /* Scroll distance, in viewport heights, spent advancing PER step after the
@@ -155,7 +158,7 @@ export function CategoryScroller({ steps }: { steps: CatStep[] }) {
               className="cat-slide-text"
               key={s.slug}
               data-active={i === active || undefined}
-              href={`/browse/categories/${s.slug}`}
+              href={`/part-types/${s.slug}`}
               tabIndex={i === active ? undefined : -1}
               aria-hidden={i === active ? undefined : true}
             >
@@ -164,11 +167,29 @@ export function CategoryScroller({ steps }: { steps: CatStep[] }) {
                 <i>&thinsp;/&thinsp;{String(n).padStart(2, "0")}</i>
               </span>
               <span className="cat-slide-name">{s.name}</span>
+              {/* The catalogue depth, promoted from a caption to the slide's
+                  centrepiece — it is the figure the whole section ranks by, it
+                  changes with every step, and it is what was leaving this
+                  column half empty as a one-line footnote. */}
+              <span className="cat-slide-stat">
+                <b className="cat-slide-count">{num(s.count)}</b>
+                <span className="cat-slide-count-label">parts in stock</span>
+              </span>
               <span className="cat-slide-meta">
                 <span className="cat-fsc">
                   FSC <b>{s.fsc}</b>
                 </span>
-                <span className="cat-count">{num(s.count)} parts in stock</span>
+                {s.egs.length > 0 ? (
+                  <span className="cat-egs">
+                    e.g.{" "}
+                    {s.egs.map((pn, k) => (
+                      <b key={pn}>
+                        {k > 0 ? " · " : ""}
+                        {pn}
+                      </b>
+                    ))}
+                  </span>
+                ) : null}
               </span>
               <span className="cat-slide-cta">
                 Browse this category
